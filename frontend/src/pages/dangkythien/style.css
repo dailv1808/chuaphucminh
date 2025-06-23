@@ -1,5 +1,0 @@
-@tailwind base; @tailwind components; @tailwind utilities;
-.input { @apply w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500; }
-.error { @apply text-sm text-red-600 mt-1; }
-.check-icon { @apply absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-lg; }
-
