@@ -1,0 +1,175 @@
+<!-- public/dang-ky-hanh-thien/index.html -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng ký hành thiền</title>
+  <link rel="stylesheet" href="/src/css/main.css" />
+  <script type="module" src="/src/js/main.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow" x-data="formDangKy()">
+    <h1 class="text-2xl font-bold mb-6 text-center">ĐĂNG KÝ HÀNH THIỀN</h1>
+
+    <!-- BƯỚC 1 -->
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-blue-700 mb-3">BƯỚC 1 – Đọc &amp; chấp nhận nội quy</h2>
+      <p class="text-sm text-gray-700 leading-relaxed">[PLACEHOLDER] – Nội quy hành thiền tóm tắt...</p>
+      <label class="flex items-start gap-2 mt-4">
+        <input type="checkbox" x-model="acceptedRules" class="mt-1" />
+        <span>Tôi đã đọc &amp; đồng ý tuân thủ nội quy.</span>
+      </label>
+    </section>
+
+    <!-- BƯỚC 2 -->
+    <section>
+      <h2 class="text-xl font-semibold text-blue-700 mb-4">BƯỚC 2 – Điền thông tin</h2>
+      <form @submit.prevent="submitForm" class="space-y-6">
+        <!-- Họ tên -->
+        <div>
+          <label class="block font-medium">Họ và tên *</label>
+          <div class="relative">
+            <input x-model="form.hoTen" @input="validateHoTen" type="text" class="input" />
+            <span class="check-icon" x-show="touched.hoTen" :class="valid.hoTen ? 'text-green-600' : 'text-red-600'" x-text="valid.hoTen ? '✔️' : '✖️'"></span>
+          </div>
+          <p class="error" x-show="touched.hoTen && !valid.hoTen">Vui lòng nhập họ tên.</p>
+        </div>
+
+        <!-- Giới tính -->
+        <div>
+          <label class="block font-medium">Giới tính *</label>
+          <select x-model="form.gioiTinh" @change="validateGioiTinh" class="input">
+            <option value="">-- Chọn giới tính --</option>
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+            <option value="Khác">Khác</option>
+          </select>
+          <p class="error" x-show="touched.gioiTinh && !valid.gioiTinh">Vui lòng chọn giới tính.</p>
+        </div>
+
+        <!-- Năm sinh -->
+        <div>
+          <label class="block font-medium">Năm sinh *</label>
+          <select x-model="form.namSinh" @change="validateNamSinh" class="input">
+            <option value="">-- Chọn năm --</option>
+            <template x-for="year in years" :key="year">
+              <option x-text="year"></option>
+            </template>
+          </select>
+          <p class="error" x-show="touched.namSinh && !valid.namSinh">Vui lòng chọn năm sinh.</p>
+        </div>
+
+        <!-- CCCD -->
+        <div>
+          <label class="block font-medium">Số CCCD *</label>
+          <div class="relative">
+            <input x-model="form.cccd" @input="validateCCCD" type="text" class="input" />
+            <span class="check-icon" x-show="touched.cccd" :class="valid.cccd ? 'text-green-600' : 'text-red-600'" x-text="valid.cccd ? '✔️' : '✖️'"></span>
+          </div>
+          <p class="error" x-show="touched.cccd && !valid.cccd">CCCD phải gồm đúng 12 số.</p>
+        </div>
+
+        <!-- Số điện thoại -->
+        <div>
+          <label class="block font-medium">Số điện thoại *</label>
+          <div class="relative">
+            <input x-model="form.soDienThoai" @input="validateSDT" type="text" class="input" />
+            <span class="check-icon" x-show="touched.soDienThoai" :class="valid.soDienThoai ? 'text-green-600' : 'text-red-600'" x-text="valid.soDienThoai ? '✔️' : '✖️'"></span>
+          </div>
+          <p class="error" x-show="touched.soDienThoai && !valid.soDienThoai">SĐT phải 10–11 số.</p>
+        </div>
+
+        <!-- Số điện thoại khẩn cấp -->
+        <div>
+          <label class="block font-medium">SĐT người thân *</label>
+          <div class="relative">
+            <input x-model="form.sdtKhanCap" @input="validateSDTKhanCap" type="text" class="input" />
+            <span class="check-icon" x-show="touched.sdtKhanCap" :class="valid.sdtKhanCap ? 'text-green-600' : 'text-red-600'" x-text="valid.sdtKhanCap ? '✔️' : '✖️'"></span>
+          </div>
+          <p class="error" x-show="touched.sdtKhanCap && !valid.sdtKhanCap">SĐT phải 10–11 số.</p>
+        </div>
+
+        <!-- Địa chỉ -->
+        <div>
+          <label class="block font-medium">Địa chỉ thường trú *</label>
+          <div class="relative">
+            <select x-model="form.diaChi" @change="validateDiaChi" class="input">
+              <option value="">-- Chọn tỉnh/thành --</option>
+              <template x-for="prov in provinces" :key="prov">
+                <option x-text="prov"></option>
+              </template>
+            </select>
+            <span class="check-icon" x-show="touched.diaChi" :class="valid.diaChi ? 'text-green-600' : 'text-red-600'" x-text="valid.diaChi ? '✔️' : '✖️'"></span>
+          </div>
+          <p class="error" x-show="touched.diaChi && !valid.diaChi">Vui lòng chọn địa chỉ.</p>
+        </div>
+
+        <!-- Ngày đến -->
+        <div>
+          <label class="block font-medium">Ngày đến *</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">📅</span>
+            <input x-model="form.ngayDen" @change="validateNgayDen" type="date" :min="minNgay" class="input pl-10" />
+            <span class="check-icon" x-show="touched.ngayDen" :class="valid.ngayDen ? 'text-green-600' : 'text-red-600'" x-text="valid.ngayDen ? '✔️' : '✖️'"></span>
+          </div>
+          <p class="error" x-show="touched.ngayDen && !valid.ngayDen">Ngày đến phải từ hôm nay trở đi.</p>
+        </div>
+
+        <!-- Thời gian tu -->
+        <div>
+          <label class="block font-medium">Thời gian hành thiền *</label>
+          <select x-model="form.thoiGianTu" @change="validateThoiGian" class="input">
+            <option value="">-- Chọn --</option>
+            <option>1‒3 ngày</option>
+            <option>4‒7 ngày</option>
+            <option>8‒14 ngày</option>
+            <option>15‒30 ngày</option>
+            <option>Trên 30 ngày</option>
+          </select>
+          <p class="error" x-show="touched.thoiGianTu && !valid.thoiGianTu">Vui lòng chọn thời gian tu.</p>
+        </div>
+
+        <!-- Vấn đề sức khoẻ -->
+        <div>
+          <p class="font-medium mb-1">Vấn đề thể chất?</p>
+          <label class="inline-flex items-center mr-4">
+            <input type="radio" value="Không" x-model="form.physicalIssue" /> <span class="ml-1">Không</span>
+          </label>
+          <label class="inline-flex items-center">
+            <input type="radio" value="Có" x-model="form.physicalIssue" /> <span class="ml-1">Có</span>
+          </label>
+          <textarea x-show="form.physicalIssue === 'Có'" x-model="form.physicalNote" rows="2" class="input mt-2" placeholder="Mô tả vấn đề thể chất"></textarea>
+        </div>
+
+        <div>
+          <p class="font-medium mb-1">Vấn đề tâm lý?</p>
+          <label class="inline-flex items-center mr-4">
+            <input type="radio" value="Không" x-model="form.mentalIssue" /> <span class="ml-1">Không</span>
+          </label>
+          <label class="inline-flex items-center">
+            <input type="radio" value="Có" x-model="form.mentalIssue" /> <span class="ml-1">Có</span>
+          </label>
+          <textarea x-show="form.mentalIssue === 'Có'" x-model="form.mentalNote" rows="2" class="input mt-2" placeholder="Mô tả vấn đề tâm lý"></textarea>
+        </div>
+
+        <!-- Ghi chú -->
+        <div>
+          <label class="block font-medium">Ghi chú thêm (nếu có)</label>
+          <textarea x-model="form.ghiChu" rows="3" class="input"></textarea>
+        </div>
+
+        <!-- Cam kết -->
+        <label class="flex items-start gap-2">
+          <input type="checkbox" x-model="agreeTruth" class="mt-1" />
+          <span>Tôi cam đoan thông tin trên là chính xác.</span>
+        </label>
+
+        <!-- Submit -->
+        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded disabled:opacity-50" :disabled="!formReady">Gửi đăng ký</button>
+      </form>
+    </section>
+  </div>
+</body>
+</html>
+
