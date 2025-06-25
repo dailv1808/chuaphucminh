@@ -27,4 +27,4 @@ class Registration(models.Model):
         indexes = [models.Index(fields=['phone_number'], name='idx_phone_number')]
 
     def __str__(self):
-        return f"{self.fullname} ({self.phone_number})"
+        return f"{self.fullname} - ({self.phone_number}) -  {self.start_date} to {self.end_date}"

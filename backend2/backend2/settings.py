@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'registration',
     'kuti',
     'kutiassignment',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
