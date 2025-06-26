@@ -12,7 +12,6 @@ export default defineConfig({
     strictPort: true,
     allowedHosts: [
       'app.chuaphucminh.com',
-      'chuaphucminh.com',
       'localhost'
     ]
   }

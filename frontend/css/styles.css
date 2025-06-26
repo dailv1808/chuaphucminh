@@ -1,0 +1,32 @@
+[x-cloak] { 
+  display: none !important; 
+}
+
+.sidebar-transition {
+  transition: all 0.3s ease;
+}
+
+.submenu-transition {
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+/* Tùy chỉnh scrollbar cho sidebar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
