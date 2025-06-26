@@ -12,53 +12,10 @@ document.addEventListener('alpine:init', () => {
     pageTitle: 'Chờ phê duyệt',
     
     // Table data
-    pendingList: [
-      {
-        id: '#TV-001',
-        name: 'Nguyễn Văn A',
-        email: 'nguyenvana@example.com',
-        avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-        registerDate: '15/05/2023',
-        kuti: 'Kuti 1',
-        status: 'pending'
-      },
-      {
-        id: '#TV-002',
-        name: 'Trần Thị B',
-        email: 'tranthib@example.com',
-        avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-        registerDate: '16/05/2023',
-        kuti: 'Kuti 3',
-        status: 'pending'
-      },
-      {
-        id: '#TV-003',
-        name: 'Lê Văn C',
-        email: 'levanc@example.com',
-        avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
-        registerDate: '17/05/2023',
-        kuti: 'Kuti 2',
-        status: 'pending'
-      },
-      {
-        id: '#TV-004',
-        name: 'Phạm Thị D',
-        email: 'phamthid@example.com',
-        avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
-        registerDate: '18/05/2023',
-        kuti: 'Kuti 4',
-        status: 'pending'
-      },
-      {
-        id: '#TV-005',
-        name: 'Hoàng Văn E',
-        email: 'hoangvane@example.com',
-        avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
-        registerDate: '19/05/2023',
-        kuti: 'Kuti 1',
-        status: 'pending'
-      }
-    ],
+    pendingList: [],
+    isLoading: true,
+    errorMessage: '',
+    successMessage: '',
     currentPage: 1,
     itemsPerPage: 5,
     
@@ -69,19 +26,110 @@ document.addEventListener('alpine:init', () => {
     get endItem() {
       return Math.min(this.currentPage * this.itemsPerPage, this.pendingList.length);
     },
+    get paginatedItems() {
+      return this.pendingList.slice(
+        (this.currentPage - 1) * this.itemsPerPage,
+        this.currentPage * this.itemsPerPage
+      );
+    },
     
     // Methods
-    approve(id) {
-      const index = this.pendingList.findIndex(item => item.id === id);
-      if (index !== -1) {
-        this.pendingList[index].status = 'approved';
+    async fetchPendingRegistrations() {
+      try {
+        this.isLoading = true;
+        this.errorMessage = '';
+        const response = await fetch('http://localhost:8000/api/registration/');
+        
+        if (!response.ok) {
+          throw new Error(`Lỗi khi tải dữ liệu: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        this.pendingList = data.map(item => ({
+          id: item.id,
+          displayId: `#TV-${item.id.toString().padStart(3, '0')}`,
+          fullname: item.fullname,
+          email: item.email,
+          phone_number: item.phone_number,
+          cccd: item.cccd,
+          gender: item.gender,
+          avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.fullname) + '&background=random',
+          registerDate: new Date(item.created_at).toLocaleDateString('vi-VN'),
+          created_at: item.created_at,
+          kuti: 'Chưa xác định',
+          status: item.status,
+          start_date: item.start_date,
+          end_date: item.end_date,
+          address: item.address,
+          emergency_phone: item.emergency_phone,
+          note: item.note
+        }));
+        
+        this.successMessage = 'Tải dữ liệu thành công';
+        setTimeout(() => this.successMessage = '', 3000);
+      } catch (error) {
+        console.error('Error fetching pending registrations:', error);
+        this.errorMessage = error.message || 'Đã xảy ra lỗi khi tải dữ liệu';
+      } finally {
+        this.isLoading = false;
       }
     },
     
-    reject(id) {
-      const index = this.pendingList.findIndex(item => item.id === id);
-      if (index !== -1) {
-        this.pendingList[index].status = 'rejected';
+    async approve(id) {
+      try {
+        this.errorMessage = '';
+        const response = await fetch(`http://localhost:8000/api/registration/${id}/`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: 'approved' })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Không thể phê duyệt đăng ký');
+        }
+        
+        // Update local state
+        const item = this.pendingList.find(item => item.id === id);
+        if (item) {
+          item.status = 'approved';
+        }
+        
+        this.successMessage = 'Đã phê duyệt đăng ký thành công';
+        setTimeout(() => this.successMessage = '', 3000);
+      } catch (error) {
+        console.error('Error approving registration:', error);
+        this.errorMessage = error.message || 'Đã xảy ra lỗi khi phê duyệt';
+      }
+    },
+    
+    async reject(id) {
+      try {
+        this.errorMessage = '';
+        const response = await fetch(`http://localhost:8000/api/registration/${id}/`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: 'rejected' })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Không thể từ chối đăng ký');
+        }
+        
+        // Update local state
+        const item = this.pendingList.find(item => item.id === id);
+        if (item) {
+          item.status = 'rejected';
+        }
+        
+        this.successMessage = 'Đã từ chối đăng ký thành công';
+        setTimeout(() => this.successMessage = '', 3000);
+      } catch (error) {
+        console.error('Error rejecting registration:', error);
+        this.errorMessage = error.message || 'Đã xảy ra lỗi khi từ chối';
       }
     },
     
@@ -97,7 +145,15 @@ document.addEventListener('alpine:init', () => {
       }
     },
     
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+      return new Date(dateString).toLocaleDateString('vi-VN', options);
+    },
+    
     init() {
+      this.fetchPendingRegistrations();
+      
       // Xử lý responsive khi resize
       window.addEventListener('resize', () => {
         if (window.innerWidth >= 768 && this.sidebarLocked) {

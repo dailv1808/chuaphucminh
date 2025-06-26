@@ -49,9 +49,20 @@ INSTALLED_APPS = [
     'kuti',
     'kutiassignment',
     'rest_framework',
+    'corsheaders',
 ]
 
+CORS_ALLOW_ALL_ORIGINS = True  # Chỉ dùng cho development
+# Hoặc cấu hình cụ thể:
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://app.chuaphucminh.com",
+
+]
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
