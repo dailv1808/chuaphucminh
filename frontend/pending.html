@@ -11,7 +11,7 @@
 </head>
 <body class="bg-gray-50 font-sans flex h-screen" x-cloak>
   <!-- Include Sidebar -->
-  <div x-html="await (await fetch('./public/sidebar.html')).text()"></div>
+  <div x-html="await (await fetch('./partials/sidebar.html')).text()"></div>
 
   <!-- Main Content -->
   <div class="flex-1 flex flex-col overflow-hidden"
@@ -21,7 +21,7 @@
          'sidebar-transition': true
        }">
     <!-- Include Header -->
-    <div x-html="await (await fetch('./public/header.html')).text()"></div>
+    <div x-html="await (await fetch('./partials/header.html')).text()"></div>
     
     <!-- Page Content -->
     <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50">
