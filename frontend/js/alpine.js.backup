@@ -38,7 +38,7 @@ document.addEventListener('alpine:init', () => {
       try {
         this.isLoading = true;
         this.errorMessage = '';
-        const response = await fetch('http://192.168.0.200:8000/api/registration/');
+        const response = await fetch('http://localhost:8000/api/registration/');
         
         if (!response.ok) {
           throw new Error(`Lỗi khi tải dữ liệu: ${response.status}`);
@@ -47,7 +47,7 @@ document.addEventListener('alpine:init', () => {
         const data = await response.json();
         this.pendingList = data.map(item => ({
           id: item.id,
-          // displayId: `#TV-${item.id.toString().padStart(3, '0')}`,
+          displayId: `#TV-${item.id.toString().padStart(3, '0')}`,
           fullname: item.fullname,
           email: item.email,
           phone_number: item.phone_number,
@@ -78,7 +78,7 @@ document.addEventListener('alpine:init', () => {
     async approve(id) {
       try {
         this.errorMessage = '';
-        const response = await fetch(`http://192.168.0.200:8000/api/registration/${id}/`, {
+        const response = await fetch(`http://localhost:8000/api/registration/${id}/`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ document.addEventListener('alpine:init', () => {
     async reject(id) {
       try {
         this.errorMessage = '';
-        const response = await fetch(`http://192.168.0.200:8000/api/registration/${id}/`, {
+        const response = await fetch(`http://localhost:8000/api/registration/${id}/`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',

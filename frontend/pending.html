@@ -62,7 +62,7 @@
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+		  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thiền sinh</th>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thông tin</th>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày đăng ký</th>
@@ -99,9 +99,9 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="item.displayId"></td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center">
-                        <div class="flex-shrink-0 h-10 w-10">
+                        <div class="flex-shrink-0 h-10 w-10"> 
                           <img class="h-10 w-10 rounded-full" :src="item.avatar" :alt="item.fullname">
-                        </div>
+			</div>
                         <div class="ml-4">
                           <div class="text-sm font-medium text-gray-900" x-text="item.fullname"></div>
                           <div class="text-sm text-gray-500" x-text="item.email"></div>
