@@ -27,6 +27,7 @@ DEBUG = True
 
 #ALLOWED_HOSTS = []
 ALLOWED_HOSTS = [
+    '192.168.0.200',
     'app.chuaphucminh.com',  # Your domain
     'localhost',             # Local development
     '127.0.0.1',             # Localhost IP
@@ -54,12 +55,35 @@ INSTALLED_APPS = [
 
 CORS_ALLOW_ALL_ORIGINS = True  # Chỉ dùng cho development
 # Hoặc cấu hình cụ thể:
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "http://app.chuaphucminh.com",
+# CORS_ALLOWED_ORIGINS = [
+#    "http://localhost:8000",
+#    "http://localhost:5173",
+#    "http://127.0.0.1:8000",
+#    "http://app.chuaphucminh.com:8000",
+#]
 
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS'
 ]
+
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',

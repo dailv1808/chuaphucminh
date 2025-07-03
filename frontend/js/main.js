@@ -1,154 +1,73 @@
-// main.js
-import Alpine from 'alpinejs'
-window.Alpine = Alpine
-Alpine.start()
-
-// ✅ Gắn toàn bộ AlpineJS (từ alpine.js gốc)
+// Khởi tạo AlpineJS
 document.addEventListener('alpine:init', () => {
-  Alpine.data('app', () => ({
-    sidebarOpen: window.innerWidth >= 768,
-    sidebarLocked: localStorage.getItem('sidebarLocked') === 'true',
-    isHovered: false,
-    accountMenuOpen: false,
-    meditationMenuOpen: true,
-    pageTitle: 'Chờ phê duyệt',
+    Alpine.data('main', () => ({
+        sidebarOpen: window.innerWidth > 1024,
+        isDarkMode: false,
+        sidebarMini: false,
+        notificationsOpen: false,
+        profileOpen: false,
 
-    pendingList: [],
-    isLoading: true,
-    errorMessage: '',
-    successMessage: '',
-    currentPage: 1,
-    itemsPerPage: 5,
+        init() {
+            // Kiểm tra dark mode từ localStorage
+            this.isDarkMode = localStorage.getItem('darkMode') === 'true';
+            this.applyDarkMode();
+            
+            // Kiểm tra sidebar mini từ localStorage
+            this.sidebarMini = localStorage.getItem('sidebarMini') === 'true';
+            
+            // Xử lý responsive sidebar
+            this.handleResize();
+            window.addEventListener('resize', this.handleResize.bind(this));
+        },
 
-    get startItem() {
-      return (this.currentPage - 1) * this.itemsPerPage + 1;
-    },
-    get endItem() {
-      return Math.min(this.currentPage * this.itemsPerPage, this.pendingList.length);
-    },
-    get paginatedItems() {
-      return this.pendingList.slice(
-        (this.currentPage - 1) * this.itemsPerPage,
-        this.currentPage * this.itemsPerPage
-      );
-    },
+        handleResize() {
+            if (window.innerWidth <= 1024) {
+                this.sidebarOpen = false;
+            } else {
+                this.sidebarOpen = true;
+            }
+        },
 
-    async fetchPendingRegistrations() {
-      try {
-        this.isLoading = true;
-        this.errorMessage = '';
-        const response = await fetch('http://192.168.0.200:8000/api/registration/');
-        if (!response.ok) throw new Error(`Lỗi khi tải dữ liệu: ${response.status}`);
-        const data = await response.json();
-        this.pendingList = data.map(item => ({
-          id: item.id,
-          fullname: item.fullname,
-          email: item.email,
-          phone_number: item.phone_number,
-          cccd: item.cccd,
-          gender: item.gender,
-          avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.fullname) + '&background=random',
-          registerDate: new Date(item.created_at).toLocaleDateString('vi-VN'),
-          created_at: item.created_at,
-          kuti: 'Chưa xác định',
-          status: item.status,
-          start_date: item.start_date,
-          end_date: item.end_date,
-          address: item.address,
-          emergency_phone: item.emergency_phone,
-          note: item.note
-        }));
-        this.successMessage = 'Tải dữ liệu thành công';
-        setTimeout(() => this.successMessage = '', 3000);
-      } catch (error) {
-        this.errorMessage = error.message || 'Đã xảy ra lỗi khi tải dữ liệu';
-      } finally {
-        this.isLoading = false;
-      }
-    },
+        toggleDarkMode() {
+            this.isDarkMode = !this.isDarkMode;
+            localStorage.setItem('darkMode', this.isDarkMode);
+            this.applyDarkMode();
+        },
 
-    async approve(id) {
-      try {
-        this.errorMessage = '';
-        const response = await fetch(`http://192.168.0.200:8000/api/registration/${id}/`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'approved' })
-        });
-        if (!response.ok) throw new Error('Không thể phê duyệt đăng ký');
-        const item = this.pendingList.find(i => i.id === id);
-        if (item) item.status = 'approved';
-        this.successMessage = 'Đã phê duyệt đăng ký thành công';
-        setTimeout(() => this.successMessage = '', 3000);
-      } catch (error) {
-        this.errorMessage = error.message || 'Đã xảy ra lỗi khi phê duyệt';
-      }
-    },
+        applyDarkMode() {
+            if (this.isDarkMode) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        },
 
-    async reject(id) {
-      try {
-        this.errorMessage = '';
-        const response = await fetch(`http://192.168.0.200:8000/api/registration/${id}/`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'rejected' })
-        });
-        if (!response.ok) throw new Error('Không thể từ chối đăng ký');
-        const item = this.pendingList.find(i => i.id === id);
-        if (item) item.status = 'rejected';
-        this.successMessage = 'Đã từ chối đăng ký thành công';
-        setTimeout(() => this.successMessage = '', 3000);
-      } catch (error) {
-        this.errorMessage = error.message || 'Đã xảy ra lỗi khi từ chối';
-      }
-    },
+        toggleSidebarMini() {
+            this.sidebarMini = !this.sidebarMini;
+            localStorage.setItem('sidebarMini', this.sidebarMini);
+        },
 
-    nextPage() {
-      if (this.currentPage * this.itemsPerPage < this.pendingList.length) {
-        this.currentPage++;
-      }
-    },
+        toggleSidebar() {
+            this.sidebarOpen = !this.sidebarOpen;
+        },
 
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
-    },
+        toggleNotifications() {
+            this.notificationsOpen = !this.notificationsOpen;
+            if (this.notificationsOpen) {
+                this.profileOpen = false;
+            }
+        },
 
-    formatDate(dateString) {
-      if (!dateString) return 'N/A';
-      const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-      return new Date(dateString).toLocaleDateString('vi-VN', options);
-    },
+        toggleProfile() {
+            this.profileOpen = !this.profileOpen;
+            if (this.profileOpen) {
+                this.notificationsOpen = false;
+            }
+        },
 
-    init() {
-      this.fetchPendingRegistrations();
-      window.addEventListener('resize', () => {
-        if (window.innerWidth >= 768 && this.sidebarLocked) {
-          this.sidebarOpen = true;
+        closeAllDropdowns() {
+            this.notificationsOpen = false;
+            this.profileOpen = false;
         }
-      });
-    }
-  }));
-
-  // Tooltip
-  Alpine.data('tooltip', () => ({
-    content: '',
-    show: false,
-    x: 0,
-    y: 0,
-    init() {
-      window.addEventListener('tooltip', (e) => {
-        this.content = e.detail.content;
-        this.show = e.detail.show;
-        this.x = e.detail.x;
-        this.y = e.detail.y;
-      });
-    }
-  }));
+    }));
 });
-
-// Tự khởi động Alpine
-// window.Alpine = Alpine;
-//Alpine.start();
-

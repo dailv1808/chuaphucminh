@@ -43,17 +43,17 @@
   <div class="flex-1 overflow-y-auto overflow-x-hidden py-4">
     <nav class="px-2 space-y-1">
       <!-- Home -->
-      <a href="index.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md group"
+      <a href="index.html" class="sidebar-menu-item flex items-center px-3 py-2 text-sm font-medium rounded-md group"
          :class="{
-           'bg-blue-50 text-blue-600': true,
            'justify-center': !sidebarOpen && !sidebarLocked && !isHovered,
            'justify-start': sidebarOpen || sidebarLocked || isHovered
          }">
-        <svg class="flex-shrink-0 h-5 w-5" :class="{
-          'text-blue-500': true,
-          'mx-auto': !sidebarOpen && !sidebarLocked && !isHovered,
-          'mr-3': sidebarOpen || sidebarLocked || isHovered
-        }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-500 group-hover:text-gray-600" 
+             :class="{
+               'mx-auto': !sidebarOpen && !sidebarLocked && !isHovered,
+               'mr-3': sidebarOpen || sidebarLocked || isHovered
+             }" 
+             fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
         </svg>
         <span x-show="sidebarOpen || sidebarLocked || isHovered" class="truncate">Home</span>
@@ -68,11 +68,12 @@
                   'justify-center': !sidebarOpen && !sidebarLocked && !isHovered,
                   'justify-start': sidebarOpen || sidebarLocked || isHovered
                 }">
-          <svg class="flex-shrink-0 h-5 w-5" :class="{
-            'text-gray-500 group-hover:text-gray-600': true,
-            'mx-auto': !sidebarOpen && !sidebarLocked && !isHovered,
-            'mr-3': sidebarOpen || sidebarLocked || isHovered
-          }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="flex-shrink-0 h-5 w-5 text-gray-500 group-hover:text-gray-600"
+               :class="{
+                 'mx-auto': !sidebarOpen && !sidebarLocked && !isHovered,
+                 'mr-3': sidebarOpen || sidebarLocked || isHovered
+               }" 
+               fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
           </svg>
           <span x-show="sidebarOpen || sidebarLocked || isHovered" class="truncate text-left flex-1">Quản lý thiền sinh</span>
@@ -91,20 +92,23 @@
              :class="{
                'pl-2': !sidebarOpen && !sidebarLocked && !isHovered
              }">
-          <a href="pending.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md group bg-blue-50 text-blue-600">
-            <svg class="w-4 h-4 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <a href="pending.html" 
+             class="sidebar-menu-item flex items-center px-3 py-2 text-sm font-medium rounded-md group text-gray-600 hover:bg-gray-100">
+            <svg class="w-4 h-4 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <span class="truncate">Chờ phê duyệt</span>
           </a>
-          <a href="approved.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md group text-gray-600 hover:bg-gray-100">
-            <svg class="w-4 h-4 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <a href="approved.html" 
+             class="sidebar-menu-item flex items-center px-3 py-2 text-sm font-medium rounded-md group text-gray-600 hover:bg-gray-100">
+            <svg class="w-4 h-4 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
             <span class="truncate">Đã phê duyệt</span>
           </a>
-          <a href="checkin.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md group text-gray-600 hover:bg-gray-100">
-            <svg class="w-4 h-4 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <a href="checkin.html" 
+             class="sidebar-menu-item flex items-center px-3 py-2 text-sm font-medium rounded-md group text-gray-600 hover:bg-gray-100">
+            <svg class="w-4 h-4 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7a4 4 0 1 1 8 0m0 0a4 4 0 0 1 4 4v6m-5.5 4a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0"></path>
             </svg>
             <span class="truncate">Đang hành thiền</span>
@@ -113,38 +117,93 @@
       </div>
       
       <!-- Quản lý Kuti -->
-      <a href="kuti.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md group"
+      <a href="kuti.html" 
+         class="sidebar-menu-item flex items-center px-3 py-2 text-sm font-medium rounded-md group text-gray-600 hover:bg-gray-100"
          :class="{
-           'text-gray-600 hover:bg-gray-100': true,
            'justify-center': !sidebarOpen && !sidebarLocked && !isHovered,
            'justify-start': sidebarOpen || sidebarLocked || isHovered
          }">
-        <svg class="flex-shrink-0 h-5 w-5" :class="{
-          'text-gray-500 group-hover:text-gray-600': true,
-          'mx-auto': !sidebarOpen && !sidebarLocked && !isHovered,
-          'mr-3': sidebarOpen || sidebarLocked || isHovered
-        }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-500 group-hover:text-gray-600"
+             :class="{
+               'mx-auto': !sidebarOpen && !sidebarLocked && !isHovered,
+               'mr-3': sidebarOpen || sidebarLocked || isHovered
+             }" 
+             fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
         </svg>
         <span x-show="sidebarOpen || sidebarLocked || isHovered" class="truncate">Quản lý Kuti</span>
       </a>
       
       <!-- Quản lý Hỏi đáp -->
-      <a href="question.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md group"
+      <a href="question.html" 
+         class="sidebar-menu-item flex items-center px-3 py-2 text-sm font-medium rounded-md group text-gray-600 hover:bg-gray-100"
          :class="{
-           'text-gray-600 hover:bg-gray-100': true,
            'justify-center': !sidebarOpen && !sidebarLocked && !isHovered,
            'justify-start': sidebarOpen || sidebarLocked || isHovered
          }">
-        <svg class="flex-shrink-0 h-5 w-5" :class="{
-          'text-gray-500 group-hover:text-gray-600': true,
-          'mx-auto': !sidebarOpen && !sidebarLocked && !isHovered,
-          'mr-3': sidebarOpen || sidebarLocked || isHovered
-        }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-500 group-hover:text-gray-600"
+             :class="{
+               'mx-auto': !sidebarOpen && !sidebarLocked && !isHovered,
+               'mr-3': sidebarOpen || sidebarLocked || isHovered
+             }" 
+             fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
         </svg>
         <span x-show="sidebarOpen || sidebarLocked || isHovered" class="truncate">Quản lý Hỏi đáp</span>
       </a>
     </nav>
   </div>
+
+  <!-- Script xử lý highlight menu -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const menuItems = document.querySelectorAll('.sidebar-menu-item');
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    
+    function setActiveMenu(item) {
+      // Xóa highlight cũ
+      menuItems.forEach(i => {
+        i.classList.remove('bg-blue-50', 'text-blue-600');
+        const icon = i.querySelector('svg');
+        if (icon) icon.classList.replace('text-blue-500', 'text-gray-500');
+      });
+      
+      // Thêm highlight mới
+      if (item) {
+        item.classList.add('bg-blue-50', 'text-blue-600');
+        const icon = item.querySelector('svg');
+        if (icon) icon.classList.replace('text-gray-500', 'text-blue-500');
+      }
+    }
+    
+    // Xử lý click menu
+    menuItems.forEach(item => {
+      item.addEventListener('click', function(e) {
+        // Chỉ xử lý nếu không phải là link external
+        if (!this.getAttribute('href').startsWith('http')) {
+          e.preventDefault();
+          setActiveMenu(this);
+          localStorage.setItem('activeMenu', this.getAttribute('href'));
+          window.location.href = this.getAttribute('href');
+        }
+      });
+    });
+    
+    // Khôi phục trạng thái từ localStorage hoặc URL
+    const activeMenuHref = localStorage.getItem('activeMenu') || currentPage;
+    const activeMenuItem = Array.from(menuItems).find(item => 
+      item.getAttribute('href') === activeMenuHref
+    );
+    
+    if (activeMenuItem) {
+      setActiveMenu(activeMenuItem);
+    } else if (currentPage) {
+      // Fallback: highlight menu dựa trên URL hiện tại
+      const defaultActive = Array.from(menuItems).find(item => 
+        item.getAttribute('href') === currentPage
+      );
+      if (defaultActive) setActiveMenu(defaultActive);
+    }
+  });
+  </script>
 </aside>

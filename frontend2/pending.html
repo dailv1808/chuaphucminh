@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi" x-data="appData()">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chờ Phê Duyệt - CPM Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="./src/css/main.css">
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+  <!-- Header -->
+  <div x-html="await (await fetch('./partials/header.html')).text()"></div>
+  
+  <!-- Sidebar -->
+  <div x-html="await (await fetch('./partials/sidebar.html')).text()"></div>
+  
+  <div class="p-4 sm:ml-64 pt-20">
+    <div class="p-6 bg-white rounded-xl card-shadow border border-gray-100 hover-scale">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gradient bg-gradient-to-r from-blue-600 to-blue-400">Danh sách chờ phê duyệt</h1>
+          <p class="text-gray-500 text-sm mt-1">Có <span class="font-medium text-blue-600">3</span> thiền sinh đang chờ phê duyệt</p>
+        </div>
+        <div class="relative w-full md:w-64">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+            </svg>
+          </div>
+          <input type="text" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" placeholder="Tìm kiếm...">
+        </div>
+      </div>
+
+      <div class="relative overflow-x-auto rounded-lg border border-gray-200">
+        <table class="w-full text-sm text-left">
+          <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-500 to-blue-400">
+            <tr>
+              <th scope="col" class="px-6 py-3">STT</th>
+              <th scope="col" class="px-6 py-3">Họ tên</th>
+              <th scope="col" class="px-6 py-3">Ngày sinh</th>
+              <th scope="col" class="px-6 py-3">Giới tính</th>
+              <th scope="col" class="px-6 py-3">Ngày đăng ký</th>
+              <th scope="col" class="px-6 py-3">Trạng thái</th>
+              <th scope="col" class="px-6 py-3 text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="bg-white border-b hover:bg-blue-50">
+              <td class="px-6 py-4 font-medium">1</td>
+              <td class="px-6 py-4 font-medium text-blue-600">Nguyễn Văn A</td>
+              <td class="px-6 py-4">15/05/1990</td>
+              <td class="px-6 py-4">Nam</td>
+              <td class="px-6 py-4">20/05/2023</td>
+              <td class="px-6 py-4">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Chờ duyệt</span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <button class="font-medium text-green-600 hover:text-green-800 hover:underline mr-3">Duyệt</button>
+                <button class="font-medium text-red-600 hover:text-red-800 hover:underline">Từ chối</button>
+              </td>
+            </tr>
+            <!-- Thêm các hàng khác tương tự -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="./src/js/main.js"></script>
+</body>
+</html>
