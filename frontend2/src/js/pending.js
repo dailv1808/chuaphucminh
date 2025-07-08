@@ -1,11 +1,4 @@
 document.addEventListener('alpine:init', () => {
-  Alpine.store('sidebar', {
-    open: window.innerWidth >= 640,
-    toggle() {
-      this.open = !this.open;
-    }
-  });
-
   Alpine.data('pendingData', () => ({
     registrations: [],
     filteredRegistrations: [],
@@ -22,9 +15,6 @@ document.addEventListener('alpine:init', () => {
 
     init() {
       this.fetchRegistrations();
-      window.addEventListener('resize', () => {
-        Alpine.store('sidebar').open = window.innerWidth >= 640;
-      });
     },
 
     async fetchRegistrations() {
