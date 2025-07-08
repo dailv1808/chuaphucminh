@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đã Phê Duyệt - CPM Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="./src/css/main.css">
+</head>
+<body x-data="approvedData()" class="bg-gray-50 font-sans">
+  <!-- Header -->
+  <div x-html="await (await fetch('./partials/header.html')).text()"></div>
+  
+  <!-- Sidebar -->
+  <div x-html="await (await fetch('./partials/sidebar.html')).text()"></div>
+  
+  <div class="p-4 sm:ml-64">
+    <div class="p-4 mt-14 bg-white rounded-lg shadow-sm border border-gray-100">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-green-800">Danh sách đã phê duyệt</h1>
+        <div class="relative w-64">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+            </svg>
+          </div>
+          <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full pl-10 p-2.5" placeholder="Tìm kiếm thiền sinh...">
+        </div>
+      </div>
+
+      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-700">
+          <thead class="text-xs text-white uppercase bg-green-600">
+            <tr>
+              <th scope="col" class="px-6 py-3">STT</th>
+              <th scope="col" class="px-6 py-3">Họ tên</th>
+              <th scope="col" class="px-6 py-3">Ngày sinh</th>
+              <th scope="col" class="px-6 py-3">Giới tính</th>
+              <th scope="col" class="px-6 py-3">Ngày đăng ký</th>
+              <th scope="col" class="px-6 py-3">Ngày duyệt</th>
+              <th scope="col" class="px-6 py-3">Trạng thái</th>
+              <th scope="col" class="px-6 py-3">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="(item, index) in items" :key="index">
+              <tr class="bg-white border-b hover:bg-green-50">
+                <td class="px-6 py-4 font-medium text-gray-900" x-text="index + 1"></td>
+                <td class="px-6 py-4 font-medium text-green-700" x-text="item.name"></td>
+                <td class="px-6 py-4" x-text="item.dob"></td>
+                <td class="px-6 py-4" x-text="item.gender"></td>
+                <td class="px-6 py-4" x-text="item.registerDate"></td>
+                <td class="px-6 py-4" x-text="item.approvedDate"></td>
+                <td class="px-6 py-4">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800" x-text="item.status"></span>
+                </td>
+                <td class="px-6 py-4">
+                  <button @click="viewDetails(index)" class="font-medium text-blue-600 hover:text-blue-800 hover:underline mr-3">Chi tiết</button>
+                  <button @click="cancelApproval(index)" class="font-medium text-red-600 hover:text-red-800 hover:underline">Hủy</button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="./src/js/approved.js"></script>
+</body>
+</html>
