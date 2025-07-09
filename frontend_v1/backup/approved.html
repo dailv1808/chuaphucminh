@@ -32,6 +32,7 @@
         </div>
         
         <div class="mt-6 space-y-4" x-show="selectedRegistration">
+          <!-- Full registration details here -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-500">Họ và tên</label>
@@ -85,78 +86,6 @@
     </div>
   </div>
 
-  <!-- Modal chọn Kuti -->
-  <div x-show="showKutiModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-      <div class="p-6">
-        <div class="flex justify-between items-start">
-          <h3 class="text-xl font-bold text-blue-600">Chọn Kuti</h3>
-          <button @click="showKutiModal = false; selectedKutiId = null" class="text-gray-400 hover:text-gray-500">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-        
-        <div class="mt-6 space-y-4">
-          <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Danh sách Kuti trống</label>
-            <template x-if="availableKutis.length === 0">
-              <p class="text-sm text-gray-500">Không có Kuti trống phù hợp</p>
-            </template>
-            <template x-for="kuti in availableKutis" :key="kuti.id">
-              <div class="flex items-center">
-                <input 
-                  type="radio" 
-                  :id="'kuti-' + kuti.id" 
-                  :value="kuti.id" 
-                  x-model="selectedKutiId" 
-                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                >
-                <label :for="'kuti-' + kuti.id" class="ml-2 block text-sm text-gray-700">
-                  <span x-text="kuti.code"></span>
-                  <span class="text-gray-500 ml-2" x-text="'(' + kuti.gender_allowed + ')'"></span>
-                </label>
-              </div>
-            </template>
-          </div>
-        </div>
-        
-        <div class="mt-6 flex justify-end space-x-3">
-          <button 
-            @click="showKutiModal = false; selectedKutiId = null" 
-            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-          >
-            Hủy
-          </button>
-          <button 
-            @click="confirmCheckIn()" 
-            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50" 
-            :disabled="!selectedKutiId"
-          >
-            Xác nhận
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Thông báo -->
-  <div x-show="showNotification" x-transition class="fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg"
-       :class="{
-         'bg-green-100 text-green-800': notificationType === 'success',
-         'bg-red-100 text-red-800': notificationType === 'error'
-       }">
-    <div class="flex items-center">
-      <span x-text="notificationMessage"></span>
-      <button @click="showNotification = false" class="ml-4 text-gray-500 hover:text-gray-700">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-    </div>
-  </div>
-
   <div class="p-4 sm:ml-64 pt-20">
     <div class="p-6 bg-white rounded-xl card-shadow border border-gray-100 hover-scale">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
@@ -206,7 +135,7 @@
                         x-text="formatStatus(registration.status).text"></span>
                 </td>
                 <td class="px-6 py-4 text-right space-x-2">
-                  <button @click="openCheckInModal(registration)" class="btn-checkin">Checked in</button>
+                  <button @click="checkIn(registration.id)" class="btn-checkin">Checked in</button>
                   <button @click="downloadTemporaryStay(registration.id)" class="btn-download">Tải tạm trú</button>
                 </td>
               </tr>

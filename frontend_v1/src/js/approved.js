@@ -9,6 +9,10 @@ document.addEventListener('alpine:init', () => {
     showNotification: false,
     notificationMessage: '',
     notificationType: 'success',
+    showKutiModal: false, // Modal chọn Kuti
+    availableKutis: [], // Danh sách Kuti trống
+    selectedKutiId: null, // Kuti được chọn
+    currentRegistrationId: null, // ID đăng ký đang xử lý
 
     init() {
       this.fetchRegistrations();
@@ -18,16 +22,85 @@ document.addEventListener('alpine:init', () => {
       try {
         this.isLoading = true;
         const response = await fetch('http://192.168.0.200:8000/api/registration/');
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) throw new Error('Lỗi kết nối mạng');
         
         const data = await response.json();
         this.registrations = data.filter(reg => reg.status === 'approved');
         this.filteredRegistrations = [...this.registrations];
       } catch (error) {
-        console.error('Error fetching registrations:', error);
+        console.error('Lỗi khi tải danh sách đăng ký:', error);
         this.showNotificationMessage('Có lỗi xảy ra khi tải dữ liệu', 'error');
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    // Lấy danh sách Kuti trống phù hợp
+    async fetchAvailableKutis(gender) {
+      try {
+        const response = await fetch('http://192.168.0.200:8000/api/kuti/');
+        if (!response.ok) throw new Error('Lỗi kết nối mạng');
+        
+        const data = await response.json();
+        this.availableKutis = data.filter(kuti => 
+          kuti.is_available && 
+          (kuti.gender_allowed === 'All' || kuti.gender_allowed === gender)
+        );
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách Kuti:', error);
+        this.showNotificationMessage('Có lỗi xảy ra khi tải danh sách Kuti', 'error');
+      }
+    },
+
+    // Mở modal chọn Kuti
+    async openCheckInModal(registration) {
+      this.currentRegistrationId = registration.id;
+      await this.fetchAvailableKutis(registration.gender);
+      this.showKutiModal = true;
+    },
+
+    // Xác nhận check-in và gán Kuti
+    async confirmCheckIn() {
+      if (!this.selectedKutiId) {
+        this.showNotificationMessage('Vui lòng chọn Kuti', 'error');
+        return;
+      }
+
+      try {
+        // Gán Kuti
+        const assignResponse = await fetch('http://192.168.0.200:8000/api/kutiassignment/assign/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            registration_id: this.currentRegistrationId,
+            kuti_id: this.selectedKutiId
+          })
+        });
+
+        if (!assignResponse.ok) throw new Error('Gán Kuti thất bại');
+
+        // Cập nhật trạng thái đăng ký
+        const checkInResponse = await fetch(`http://192.168.0.200:8000/api/registration/${this.currentRegistrationId}/`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            status: 'checked_in'
+          })
+        });
+        
+        if (!checkInResponse.ok) throw new Error('Check-in thất bại');
+        
+        this.showNotificationMessage('Check-in thành công', 'success');
+        this.showKutiModal = false;
+        this.selectedKutiId = null;
+        this.fetchRegistrations();
+      } catch (error) {
+        console.error('Lỗi check-in:', error);
+        this.showNotificationMessage('Có lỗi xảy ra khi check-in', 'error');
       }
     },
 
@@ -83,31 +156,8 @@ document.addEventListener('alpine:init', () => {
       this.showDetail = true;
     },
 
-    async checkIn(id) {
-      try {
-        const response = await fetch(`http://192.168.0.200:8000/api/registration/${id}/`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            status: 'checked_in'
-          })
-        });
-        
-        if (!response.ok) throw new Error('Check-in failed');
-        
-        this.showNotificationMessage('Check-in thành công', 'success');
-        this.fetchRegistrations();
-      } catch (error) {
-        console.error('Check-in error:', error);
-        this.showNotificationMessage('Có lỗi xảy ra khi check-in', 'error');
-      }
-    },
-
     downloadTemporaryStay(id) {
-      // Implement download functionality
-      console.log('Download temporary stay for ID:', id);
+      console.log('Tải file tạm trú cho ID:', id);
       this.showNotificationMessage('Đang tải file tạm trú...', 'success');
     }
   }));

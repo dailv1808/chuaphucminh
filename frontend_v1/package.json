@@ -20,7 +20,8 @@
   "dependencies": {
     "@alpinejs/collapse": "^3.14.9",
     "@alpinejs/persist": "^3.14.9",
-    "alpinejs": "^3.14.9"
+    "alpinejs": "^3.14.9",
+    "nodejs": "^0.0.0"
   },
   "description": ""
 }
