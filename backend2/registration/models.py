@@ -1,7 +1,7 @@
 from django.db import models
 class Registration(models.Model):    
-    # phone_number = models.ForeignKey(Account, on_delete=models.CASCADE)
-    phone_number = models.CharField(max_length=12, unique=True)
+    # username = models.ForeignKey(Account, on_delete=models.CASCADE)
+    username  = models.CharField(max_length=12, unique=True)
     cccd = models.CharField(max_length=12, unique=True)
     fullname = models.CharField(max_length=128)
     GENDER_CHOICES = [('Nam', 'Nam'), ('Nữ', 'Nữ')]
@@ -12,6 +12,12 @@ class Registration(models.Model):
     emergency_phone = models.CharField(max_length=15, null=True, blank=True)
     note = models.TextField(null=True, blank=True)
     reject_reason = models.TextField(null=True, blank=True)
+
+    ## Add them
+    kuti_assigned = models.BooleanField(default=False)     #  các đăng ký chưa được gán kuti.
+    duration = models.IntegerField(null=True, blank=True)  # lưu số ngày hành thiền, có thể tính tự động từ start_date và end_date.
+
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     STATUS_CHOICES = [
@@ -26,7 +32,8 @@ class Registration(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     class Meta:
-        indexes = [models.Index(fields=['phone_number'], name='idx_phone_number')]
+        indexes = [models.Index(fields=['username'], name='username')]
 
     def __str__(self):
-        return f"{self.fullname} - ({self.phone_number}) -  {self.start_date} to {self.end_date}"
+        return f"{self.fullname} - ({self.username }) -  {self.start_date} to {self.end_date}"
+
