@@ -1,31 +1,184 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="vi" x-data="dashboardData()">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - TailAdmin</title>
+  <title>Dashboard - CPM Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="./src/css/main.css">
+  <link rel="stylesheet" href="./src/css/index.css">
 </head>
-<body x-data="appData()" class="bg-gray-50 dark:bg-gray-900 font-sans">
+
+<body class="bg-gray-50 font-sans text-gray-800">
   <!-- Header -->
   <div x-html="await (await fetch('./partials/header.html')).text()"></div>
   
   <!-- Sidebar -->
   <div x-html="await (await fetch('./partials/sidebar.html')).text()"></div>
-  
-  <div class="p-4 sm:ml-64">
-    <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
-      <div class="grid grid-cols-1 gap-4 mb-4">
-        <div class="flex items-center justify-center h-24 rounded bg-gray-50 dark:bg-gray-800">
-          <p class="text-2xl text-gray-400 dark:text-gray-500">Dashboard Content</p>
+
+  <div class="p-4 sm:ml-64 pt-20">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      <!-- Total Meditators Card -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <h3 class="text-lg font-medium text-gray-500 mb-2">Tổng thiền sinh</h3>
+        <div class="flex items-end">
+          <span class="text-3xl font-bold" x-text="stats.totalMeditators">124</span>
+          <span class="ml-2 text-green-500 flex items-center">
+            <i class="fas fa-arrow-up mr-1"></i>
+            <span x-text="stats.meditatorGrowth">5,2%</span>
+            <span class="text-gray-500 text-sm ml-1">so với tháng trước</span>
+          </span>
         </div>
+      </div>
+
+      <!-- Pending Approvals Card -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <h3 class="text-lg font-medium text-gray-500 mb-2">Chờ phê duyệt</h3>
+        <div class="flex items-end">
+          <span class="text-3xl font-bold" x-text="stats.pendingApprovals">8</span>
+          <span class="ml-2 text-red-500 flex items-center">
+            <i class="fas fa-arrow-down mr-1"></i>
+            <span x-text="stats.approvalDecline">2,1%</span>
+            <span class="text-gray-500 text-sm ml-1">so với tháng trước</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Total Kuti Card -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <h3 class="text-lg font-medium text-gray-500 mb-2">Tổng số Kuti</h3>
+        <div class="flex items-end">
+          <span class="text-3xl font-bold" x-text="stats.totalKuti">42</span>
+          <span class="ml-2 text-green-500 flex items-center">
+            <i class="fas fa-arrow-up mr-1"></i>
+            <span x-text="stats.kutiGrowth">3,7%</span>
+            <span class="text-gray-500 text-sm ml-1">so với tháng trước</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <!-- Latest Meditator -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 lg:col-span-1">
+        <h3 class="text-lg font-medium text-gray-700 mb-4">Thiền sinh mới nhất</h3>
+        <div class="space-y-4" x-data="{ latestMeditator: { name: 'Nguyễn Văn A', email: 'van.a@example.com' } }">
+          <div class="flex items-start">
+            <div class="bg-blue-100 text-blue-800 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+              <i class="fas fa-user"></i>
+            </div>
+            <div>
+              <h4 class="font-medium" x-text="latestMeditator.name">Nguyễn Văn A</h4>
+              <p class="text-gray-500 text-sm" x-text="latestMeditator.email">van.a@example.com</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Questions -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 lg:col-span-2">
+        <h3 class="text-lg font-medium text-gray-700 mb-4">Câu hỏi mới</h3>
+        <div class="space-y-4">
+          <div class="border-b border-gray-100 pb-4">
+            <p class="font-medium">Làm thế nào để tập trung khi thiền?</p>
+            <p class="text-gray-500 text-sm">Bồi Nguyễn Văn B - 2 giờ trước</p>
+          </div>
+          <div class="border-b border-gray-100 pb-4">
+            <p class="font-medium">Thời gian thiền tốt nhất trong ngày?</p>
+            <p class="text-gray-500 text-sm">Bồi Tân Thị C - 5 giờ trước</p>
+          </div>
+          <div class="pt-2">
+            <a href="#" class="text-blue-600 hover:text-blue-800 text-sm flex items-center">
+              Xem tất cả câu hỏi
+              <i class="fas fa-chevron-right ml-1 text-xs"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Approvals Table -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-medium text-gray-700">Danh sách phê duyệt gần đây</h3>
+        <a href="#" class="text-blue-600 hover:text-blue-800 text-sm">Xem tất cả</a>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="pb-3">STT</th>
+              <th class="pb-3">TÊN</th>
+              <th class="pb-3">QUỐC GIA</th>
+              <th class="pb-3">NGÀY ĐĂNG KÝ</th>
+              <th class="pb-3">TRẠNG THÁI</th>
+              <th class="pb-3 text-right">HÀNH ĐỘNG</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+              <td class="py-4">32</td>
+              <td class="py-4">Nam</td>
+              <td class="py-4">Việt Nam</td>
+              <td class="py-4">15/06/2023</td>
+              <td class="py-4">
+                <span class="px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full">Đã duyệt</span>
+              </td>
+              <td class="py-4 text-right">
+                <a href="#" class="text-blue-600 hover:text-blue-800">Chi tiết</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Kuti Status Table -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-medium text-gray-700">Trạng thái Kuti</h3>
+        <a href="#" class="text-blue-600 hover:text-blue-800 text-sm">Xem tất cả</a>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="pb-3">STT</th>
+              <th class="pb-3">TÊN</th>
+              <th class="pb-3">TRẠNG THÁI KUTI</th>
+              <th class="pb-3 text-right">HÀNH ĐỘNG</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+              <td class="py-4">64</td>
+              <td class="py-4">Giáo sư lớp</td>
+              <td class="py-4">
+                <span class="block">Kuti A1</span>
+                <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Đang sử dụng</span>
+              </td>
+              <td class="py-4 text-right">
+                <a href="#" class="text-blue-600 hover:text-blue-800">Tối</a>
+              </td>
+            </tr>
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+              <td class="py-4">65</td>
+              <td class="py-4"></td>
+              <td class="py-4">
+                <span class="block">Kuti B2</span>
+                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Cần bảo trì</span>
+              </td>
+              <td class="py-4 text-right">
+                <a href="#" class="text-blue-600 hover:text-blue-800">Chi tiết</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <script src="./src/js/main.js"></script>
+  <script src="./src/js/index.js"></script>
 </body>
 </html>

@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for dashboard */
+.dashboard-card {
+  @apply bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow;
+}
+
+.stat-card {
+  @apply bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow;
+}
+
+.table-row {
+  @apply border-b border-gray-100 hover:bg-gray-50 transition-colors;
+}
+
+.status-badge {
+  @apply px-3 py-1 text-xs rounded-full inline-flex items-center;
+}

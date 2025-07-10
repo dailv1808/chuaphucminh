@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi" x-data="qaData()">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Hỏi đáp - CPM Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="./src/css/qa.css">
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800">
+  <!-- Header -->
+  <div x-html="await (await fetch('./partials/header.html')).text()"></div>
+  
+  <!-- Sidebar -->
+  <div x-html="await (await fetch('./partials/sidebar.html')).text()"></div>
+
+  <!-- Modal thêm/sửa câu hỏi -->
+  <div x-show="showQuestionModal" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div @click.outside="closeQuestionModal()" class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-bold text-blue-600" x-text="isEditing ? 'Chỉnh sửa câu hỏi' : 'Thêm câu hỏi mới'"></h3>
+          <button @click="closeQuestionModal()" class="text-gray-400 hover:text-gray-500 transition-colors">
+            <i class="fas fa-times text-lg"></i>
+          </button>
+        </div>
+        
+        <div class="space-y-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Tên người hỏi <span class="text-red-500">*</span></label>
+              <input type="text" x-model="currentQuestion.name" required 
+                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
+              <input type="email" x-model="currentQuestion.email" required 
+                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nội dung câu hỏi <span class="text-red-500">*</span></label>
+            <textarea x-model="currentQuestion.content" rows="4" required
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></textarea>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+              <select x-model="currentQuestion.status" 
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                <option value="pending">Chờ trả lời</option>
+                <option value="answered">Đã trả lời</option>
+                <option value="archived">Lưu trữ</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Độ ưu tiên</label>
+              <select x-model="currentQuestion.priority" 
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                <option value="low">Thấp</option>
+                <option value="medium">Trung bình</option>
+                <option value="high">Cao</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nhóm</label>
+              <input type="number" x-model="currentQuestion.group" 
+                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-8 flex justify-end gap-3">
+          <button @click="closeQuestionModal()" 
+                  class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+            Hủy bỏ
+          </button>
+          <button @click="saveQuestion()" 
+                  class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+            <span x-text="isEditing ? 'Cập nhật' : 'Thêm mới'"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal xác nhận xóa -->
+  <div x-show="showConfirmModal" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div @click.outside="showConfirmModal = false" class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-blue-600">Xác nhận xóa</h3>
+          <button @click="showConfirmModal = false" class="text-gray-400 hover:text-gray-500 transition-colors">
+            <i class="fas fa-times text-lg"></i>
+          </button>
+        </div>
+        
+        <div class="space-y-2">
+          <p class="text-gray-700">Bạn có chắc chắn muốn xóa câu hỏi này?</p>
+          <p class="text-red-500 text-sm">Lưu ý: Không thể hoàn tác sau khi xóa!</p>
+        </div>
+        
+        <div class="mt-6 flex justify-end gap-3">
+          <button @click="showConfirmModal = false" 
+                  class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+            Hủy bỏ
+          </button>
+          <button @click="deleteQuestion()" 
+                  class="px-5 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+            Xác nhận xóa
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thông báo -->
+  <div x-show="showNotification" x-transition class="fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg"
+       :class="{
+         'bg-green-100 text-green-800': notificationType === 'success',
+         'bg-red-100 text-red-800': notificationType === 'error'
+       }">
+    <div class="flex items-center">
+      <span x-text="notificationMessage"></span>
+      <button @click="showNotification = false" class="ml-4 text-gray-500 hover:text-gray-700">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="p-4 sm:ml-64 pt-20">
+    <div class="p-6 bg-white rounded-xl card-shadow border border-gray-100 hover-scale">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gradient">Quản lý Hỏi đáp</h1>
+          <p class="text-gray-500 text-sm mt-1" x-text="`Tổng cộng ${questions.length} câu hỏi`"></p>
+        </div>
+        <div class="flex gap-3">
+          <div class="relative w-full md:w-64">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <i class="fas fa-search text-gray-400"></i>
+            </div>
+            <input type="text" x-model="searchQuery" @input="filterQuestions" 
+                   class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" 
+                   placeholder="Tìm kiếm...">
+          </div>
+          <button @click="openAddQuestionModal()" class="btn-primary">
+            <i class="fas fa-plus mr-2"></i>
+            <span>Thêm mới</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="relative overflow-x-auto rounded-lg border border-gray-200">
+        <table class="w-full text-sm text-left">
+          <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-500 to-blue-400">
+            <tr>
+              <th scope="col" class="px-6 py-3">STT</th>
+              <th scope="col" class="px-6 py-3">Người hỏi</th>
+              <th scope="col" class="px-6 py-3">Nội dung</th>
+              <th scope="col" class="px-6 py-3">Trạng thái</th>
+              <th scope="col" class="px-6 py-3">Độ ưu tiên</th>
+              <th scope="col" class="px-6 py-3">Ngày tạo</th>
+              <th scope="col" class="px-6 py-3 text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="(question, index) in filteredQuestions" :key="question.id">
+              <tr class="bg-white border-b hover:bg-blue-50 transition-colors">
+                <td class="px-6 py-4 font-medium" x-text="index + 1"></td>
+                <td class="px-6 py-4">
+                  <div class="font-medium" x-text="question.name"></div>
+                  <div class="text-gray-500 text-sm" x-text="question.email"></div>
+                </td>
+                <td class="px-6 py-4 max-w-xs">
+                  <div class="font-medium" x-text="question.short_content || question.content.substring(0, 50) + '...'"></div>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="status-badge" 
+                        :class="{
+                          'bg-yellow-100 text-yellow-800': question.status === 'pending',
+                          'bg-green-100 text-green-800': question.status === 'answered',
+                          'bg-gray-100 text-gray-800': question.status === 'archived'
+                        }"
+                        x-text="{
+                          pending: 'Chờ trả lời',
+                          answered: 'Đã trả lời',
+                          archived: 'Lưu trữ'
+                        }[question.status]"></span>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="priority-badge" 
+                        :class="{
+                          'bg-red-100 text-red-800': question.priority === 'high',
+                          'bg-blue-100 text-blue-800': question.priority === 'medium',
+                          'bg-gray-100 text-gray-800': question.priority === 'low'
+                        }"
+                        x-text="{
+                          high: 'Cao',
+                          medium: 'Trung bình',
+                          low: 'Thấp'
+                        }[question.priority]"></span>
+                </td>
+                <td class="px-6 py-4" x-text="formatDate(question.created_at)"></td>
+                <td class="px-6 py-4 text-right">
+                  <div class="flex justify-end gap-3">
+                    <button @click="openEditQuestionModal(question)" class="btn-edit" title="Chỉnh sửa">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button @click="confirmDelete(question)" class="btn-delete" title="Xóa">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </template>
+            <tr x-show="filteredQuestions.length === 0">
+              <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                <span x-show="isLoading">Đang tải dữ liệu...</span>
+                <span x-show="!isLoading && filteredQuestions.length === 0">Không tìm thấy câu hỏi nào</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="./src/js/qa.js"></script>
+</body>
+</html>

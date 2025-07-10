@@ -3,7 +3,7 @@ from .models import GuestQuestion, QuestionGroup, QuestionTag
 
 @admin.register(GuestQuestion)
 class GuestQuestionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'short_content', 'status', 'priority', 'answered_at', 'created_at')
+    list_display = ('id', 'name', 'email', 'short_content', 'status', 'priority', 'answered_at', 'created_at')
     list_filter = ('status', 'priority', 'group', 'tags',)
     search_fields = ('name', 'email', 'content', 'short_content',)
     autocomplete_fields = ['tags', 'group']
