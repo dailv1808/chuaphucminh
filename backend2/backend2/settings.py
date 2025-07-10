@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'kutiassignment',
     'rest_framework',
     'corsheaders',
+    'guest_question',
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True  # Chỉ dùng cho development

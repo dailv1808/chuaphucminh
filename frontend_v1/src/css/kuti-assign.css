@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for kuti-assign page */
+.card-shadow {
+  @apply shadow-sm hover:shadow-md transition-shadow;
+}
+
+.hover-scale {
+  @apply transition-transform hover:scale-[1.002];
+}
+
+.text-gradient {
+  @apply text-transparent bg-clip-text;
+}

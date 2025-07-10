@@ -1,8 +1,9 @@
 from django.db import models
+
 class Registration(models.Model):    
     # username = models.ForeignKey(Account, on_delete=models.CASCADE)
-    username  = models.CharField(max_length=12, unique=True)
-    cccd = models.CharField(max_length=12, unique=True)
+    username  = models.CharField(max_length=12)
+    cccd = models.CharField(max_length=12)
     fullname = models.CharField(max_length=128)
     GENDER_CHOICES = [('Nam', 'Nam'), ('Nữ', 'Nữ')]
     gender = models.CharField(max_length=5, choices=GENDER_CHOICES)
@@ -36,4 +37,3 @@ class Registration(models.Model):
 
     def __str__(self):
         return f"{self.fullname} - ({self.username }) -  {self.start_date} to {self.end_date}"
-

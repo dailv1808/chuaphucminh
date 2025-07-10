@@ -16,7 +16,7 @@ class CheckoutAPI(generics.UpdateAPIView):
     API xử lý checkout (trả Kuti)
     PUT /api/registration/<id>/checkout/
     """
-    permission_classes = [IsAdminUser]
+    #permission_classes = [IsAdminUser]
 
     def update(self, request, *args, **kwargs):
         try:
