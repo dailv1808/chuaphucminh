@@ -51,7 +51,7 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-500">Số điện thoại</label>
-              <p class="mt-1 text-gray-900" x-text="selectedRegistration.phone_number"></p>
+              <p class="mt-1 text-gray-900" x-text="selectedRegistration.username"></p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-500">Email</label>
@@ -206,7 +206,7 @@
                         x-text="formatStatus(registration.status).text"></span>
                 </td>
                 <td class="px-6 py-4 text-right space-x-2">
-                  <button @click="openCheckInModal(registration)" class="btn-checkin">Checked in</button>
+                  <button @click="openCheckInModal(registration)" class="btn-checkin">Check in</button>
                   <button @click="downloadTemporaryStay(registration.id)" class="btn-download">Tải tạm trú</button>
                 </td>
               </tr>

@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'guest_question',
+    'tamtru',
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True  # Chỉ dùng cho development

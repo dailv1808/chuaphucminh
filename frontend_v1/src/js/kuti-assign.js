@@ -90,7 +90,7 @@ document.addEventListener('alpine:init', () => {
             if (user.fullname && user.fullname.toLowerCase().includes(query)) {
               return true;
             }
-            if (user.phone_number && user.phone_number.includes(query)) {
+            if (user.username && user.username.includes(query)) {
               return true;
             }
           }

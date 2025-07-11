@@ -87,7 +87,7 @@
                 </td>
                 <td class="px-6 py-4">
                   <template x-if="kuti.current_registration && getUserById(kuti.current_registration)">
-                    <span x-text="getUserById(kuti.current_registration).phone_number"></span>
+                    <span x-text="getUserById(kuti.current_registration).username"></span>
                   </template>
                   <template x-if="!kuti.current_registration">
                     <span class="text-gray-400">-</span>

@@ -136,7 +136,7 @@ document.addEventListener('alpine:init', () => {
       const query = this.searchQuery.toLowerCase();
       this.filteredRegistrations = this.registrations.filter(reg => 
         reg.fullname.toLowerCase().includes(query) ||
-        reg.phone_number.includes(query) ||
+        reg.username.includes(query) ||
         (reg.cccd && reg.cccd.includes(query)) ||
         (reg.address && reg.address.toLowerCase().includes(query))
       );
@@ -161,4 +161,4 @@ document.addEventListener('alpine:init', () => {
       this.showNotificationMessage('Đang tải file tạm trú...', 'success');
     }
   }));
-});
+})

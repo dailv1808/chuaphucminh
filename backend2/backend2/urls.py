@@ -23,4 +23,5 @@ urlpatterns = [
     path('api/kuti/', include('kuti.urls')),
     path('api/kutiassignment/', include('kutiassignment.urls')),
     path('api/questions/', include('guest_question.urls')),
+    path('api/tamtru/', include('tamtru.urls')),
 ]
