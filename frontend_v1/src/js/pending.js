@@ -16,11 +16,12 @@ document.addEventListener('alpine:init', () => {
     init() {
       this.fetchRegistrations();
     },
-
     async fetchRegistrations() {
       try {
-        this.isLoading = true;
-        const response = await fetch('http://192.168.0.200:8000/api/registration/');
+        this.isLoading = true;        
+	const response = await fetch('http://192.168.0.200:8000/api/registration/')
+
+
         if (!response.ok) throw new Error('Network response was not ok');
         
         const data = await response.json();
@@ -101,7 +102,7 @@ document.addEventListener('alpine:init', () => {
 
     async approveRegistration(id) {
       try {
-        const response = await fetch(`http://192.168.0.200:8000/api/registration/${id}/`, {
+        const response = await fetch('http://192.168.0.200:8000/api/registration/${id}/', {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -129,7 +130,7 @@ document.addEventListener('alpine:init', () => {
       }
       
       try {
-        const response = await fetch(`http://192.168.0.200:8000/api/registration/${this.selectedRejectId}/`, {
+        const response = await fetch('http://192.168.0.200:8000/api/registration/${this.selectedRejectId}/', {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',

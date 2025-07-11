@@ -1,22 +1,42 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from .models import Registration
 from .serializers import RegistrationSerializer
 from django.utils import timezone
 from kutiassignment.models import KutiAssignment
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class RegistrationViewSet(viewsets.ModelViewSet):
     queryset = Registration.objects.all()
     serializer_class = RegistrationSerializer
+
+    authentication_classes = [JWTAuthentication]
+
+    def get_permissions(self):
+        if self.action == 'list':  # GET /registrations/
+            permission_classes = [permissions.AllowAny]
+        elif self.action == 'create':  # POST /registrations/
+            permission_classes = [permissions.AllowAny]
+        elif self.action in ['update', 'partial_update']:  # PUT/PATCH /registrations/<id>/
+            permission_classes = [permissions.IsAdminUser]
+        elif self.action == 'destroy':  # DELETE /registrations/<id>/
+            permission_classes = [permissions.IsAdminUser]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+
+        return [permission() for permission in permission_classes]
+
+
+
 
 class CheckoutAPI(generics.UpdateAPIView):
     """
     API xử lý checkout (trả Kuti)
     PUT /api/registration/<id>/checkout/
     """
-    #permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
 
     def update(self, request, *args, **kwargs):
         try:

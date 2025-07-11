@@ -1,17 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.utils import timezone
+
 class MyAccountManager(BaseUserManager):
-    def create_user(self, full_name, phone_number, email, password=None):
+    def create_user(self, full_name, username, email, password=None):
         if not email:
             raise ValueError('Email address is required')
+        if not username:
+            raise ValueError('username is required')
 
-        if not phone_number:
-            raise ValueError('phone_number is required')
-
-        # Tạo đối tượng user mới
         user = self.model(
-            email=self.normalize_email(email=email),    # Chuyển email về dạng bình thường
-            phone_number=phone_number,
+            email=self.normalize_email(email=email),
+            username=username,
             full_name=full_name,
         )
 
@@ -19,10 +19,10 @@ class MyAccountManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, full_name, email, phone_number, password):
+    def create_superuser(self, full_name, email, username, password):
         user = self.create_user(
             email=self.normalize_email(email=email),
-            phone_number=phone_number,
+            username=username,
             password=password,
             full_name=full_name,
         )
@@ -32,21 +32,27 @@ class MyAccountManager(BaseUserManager):
         user.is_superadmin = True
         user.save(using=self._db)
         return user
+
 class Account(AbstractBaseUser):
     full_name = models.CharField(max_length=50)
     email = models.EmailField(max_length=100, unique=True)
-    phone_number = models.CharField(max_length=50, unique=True)
-
+    username = models.CharField(max_length=50, unique=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    
     # required
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now_add=True)
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)  # Thay đổi thành True nếu không cần xác thực email
     is_superadmin = models.BooleanField(default=False)
+    
+    # Thêm trường cho reset password
+    reset_password_token = models.CharField(max_length=100, blank=True, null=True)
+    reset_password_token_expire = models.DateTimeField(blank=True, null=True)
 
-    USERNAME_FIELD = 'phone_number'    # Trường quyêt định khi login
-    REQUIRED_FIELDS = ['email', 'full_name']    # Các trường yêu cầu khi đk tài khoản (mặc định đã có email), mặc định có password
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email', 'full_name']
 
     objects = MyAccountManager()
 
@@ -54,7 +60,7 @@ class Account(AbstractBaseUser):
         return self.email
 
     def has_perm(self, perm, obj=None):
-        return self.is_admin    # Admin có tất cả quyền trong hệ thống
+        return self.is_admin
 
     def has_module_perms(self, add_label):
         return True
