@@ -76,10 +76,23 @@
             <label class="block text-sm font-medium text-gray-500">Thời gian hành thiền</label>
             <p class="mt-1 text-gray-900" x-text="`${formatDate(selectedRegistration.start_date)} đến ${formatDate(selectedRegistration.end_date)} (${calculateDuration(selectedRegistration.start_date, selectedRegistration.end_date)} ngày)`"></p>
           </div>
-        </div>
-        
-        <div class="mt-6 flex justify-end space-x-3">
-          <button @click="showDetail = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Đóng</button>
+
+          <!-- Thêm nút tải tạm trú trong modal chi tiết -->
+          <div class="mt-6 flex justify-end space-x-3">
+            <button @click="downloadTemporaryStay(selectedRegistration)" 
+                    class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center"
+                    :disabled="isDownloading">
+              <span x-show="!isDownloading">Tải tờ khai tạm trú</span>
+              <span x-show="isDownloading" class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Đang tải...
+              </span>
+            </button>
+            <button @click="showDetail = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Đóng</button>
+          </div>
         </div>
       </div>
     </div>
@@ -145,7 +158,8 @@
   <div x-show="showNotification" x-transition class="fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg"
        :class="{
          'bg-green-100 text-green-800': notificationType === 'success',
-         'bg-red-100 text-red-800': notificationType === 'error'
+         'bg-red-100 text-red-800': notificationType === 'error',
+         'bg-blue-100 text-blue-800': notificationType === 'info'
        }">
     <div class="flex items-center">
       <span x-text="notificationMessage"></span>
@@ -194,9 +208,9 @@
               <tr class="bg-white border-b hover:bg-blue-50 transition-colors">
                 <td class="px-6 py-4 font-medium" x-text="index + 1"></td>
                 <td class="px-6 py-4 font-medium text-blue-600 cursor-pointer hover:underline" 
-                    @click="showRegistrationDetail(registration)" x-text="registration.fullname"></td>
+                    @click="showRegistrationDetail(registration)" x-text="registration.fullname || 'Chưa có thông tin'"></td>
                 <td class="px-6 py-4" x-text="formatDate(registration.birthday)"></td>
-                <td class="px-6 py-4" x-text="registration.gender"></td>
+                <td class="px-6 py-4" x-text="registration.gender || 'N/A'"></td>
                 <td class="px-6 py-4" x-text="formatDate(registration.created_at)"></td>
                 <td class="px-6 py-4" x-text="formatDate(registration.updated_at)"></td>
                 <td class="px-6 py-4" x-text="calculateDuration(registration.start_date, registration.end_date)"></td>
@@ -207,7 +221,20 @@
                 </td>
                 <td class="px-6 py-4 text-right space-x-2">
                   <button @click="openCheckInModal(registration)" class="btn-checkin">Check in</button>
-                  <button @click="downloadTemporaryStay(registration.id)" class="btn-download">Tải tạm trú</button>
+                  <button @click="downloadTemporaryStay(registration)" class="btn-download" :disabled="isDownloading">
+                    <template x-if="!isDownloading">
+                      <span>Tải tạm trú</span>
+                    </template>
+                    <template x-if="isDownloading">
+                      <span class="flex items-center">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Đang tải...
+                      </span>
+                    </template>
+                  </button>
                 </td>
               </tr>
             </template>

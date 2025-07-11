@@ -6,13 +6,14 @@ document.addEventListener('alpine:init', () => {
     showDetail: false,
     selectedRegistration: null,
     isLoading: true,
+    isDownloading: false,
     showNotification: false,
     notificationMessage: '',
     notificationType: 'success',
-    showKutiModal: false, // Modal chọn Kuti
-    availableKutis: [], // Danh sách Kuti trống
-    selectedKutiId: null, // Kuti được chọn
-    currentRegistrationId: null, // ID đăng ký đang xử lý
+    showKutiModal: false,
+    availableKutis: [],
+    selectedKutiId: null,
+    currentRegistrationId: null,
 
     init() {
       this.fetchRegistrations();
@@ -35,7 +36,6 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
-    // Lấy danh sách Kuti trống phù hợp
     async fetchAvailableKutis(gender) {
       try {
         const response = await fetch('http://192.168.0.200:8000/api/kuti/');
@@ -52,14 +52,12 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
-    // Mở modal chọn Kuti
     async openCheckInModal(registration) {
       this.currentRegistrationId = registration.id;
       await this.fetchAvailableKutis(registration.gender);
       this.showKutiModal = true;
     },
 
-    // Xác nhận check-in và gán Kuti
     async confirmCheckIn() {
       if (!this.selectedKutiId) {
         this.showNotificationMessage('Vui lòng chọn Kuti', 'error');
@@ -67,7 +65,6 @@ document.addEventListener('alpine:init', () => {
       }
 
       try {
-        // Gán Kuti
         const assignResponse = await fetch('http://192.168.0.200:8000/api/kutiassignment/assign/', {
           method: 'POST',
           headers: {
@@ -81,7 +78,6 @@ document.addEventListener('alpine:init', () => {
 
         if (!assignResponse.ok) throw new Error('Gán Kuti thất bại');
 
-        // Cập nhật trạng thái đăng ký
         const checkInResponse = await fetch(`http://192.168.0.200:8000/api/registration/${this.currentRegistrationId}/`, {
           method: 'PATCH',
           headers: {
@@ -101,6 +97,90 @@ document.addEventListener('alpine:init', () => {
       } catch (error) {
         console.error('Lỗi check-in:', error);
         this.showNotificationMessage('Có lỗi xảy ra khi check-in', 'error');
+      }
+    },
+
+    async downloadTemporaryStay(registration) {
+      try {
+        let regData = registration;
+        
+        if (this.selectedRegistration && this.selectedRegistration.id === registration.id) {
+          regData = this.selectedRegistration;
+        }
+        else if (!registration.cccd || !registration.fullname) {
+          try {
+            const response = await fetch(`http://192.168.0.200:8000/api/registration/${registration.id}/`);
+            if (!response.ok) throw new Error('Lỗi khi lấy thông tin chi tiết');
+            regData = await response.json();
+          } catch (fetchError) {
+            console.error('Lỗi khi lấy thông tin:', fetchError);
+            this.showRegistrationDetail(registration);
+            this.showNotificationMessage('Vui lòng xem thông tin chi tiết trước khi tải', 'info');
+            return;
+          }
+        }
+
+        if (!regData.cccd || !regData.fullname) {
+          this.showNotificationMessage('Thông tin CCCD hoặc họ tên bị thiếu', 'error');
+          return;
+        }
+
+        this.isDownloading = true;
+        this.showNotificationMessage('Đang tạo tờ khai tạm trú...', 'info');
+        
+        const response = await fetch('http://192.168.0.200:8000/api/tamtru/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: regData.username || '',
+            cccd: regData.cccd,
+            fullname: regData.fullname,
+            gender: regData.gender || 'Nam',
+            birthday: regData.birthday || new Date().toISOString().split('T')[0],
+            email: regData.email || '',
+            address: regData.address || ''
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Lỗi khi tạo tờ khai tạm trú');
+        }
+
+        // Lấy filename từ Content-Disposition hoặc tạo mới
+        const contentDisposition = response.headers.get('content-disposition');
+        let filename = `To_khai_tam_tru_${regData.cccd}.docx`;
+        
+        if (contentDisposition) {
+          const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+          if (filenameMatch && filenameMatch[1]) {
+            filename = filenameMatch[1].replace(/"/g, '');
+          }
+        }
+
+        // Tạo blob từ response và tải xuống
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        
+        // Dọn dẹp
+        setTimeout(() => {
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        }, 100);
+
+        this.showNotificationMessage('Tải tờ khai tạm trú thành công', 'success');
+      } catch (error) {
+        console.error('Lỗi khi tải tờ khai tạm trú:', error);
+        this.showNotificationMessage(error.message || 'Có lỗi xảy ra khi tải tờ khai tạm trú', 'error');
+      } finally {
+        this.isDownloading = false;
       }
     },
 
@@ -135,8 +215,8 @@ document.addEventListener('alpine:init', () => {
       
       const query = this.searchQuery.toLowerCase();
       this.filteredRegistrations = this.registrations.filter(reg => 
-        reg.fullname.toLowerCase().includes(query) ||
-        reg.username.includes(query) ||
+        (reg.fullname && reg.fullname.toLowerCase().includes(query)) ||
+        (reg.username && reg.username.includes(query)) ||
         (reg.cccd && reg.cccd.includes(query)) ||
         (reg.address && reg.address.toLowerCase().includes(query))
       );
@@ -154,11 +234,6 @@ document.addEventListener('alpine:init', () => {
     showRegistrationDetail(registration) {
       this.selectedRegistration = registration;
       this.showDetail = true;
-    },
-
-    downloadTemporaryStay(id) {
-      console.log('Tải file tạm trú cho ID:', id);
-      this.showNotificationMessage('Đang tải file tạm trú...', 'success');
     }
   }));
-})
+});
