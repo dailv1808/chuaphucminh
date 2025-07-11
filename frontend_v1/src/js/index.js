@@ -1,62 +1,124 @@
 document.addEventListener('alpine:init', () => {
   Alpine.data('dashboardData', () => ({
     stats: {
-      totalMeditators: 0,
-      meditatorGrowth: '0%',
-      pendingApprovals: 0,
-      approvalDecline: '0%',
+      pendingRegistrations: 0,
+      pendingChange: 5.2,
+      checkedInMeditators: 0,
+      checkedInChange: -2.1,
+      tomorrowCheckins: 0,
+      tomorrowCheckouts: 0,
+      availableKuti: 0,
       totalKuti: 0,
-      kutiGrowth: '0%',
-      newQuestions: 0,
-      questionGrowth: '0%'
+      newQuestions: 0
     },
+    latestRegistrations: [],
+    latestQuestions: [],
+    showNotification: false,
+    notificationMessage: '',
+    notificationType: 'success',
     isLoading: true,
 
     init() {
-      this.fetchDashboardData();
+      this.fetchAllData();
     },
 
-    async fetchDashboardData() {
+    async fetchAllData() {
       try {
-        // Fetch stats data from API
-        const statsResponse = await fetch(`${window.AppConfig.API_BASE_URL}/dashboard/stats/`);
-        if (!statsResponse.ok) throw new Error('Failed to load stats');
-        const statsData = await statsResponse.json();
+        this.isLoading = true;
         
-        // Update stats with actual data or fallback to demo data
-        this.stats = {
-          totalMeditators: statsData.total_meditators || 124,
-          meditatorGrowth: statsData.meditator_growth || '5,2%',
-          pendingApprovals: statsData.pending_approvals || 8,
-          approvalDecline: statsData.approval_decline || '2,1%',
-          totalKuti: statsData.total_kuti || 42,
-          kutiGrowth: statsData.kuti_growth || '3,7%',
-          newQuestions: statsData.new_questions || 15,
-          questionGrowth: statsData.question_growth || '8,5%'
-        };
-
+        // Fetch all registrations
+        const registrationsRes = await fetch('http://192.168.0.200:8000/api/registration/');
+        if (registrationsRes.ok) {
+          const registrationsData = await registrationsRes.json();
+          
+          // Filter pending registrations
+          const pendingRegistrations = registrationsData.filter(reg => reg.status === 'pending');
+          this.stats.pendingRegistrations = pendingRegistrations.length;
+          
+          // Filter checked-in meditators
+          this.stats.checkedInMeditators = registrationsData.filter(reg => reg.status === 'checked_in').length;
+          
+          // Filter tomorrow's check-ins (approved with start_date = tomorrow)
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const tomorrowStr = tomorrow.toISOString().split('T')[0];
+          this.stats.tomorrowCheckins = registrationsData.filter(reg => 
+            reg.status === 'approved' && 
+            reg.start_date === tomorrowStr
+          ).length;
+          
+          // Filter tomorrow's check-outs (checked_in with end_date = tomorrow)
+          this.stats.tomorrowCheckouts = registrationsData.filter(reg => 
+            reg.status === 'checked_in' && 
+            reg.end_date === tomorrowStr
+          ).length;
+          
+          // Get latest PENDING registrations (sorted by date)
+          this.latestRegistrations = pendingRegistrations
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .slice(0, 3);
+        }
+        
+        // Fetch Kuti status
+        const kutiRes = await fetch('http://192.168.0.200:8000/api/kuti/');
+        if (kutiRes.ok) {
+          const kutiData = await kutiRes.json();
+          this.stats.totalKuti = kutiData.length;
+          this.stats.availableKuti = kutiData.filter(k => k.is_available).length;
+        }
+        
+        // Fetch latest questions
+        const questionsRes = await fetch('http://192.168.0.200:8000/api/questions/');
+        if (questionsRes.ok) {
+          const questionsData = await questionsRes.json();
+          this.stats.newQuestions = questionsData.filter(q => q.status !== 'answered').length;
+          this.latestQuestions = questionsData
+            .filter(q => q.status !== 'answered')
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .slice(0, 3);
+        }
+        
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
-        // Fallback to demo data if API fails
-        this.stats = {
-          totalMeditators: 124,
-          meditatorGrowth: '5,2%',
-          pendingApprovals: 8,
-          approvalDecline: '2,1%',
-          totalKuti: 42,
-          kutiGrowth: '3,7%',
-          newQuestions: 15,
-          questionGrowth: '8,5%'
-        };
+        this.showNotificationMessage('Có lỗi xảy ra khi tải dữ liệu', 'error');
       } finally {
         this.isLoading = false;
       }
     },
 
     formatDate(dateString) {
-      if (!dateString) return '';
+      if (!dateString) return 'N/A';
       const date = new Date(dateString);
       return date.toLocaleDateString('vi-VN');
+    },
+
+    formatTimeAgo(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInSeconds = Math.floor((now - date) / 1000);
+      
+      if (diffInSeconds < 60) return 'vài giây trước';
+      if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
+      if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+      return `${Math.floor(diffInSeconds / 86400)} ngày trước`;
+    },
+
+    calculateDuration(startDate, endDate) {
+      if (!startDate || !endDate) return 0;
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const diffTime = Math.abs(end - start);
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    },
+
+    showNotificationMessage(message, type = 'success') {
+      this.notificationMessage = message;
+      this.notificationType = type;
+      this.showNotification = true;
+      setTimeout(() => {
+        this.showNotification = false;
+      }, 3000);
     }
   }));
 });
