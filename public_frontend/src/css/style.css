@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .form-input, .form-textarea {
+    @apply w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-800 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition;
+  }
+
+  .form-textarea {
+    @apply h-36 resize-y;
+  }
+
+  .form-button {
+    @apply bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 shadow-md transition;
+  }
+}
+
