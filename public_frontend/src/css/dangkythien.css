@@ -6,6 +6,12 @@
     html {
         font-family: 'Alegreya', sans-serif;
     }
+    input, select, textarea {
+        @apply text-gray-700;
+    }
+    .form-group {
+        @apply mb-6;
+    }
 }
 
 /* Custom styles */
@@ -17,17 +23,4 @@
 }
 .text-primary {
     color: #810000;
-}
-
-.fixed {
-    position: fixed;
-}
-.inset-0 {
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-}
-.z-50 {
-    z-index: 50;
 }

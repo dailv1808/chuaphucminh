@@ -1,12 +1,13 @@
-<header class="bg-white shadow-sm">
+<div class="bg-white shadow-sm">
     <div class="container mx-auto px-4 py-4">
         <nav class="flex justify-between items-center">
             <div class="flex-1 flex justify-center md:justify-start">
                 <div class="hidden md:flex space-x-8">
                     <a href="#" class="text-gray-700 hover:text-[#810000]">TRANG CHỦ</a>
                     <a href="#" class="text-gray-700 hover:text-[#810000]">GIỚI THIỆU</a>
-                    <a href="#" class="text-gray-700 hover:text-[#810000]">HÀNH THIỀN</a>
+                    <a href="/dangkythien.html" class="text-gray-700 hover:text-[#810000]">HÀNH THIỀN</a>
                     <a href="#" class="text-gray-700 hover:text-[#810000]">KINH - SÁCH - MP3</a>
+		    <a href="/trinhphap.html" class="text-gray-700 hover:text-[#810000]">TRÌNH PHÁP</a>
                 </div>
             </div>
             
@@ -26,7 +27,7 @@
                     </a>
                 </div>
                 
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-gray-700">
+                <button id="mobileMenuBtn" class="md:hidden text-gray-700">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
@@ -35,11 +36,12 @@
         </nav>
         
         <!-- Mobile menu -->
-        <div x-show="mobileMenuOpen" @click.away="mobileMenuOpen = false" class="md:hidden mt-4 space-y-2">
+        <div id="mobileMenu" class="md:hidden mt-4 space-y-2 hidden">
             <a href="#" class="block px-3 py-2 text-gray-700 hover:text-[#810000]">TRANG CHỦ</a>
             <a href="#" class="block px-3 py-2 text-gray-700 hover:text-[#810000]">GIỚI THIỆU</a>
-            <a href="#" class="block px-3 py-2 text-gray-700 hover:text-[#810000]">HÀNH THIỀN</a>
+            <a href="/dangkythien.html" class="block px-3 py-2 text-gray-700 hover:text-[#810000]">HÀNH THIỀN</a>
             <a href="#" class="block px-3 py-2 text-gray-700 hover:text-[#810000]">KINH - SÁCH - MP3</a>
+	    <a href="/trinhphap.html" class="block px-3 py-2 text-gray-700 hover:text-[#810000]">TRÌNH PHÁP</a>
             <div class="pt-2 border-t mt-2">
                 <a href="#" class="block px-3 py-2 text-gray-700 hover:text-[#810000] flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,4 +58,4 @@
             </div>
         </div>
     </div>
-</header>
+</div>

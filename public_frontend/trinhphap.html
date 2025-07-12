@@ -7,12 +7,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="//unpkg.com/alpinejs" defer></script>
     <link rel="stylesheet" href="/src/css/trinhphap.css">
 </head>
-<body class="bg-gray-50 font-alegreya" x-data="{ mobileMenuOpen: false }">
-    <!-- Header Partial -->
-    <div data-include="partials/header.html"></div>
+<body class="bg-gray-50 font-alegreya">
+    <!-- Header sẽ được thêm bằng JS -->
+    <header id="header-container"></header>
 
     <main class="container mx-auto px-4 py-8 max-w-4xl">
         <div class="text-center mb-10">
@@ -28,13 +27,12 @@
                 phân hồi đáp của một buổi giảng pháp gần nhất.
             </p>
 
-            <form x-data="formData()" @submit.prevent="submitForm" class="space-y-6">
+            <form id="questionForm" class="space-y-6">
                 <div>
                     <label for="name" class="block text-gray-700 font-medium mb-2">Pháp danh hoặc tên của bạn *</label>
                     <input 
                         type="text" 
                         id="name" 
-                        x-model="name"
                         required 
                         class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]"
                         placeholder="Nhập pháp danh hoặc tên của bạn">
@@ -44,7 +42,6 @@
                     <label for="question" class="block text-gray-700 font-medium mb-2">Câu hỏi, phần trình pháp *</label>
                     <textarea 
                         id="question" 
-                        x-model="question"
                         rows="6" 
                         required 
                         class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]"
@@ -56,7 +53,6 @@
                     <input 
                         type="text" 
                         id="contact" 
-                        x-model="contact"
                         required 
                         class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]"
                         placeholder="Thông tin liên lạc">
@@ -69,17 +65,45 @@
 
                 <button 
                     type="submit" 
-                    class="w-full bg-[#810000] hover:bg-[#6a0000] text-white font-bold py-3 px-4 rounded-md transition duration-200"
-                    :disabled="isSubmitting">
-                    <span x-text="isSubmitting ? 'Đang gửi...' : 'Gửi trình pháp'"></span>
+                    id="submitBtn"
+                    class="w-full bg-[#810000] hover:bg-[#6a0000] text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                    Gửi trình pháp
                 </button>
             </form>
         </div>
     </main>
 
-    <!-- Footer Partial -->
-    <div data-include="partials/footer.html"></div>
+    <!-- Footer sẽ được thêm bằng JS -->
+    <footer id="footer-container"></footer>
 
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="text-center">
+                <svg class="mx-auto h-16 w-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <h3 class="text-xl font-bold text-gray-900 mt-4">Gửi trình pháp thành công!</h3>
+                <div class="mt-4 text-gray-600">
+                    <p>Câu trả lời sẽ được gửi qua thông tin liên lạc bạn cung cấp hoặc bạn có thể:</p>
+                </div>
+                <div class="mt-6 flex flex-col space-y-3">
+                    <a href="#" class="px-4 py-2 bg-[#810000] text-white rounded-md hover:bg-[#6a0000] transition flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                        </svg>
+                        Tạo tài khoản để theo dõi trạng thái
+                    </a>
+                    <button id="closeModalBtn" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition">
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load toàn bộ JS -->
+    <script src="/src/js/baseURL.js"></script>
     <script src="/src/js/trinhphap.js"></script>
 </body>
 </html>

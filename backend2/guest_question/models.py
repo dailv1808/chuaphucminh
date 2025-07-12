@@ -28,6 +28,7 @@ class GuestQuestion(models.Model):
     name = models.CharField("Tên", max_length=255)
     email = models.EmailField("Email", blank=True, null=True)
     content = models.TextField("Nội dung câu hỏi")
+    contact = models.CharField("Contact SĐT hoặc email hoặc link fb", max_length=100, blank=True)
     answer = models.TextField("Nội dung câu trả lời", blank=True, null=True)
     short_content = models.CharField("Nội dung rút gọn", max_length=300, blank=True)
     answered_at = models.DateTimeField("Thời điểm trả lời", blank=True, null=True)
