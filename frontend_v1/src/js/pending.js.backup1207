@@ -16,23 +16,10 @@ document.addEventListener('alpine:init', () => {
     init() {
       this.fetchRegistrations();
     },
-
     async fetchRegistrations() {
       try {
-        this.isLoading = true;
-
-        
-        //const token = localStorage.getItem('access_token');
-        //if (!token) throw new Error('No authentication token found');
-        
-        const response = await fetch('http://192.168.0.200:8000/api/registration/', {
-          headers: {
-            //'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        // const response = await fetch('http://192.168.0.200:8000/api/registration/');
+        this.isLoading = true;        
+	const response = await fetch('http://192.168.0.200:8000/api/registration/')
 
 
         if (!response.ok) throw new Error('Network response was not ok');
@@ -86,7 +73,7 @@ document.addEventListener('alpine:init', () => {
       const query = this.searchQuery.toLowerCase();
       this.filteredRegistrations = this.registrations.filter(reg => 
         reg.fullname.toLowerCase().includes(query) ||
-        reg.phone_number.includes(query) ||
+        reg.username.includes(query) ||
         (reg.cccd && reg.cccd.includes(query)) ||
         (reg.address && reg.address.toLowerCase().includes(query))
       );
@@ -115,14 +102,10 @@ document.addEventListener('alpine:init', () => {
 
     async approveRegistration(id) {
       try {
-
-        const token = localStorage.getItem('access_token'); //Them moi
-
-        const response = await fetch(`http://192.168.0.200:8000/api/registration/${id}/`, {
+        const response = await fetch('http://192.168.0.200:8000/api/registration/${id}/', {
           method: 'PATCH',
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json', // THem moi
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             status: 'approved'
@@ -147,11 +130,9 @@ document.addEventListener('alpine:init', () => {
       }
       
       try {
-        const token = localStorage.getItem('access_token'); // Them moi
-        const response = await fetch(`http://192.168.0.200:8000/api/registration/${this.selectedRejectId}/`, {
+        const response = await fetch('http://192.168.0.200:8000/api/registration/${this.selectedRejectId}/', {
           method: 'PATCH',
           headers: {
-            'Authorization': `Bearer ${token}`, //themmoi
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({

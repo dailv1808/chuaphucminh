@@ -18,7 +18,15 @@ document.addEventListener('alpine:init', () => {
         this.isLoading = true;
         
         // Fetch kutis
-        const kutisResponse = await fetch('http://192.168.0.200:8000/api/kuti/');
+        
+	const token = localStorage.getItem('access_token');
+
+	const kutisResponse = await fetch('http://192.168.0.200:8000/api/kuti/', {
+	  headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+	});
         if (!kutisResponse.ok) {
           throw new Error(`HTTP error! status: ${kutisResponse.status}`);
         }

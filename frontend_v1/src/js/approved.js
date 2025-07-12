@@ -77,10 +77,11 @@ document.addEventListener('alpine:init', () => {
         });
 
         if (!assignResponse.ok) throw new Error('Gán Kuti thất bại');
-
+        const token = localStorage.getItem('access_token');
         const checkInResponse = await fetch(`http://192.168.0.200:8000/api/registration/${this.currentRegistrationId}/`, {
           method: 'PATCH',
           headers: {
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -127,10 +128,11 @@ document.addEventListener('alpine:init', () => {
 
         this.isDownloading = true;
         this.showNotificationMessage('Đang tạo tờ khai tạm trú...', 'info');
-        
+        const token = localStorage.getItem('access_token'); 
         const response = await fetch('http://192.168.0.200:8000/api/tamtru/', {
           method: 'POST',
           headers: {
+     	    'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({

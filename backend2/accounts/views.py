@@ -23,7 +23,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 class RegisterView(generics.CreateAPIView):
     queryset = Account.objects.all()
     serializer_class = RegisterSerializer
-    permission_classes = [permissions.AllowAny]
+    #permission_classes = [permissions.IsAdminUser]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -119,7 +119,7 @@ class AccountProfileView(generics.RetrieveUpdateAPIView):
 
 
 class LogoutView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         try:
@@ -187,7 +187,7 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 
 class UserListView(generics.ListAPIView):
     serializer_class = AccountSerializer
-    permission_classes = [permissions.IsAdminUser]  # Chỉ admin mới có quyền truy cập
+    #permission_classes = [permissions.IsAdminUser]  # Chỉ admin mới có quyền truy cập
     
     def get_queryset(self):
         return Account.objects.all().order_by('-date_joined')

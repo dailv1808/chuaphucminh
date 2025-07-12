@@ -14,7 +14,7 @@ from datetime import timedelta
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = ['id', 'full_name', 'email', 'username', 'phone_number']
+        fields = ['id', 'full_name', 'email', 'username']
         read_only_fields = ['id']
 
 class RegisterSerializer(serializers.ModelSerializer):

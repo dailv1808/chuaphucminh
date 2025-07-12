@@ -244,10 +244,10 @@ document.addEventListener('alpine:init', function() {
 
       updateQuestion: function() {
         const payload = this.preparePayload();
-        
+        const token = localStorage.getItem('access_token');
         fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
         .then(response => {
@@ -271,8 +271,10 @@ document.addEventListener('alpine:init', function() {
       },
 
       deleteQuestion: function() {
+	const token = localStorage.getItem('access_token');
         fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}`}
         })
         .then(response => {
           if (!response.ok) throw new Error('Xóa câu hỏi thất bại');

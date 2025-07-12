@@ -97,9 +97,11 @@ document.addEventListener('alpine:init', () => {
 
     async checkoutRegistration(id) {
       try {
+	const token = localStorage.getItem('access_token');
         const response = await fetch(`http://192.168.0.200:8000/api/registration/${id}/checkout/`, {
           method: 'PUT',
           headers: {
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           }
         });

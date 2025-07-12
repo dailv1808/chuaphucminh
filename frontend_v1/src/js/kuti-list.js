@@ -23,7 +23,16 @@ document.addEventListener('alpine:init', () => {
     async fetchKutis() {
       try {
         this.isLoading = true;
-        const response = await fetch('http://192.168.0.200:8000/api/kuti/');
+
+
+	const token = localStorage.getItem('access_token');
+	
+       const response = await fetch('http://192.168.0.200:8000/api/kuti/', {
+	  headers: {
+	    'Authorization': `Bearer ${token}`,
+	    'Content-Type': 'application/json'
+	  }
+        });
         
         if (!response.ok) throw new Error('Lỗi khi tải danh sách Kuti');
         
@@ -75,15 +84,19 @@ document.addEventListener('alpine:init', () => {
           : 'http://192.168.0.200:8000/api/kuti/';
         
         const method = this.isEditing ? 'PUT' : 'POST';
-        
+
+
+        const token = localStorage.getItem('access_token');
         const response = await fetch(url, {
           method: method,
           headers: {
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(this.currentKuti)
         });
         
+
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(errorData.message || (this.isEditing ? 'Cập nhật thất bại' : 'Thêm mới thất bại'));
@@ -109,7 +122,11 @@ document.addEventListener('alpine:init', () => {
 
     async deleteKuti() {
       try {
+        const token = localStorage.getItem('access_token');
         const response = await fetch(`http://192.168.0.200:8000/api/kuti/${this.currentKuti.id}/`, {
+	  headers: {
+	    'Authorization': `Bearer ${token}`,
+          },
           method: 'DELETE'
         });
         
