@@ -1,3 +1,4 @@
+
 document.addEventListener('alpine:init', () => {
   Alpine.data('pendingData', () => ({
     registrations: [],
@@ -21,18 +22,12 @@ document.addEventListener('alpine:init', () => {
       try {
         this.isLoading = true;
 
-        
-        //const token = localStorage.getItem('access_token');
-        //if (!token) throw new Error('No authentication token found');
-        
-        const response = await fetch('http://192.168.0.200:8000/api/registration/', {
+        const response = await fetch(getApiUrl('/api/registration/'), {
           headers: {
             //'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
-
-        // const response = await fetch('http://192.168.0.200:8000/api/registration/');
 
 
         if (!response.ok) throw new Error('Network response was not ok');
@@ -118,7 +113,7 @@ document.addEventListener('alpine:init', () => {
 
         const token = localStorage.getItem('access_token'); //Them moi
 
-        const response = await fetch(`http://192.168.0.200:8000/api/registration/${id}/`, {
+        const response = await fetch(getApiUrl(`/api/registration/${id}/`), {
           method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -148,7 +143,7 @@ document.addEventListener('alpine:init', () => {
       
       try {
         const token = localStorage.getItem('access_token'); // Them moi
-        const response = await fetch(`http://192.168.0.200:8000/api/registration/${this.selectedRejectId}/`, {
+        const response = await fetch(getApiUrl(`/api/registration/${this.selectedRejectId}/`), {
           method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${token}`, //themmoi

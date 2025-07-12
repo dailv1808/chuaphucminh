@@ -57,7 +57,7 @@ document.addEventListener('alpine:init', function() {
 
       fetchQuestions: function() {
         this.isLoading = true;
-        fetch('http://192.168.0.200:8000/api/questions/')
+        fetch(getApiUrl('/api/questions/'))
           .then(response => {
             if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
             return response.json();
@@ -222,7 +222,7 @@ document.addEventListener('alpine:init', function() {
       createQuestion: function() {
         const payload = this.preparePayload();
         
-        fetch('http://192.168.0.200:8000/api/questions/', {
+        fetch(getApiUrl('/api/questions/'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -245,7 +245,7 @@ document.addEventListener('alpine:init', function() {
       updateQuestion: function() {
         const payload = this.preparePayload();
         const token = localStorage.getItem('access_token');
-        fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
+        fetch(getApiUrl(`/api/questions/${this.currentQuestion.id}/`), {
           method: 'PUT',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -272,7 +272,7 @@ document.addEventListener('alpine:init', function() {
 
       deleteQuestion: function() {
 	const token = localStorage.getItem('access_token');
-        fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
+        fetch(getApiUrl(`/api/questions/${this.currentQuestion.id}/`), {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}`}
         })

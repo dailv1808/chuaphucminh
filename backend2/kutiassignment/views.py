@@ -9,7 +9,6 @@ from kuti.models import Kuti
 class AssignKutiAPI(generics.CreateAPIView):
     """
     API gán Kuti cho người dùng
-    POST /api/assign-kuti/
     {
         "registration_id": 1,
         "kuti_id": 1

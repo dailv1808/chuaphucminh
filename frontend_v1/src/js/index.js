@@ -27,7 +27,7 @@ document.addEventListener('alpine:init', () => {
         this.isLoading = true;
         
         // Fetch all registrations
-        const registrationsRes = await fetch('http://192.168.0.200:8000/api/registration/');
+        const registrationsRes = await fetch(getApiUrl('/api/registration/'));
         if (registrationsRes.ok) {
           const registrationsData = await registrationsRes.json();
           
@@ -60,7 +60,7 @@ document.addEventListener('alpine:init', () => {
         }
         
         // Fetch Kuti status
-        const kutiRes = await fetch('http://192.168.0.200:8000/api/kuti/');
+        const kutiRes = await fetch(getApiUrl('/api/kuti/'));
         if (kutiRes.ok) {
           const kutiData = await kutiRes.json();
           this.stats.totalKuti = kutiData.length;
@@ -68,7 +68,7 @@ document.addEventListener('alpine:init', () => {
         }
         
         // Fetch latest questions
-        const questionsRes = await fetch('http://192.168.0.200:8000/api/questions/');
+        const questionsRes = await fetch(getApiUrl('/api/questions/'));
         if (questionsRes.ok) {
           const questionsData = await questionsRes.json();
           this.stats.newQuestions = questionsData.filter(q => q.status !== 'answered').length;
