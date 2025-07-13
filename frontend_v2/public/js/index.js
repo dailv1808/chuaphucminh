@@ -27,7 +27,7 @@ document.addEventListener('alpine:init', () => {
         this.isLoading = true;
         
         // Fetch all registrations
-        const registrationsRes = await fetch('${window.API_BASE_URL}/api/registration/');
+        const registrationsRes = await fetch('https://api.chuaphucminh.xyz/api/registration/');
         if (registrationsRes.ok) {
           const registrationsData = await registrationsRes.json();
           
@@ -60,7 +60,13 @@ document.addEventListener('alpine:init', () => {
         }
         
         // Fetch Kuti status
-        const kutiRes = await fetch('${window.API_BASE_URL}/api/kuti/');
+        const token = localStorage.getItem('access_token');
+        const kutiRes = await fetch('https://api.chuaphucminh.xyz/api/kuti/', {
+          headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                }
+        });
         if (kutiRes.ok) {
           const kutiData = await kutiRes.json();
           this.stats.totalKuti = kutiData.length;
@@ -68,7 +74,7 @@ document.addEventListener('alpine:init', () => {
         }
         
         // Fetch latest questions
-        const questionsRes = await fetch('${window.API_BASE_URL}/api/questions/');
+        const questionsRes = await fetch('https://api.chuaphucminh.xyz/api/questions/');
         if (questionsRes.ok) {
           const questionsData = await questionsRes.json();
           this.stats.newQuestions = questionsData.filter(q => q.status !== 'answered').length;

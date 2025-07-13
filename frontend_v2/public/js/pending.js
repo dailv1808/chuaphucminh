@@ -1,5 +1,3 @@
-import { getApiUrl } from './config.js';
-
 document.addEventListener('alpine:init', () => {
   Alpine.data('pendingData', () => ({
     registrations: [],
@@ -23,7 +21,7 @@ document.addEventListener('alpine:init', () => {
       try {
         this.isLoading = true;
 
-        const response = await fetch('${window.API_BASE_URL}/api/registration/', {
+        const response = await fetch('https://api.chuaphucminh.xyz/api/registration/', {
           headers: {
             //'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -114,7 +112,7 @@ document.addEventListener('alpine:init', () => {
 
         const token = localStorage.getItem('access_token'); //Them moi
 
-        const response = await fetch(`${window.API_BASE_URL}/api/registration/${id}/`, {
+        const response = await fetch(`https://api.chuaphucminh.xyz/api/registration/${id}/`, {
           method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -144,7 +142,7 @@ document.addEventListener('alpine:init', () => {
       
       try {
         const token = localStorage.getItem('access_token'); // Them moi
-        const response = await fetch(`${window.API_BASE_URL}/api/registration/${this.selectedRejectId}/`, {
+        const response = await fetch(`https://api.chuaphucminh.xyz/api/registration/${this.selectedRejectId}/`, {
           method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${token}`, //themmoi

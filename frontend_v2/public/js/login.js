@@ -13,7 +13,7 @@ document.addEventListener('alpine:init', () => {
       this.error = null;
       
       try {
-        const response = await fetch(`${window.API_BASE_URL}/api/accounts/login/`, {
+        const response = await fetch(`https://api.chuaphucminh.xyz/api/accounts/login/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

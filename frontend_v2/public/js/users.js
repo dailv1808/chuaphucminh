@@ -1,5 +1,3 @@
-import { getApiUrl } from './config.js';
-
 document.addEventListener('alpine:init', () => {
   Alpine.data('usersData', () => ({
     users: [],
@@ -32,7 +30,7 @@ document.addEventListener('alpine:init', () => {
         this.isLoading = true;
         const token = localStorage.getItem('access_token');
 
-        const response = await fetch('${window.API_BASE_URL}/api/accounts/users/', {
+        const response = await fetch('https://api.chuaphucminh.xyz/api/accounts/users/', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -127,7 +125,7 @@ document.addEventListener('alpine:init', () => {
         
         if (this.selectedUser) {
           // Update existing user
-          const url = `${window.API_BASE_URL}/api/accounts/profile/`;
+          const url = `https://api.chuaphucminh.xyz/api/accounts/profile/`;
           response = await fetch(url, {
             method: 'PUT',
             headers: {
@@ -149,7 +147,7 @@ document.addEventListener('alpine:init', () => {
             throw new Error('Mật khẩu không khớp');
           }
           
-          const url = '${window.API_BASE_URL}/api/accounts/register/';
+          const url = 'https://api.chuaphucminh.xyz/api/accounts/register/';
           response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -188,7 +186,7 @@ document.addEventListener('alpine:init', () => {
     async deleteUser() {
       try {
         const token = localStorage.getItem('access_token');
-        const url = `${window.API_BASE_URL}/api/accounts/profile/`;
+        const url = `https://api.chuaphucminh.xyz/api/accounts/profile/`;
         
         const response = await fetch(url, {
           method: 'PATCH',

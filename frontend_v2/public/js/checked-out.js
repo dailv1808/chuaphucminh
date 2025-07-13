@@ -1,5 +1,3 @@
-import { getApiUrl } from './config.js';
-
 document.addEventListener('alpine:init', () => {
   Alpine.data('checkedOutData', () => ({
     registrations: [],
@@ -19,7 +17,7 @@ document.addEventListener('alpine:init', () => {
     async fetchRegistrations() {
       try {
         this.isLoading = true;
-        const response = await fetch('${window.API_BASE_URL}/api/registration/');
+        const response = await fetch('https://api.chuaphucminh.xyz/api/registration/');
         if (!response.ok) throw new Error('Lỗi kết nối mạng');
         
         const data = await response.json();

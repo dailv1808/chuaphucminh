@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi" x-data="kutiAssignData()">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tra cứu Kuti - CPM Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="/js/auth.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/kutiassign-BpnP-bvj.css">
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800">
+  <!-- Header -->
+  <div x-html="await (await fetch('./partials/header.html')).text()"></div>
+  
+  <!-- Sidebar -->
+  <div x-html="await (await fetch('./partials/sidebar.html')).text()"></div>
+
+  <!-- Notification Popup -->
+  <div x-show="showNotification" x-transition class="fixed top-4 right-4 z-50">
+    <div class="px-6 py-4 rounded-lg shadow-lg" 
+         :class="{
+           'bg-green-100 text-green-800': notificationType === 'success',
+           'bg-red-100 text-red-800': notificationType === 'error'
+         }">
+      <div class="flex items-center">
+        <span x-text="notificationMessage"></span>
+        <button @click="showNotification = false" class="ml-4">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-4 sm:ml-64 pt-20">
+    <div class="p-6 bg-white rounded-xl card-shadow border border-gray-100 hover-scale">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gradient bg-gradient-to-r from-blue-600 to-blue-400">Tra cứu Kuti</h1>
+          <p class="text-gray-500 text-sm mt-1" x-text="`Tổng số ${kutis.length} Kuti`"></p>
+        </div>
+        <div class="relative w-full md:w-64">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+            </svg>
+          </div>
+          <input type="text" x-model="searchQuery" @input="filterKutis" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" placeholder="Tìm kiếm...">
+        </div>
+      </div>
+
+      <div class="relative overflow-x-auto rounded-lg border border-gray-200">
+        <table class="w-full text-sm text-left">
+          <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-500 to-blue-400">
+            <tr>
+              <th scope="col" class="px-6 py-3">STT</th>
+              <th scope="col" class="px-6 py-3">Mã Kuti</th>
+              <th scope="col" class="px-6 py-3">Trạng thái</th>
+              <th scope="col" class="px-6 py-3">Giới tính</th>
+              <th scope="col" class="px-6 py-3">Thiền sinh</th>
+              <th scope="col" class="px-6 py-3">Số điện thoại</th>
+              <th scope="col" class="px-6 py-3">Thời gian hành thiền</th>
+              <th scope="col" class="px-6 py-3">Cập nhật</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="(kuti, index) in filteredKutis" :key="kuti.id">
+              <tr class="bg-white border-b hover:bg-blue-50 transition-colors">
+                <td class="px-6 py-4 font-medium" x-text="index + 1"></td>
+                <td class="px-6 py-4 font-medium text-blue-600" x-text="kuti.code"></td>
+                <td class="px-6 py-4">
+                  <span class="px-3 py-1 text-xs rounded-full" 
+                        :class="kuti.is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                        x-text="kuti.is_available ? 'Trống' : 'Đã có người'"></span>
+                </td>
+                <td class="px-6 py-4" x-text="kuti.gender_allowed"></td>
+                <td class="px-6 py-4">
+                  <template x-if="kuti.current_registration && getUserById(kuti.current_registration)">
+                    <span x-text="getUserById(kuti.current_registration).fullname"></span>
+                  </template>
+                  <template x-if="!kuti.current_registration">
+                    <span class="text-gray-400">Trống</span>
+                  </template>
+                </td>
+                <td class="px-6 py-4">
+                  <template x-if="kuti.current_registration && getUserById(kuti.current_registration)">
+                    <span x-text="getUserById(kuti.current_registration).username"></span>
+                  </template>
+                  <template x-if="!kuti.current_registration">
+                    <span class="text-gray-400">-</span>
+                  </template>
+                </td>
+                <td class="px-6 py-4">
+                  <template x-if="kuti.current_registration && getUserById(kuti.current_registration)">
+                    <span x-text="formatDateRange(getUserById(kuti.current_registration).start_date, getUserById(kuti.current_registration).end_date)"></span>
+                  </template>
+                  <template x-if="!kuti.current_registration">
+                    <span class="text-gray-400">-</span>
+                  </template>
+                </td>
+                <td class="px-6 py-4" x-text="formatDate(kuti.updated_at)"></td>
+              </tr>
+            </template>
+            <tr x-show="filteredKutis.length === 0">
+              <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                <span x-show="isLoading">Đang tải dữ liệu...</span>
+                <span x-show="!isLoading && filteredKutis.length === 0">Không có dữ liệu</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('alpine:initialized', () => {
+      Alpine.store('sidebar', {
+        open: window.innerWidth >= 640,
+        toggle() {
+          this.open = !this.open;
+        }
+      });
+    });
+  </script>
+
+  <script src="/js/kuti-assign.js"></script>
+</body>
+</html>

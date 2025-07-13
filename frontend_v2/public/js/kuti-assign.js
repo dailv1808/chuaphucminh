@@ -1,5 +1,3 @@
-import { getApiUrl } from './config.js';
-
 document.addEventListener('alpine:init', () => {
   Alpine.data('kutiAssignData', () => ({
     kutis: [],
@@ -23,7 +21,7 @@ document.addEventListener('alpine:init', () => {
         
 	const token = localStorage.getItem('access_token');
 
-	const kutisResponse = await fetch('${window.API_BASE_URL}/api/kuti/', {
+	const kutisResponse = await fetch('https://api.chuaphucminh.xyz/api/kuti/', {
 	  headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -36,7 +34,7 @@ document.addEventListener('alpine:init', () => {
         console.log('Kutis data:', this.kutis);
 
         // Fetch registrations
-        const registrationsResponse = await fetch('${window.API_BASE_URL}/api/registration/');
+        const registrationsResponse = await fetch('https://api.chuaphucminh.xyz/api/registration/');
         if (!registrationsResponse.ok) {
           throw new Error(`HTTP error! status: ${registrationsResponse.status}`);
         }

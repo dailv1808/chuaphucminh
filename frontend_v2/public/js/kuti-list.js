@@ -1,5 +1,3 @@
-import { getApiUrl } from './config.js';
-
 document.addEventListener('alpine:init', () => {
   Alpine.data('kutiData', () => ({
     kutis: [],
@@ -29,7 +27,7 @@ document.addEventListener('alpine:init', () => {
 
 	const token = localStorage.getItem('access_token');
 	
-       const response = await fetch('${window.API_BASE_URL}/api/kuti/', {
+       const response = await fetch('https://api.chuaphucminh.xyz/api/kuti/', {
 	  headers: {
 	    'Authorization': `Bearer ${token}`,
 	    'Content-Type': 'application/json'
@@ -82,8 +80,8 @@ document.addEventListener('alpine:init', () => {
 
       try {
         const url = this.isEditing 
-          ? `${window.API_BASE_URL}/api/kuti/${this.currentKuti.id}/`
-          : '${window.API_BASE_URL}/api/kuti/';
+          ? `https://api.chuaphucminh.xyz/api/kuti/${this.currentKuti.id}/`
+          : 'https://api.chuaphucminh.xyz/api/kuti/';
         
         const method = this.isEditing ? 'PUT' : 'POST';
 
@@ -125,7 +123,7 @@ document.addEventListener('alpine:init', () => {
     async deleteKuti() {
       try {
         const token = localStorage.getItem('access_token');
-        const response = await fetch(`${window.API_BASE_URL}/api/kuti/${this.currentKuti.id}/`, {
+        const response = await fetch(`https://api.chuaphucminh.xyz/api/kuti/${this.currentKuti.id}/`, {
 	  headers: {
 	    'Authorization': `Bearer ${token}`,
           },

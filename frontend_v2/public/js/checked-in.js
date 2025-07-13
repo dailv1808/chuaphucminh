@@ -17,7 +17,7 @@ document.addEventListener('alpine:init', () => {
     async fetchRegistrations() {
       try {
         this.isLoading = true;
-        const response = await fetch('${window.API_BASE_URL}/api/registration/');
+        const response = await fetch('https://api.chuaphucminh.xyz/api/registration/');
         if (!response.ok) throw new Error('Lỗi kết nối mạng');
         
         const data = await response.json();
@@ -98,7 +98,7 @@ document.addEventListener('alpine:init', () => {
     async checkoutRegistration(id) {
       try {
 	const token = localStorage.getItem('access_token');
-        const response = await fetch(`${window.API_BASE_URL}/api/registration/${id}/checkout/`, {
+        const response = await fetch(`https://api.chuaphucminh.xyz/api/registration/${id}/checkout/`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
