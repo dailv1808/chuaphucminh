@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        font-family: 'Alegreya', sans-serif;
+    }
+    input, select, textarea {
+        @apply text-gray-700;
+    }
+    .form-group {
+        @apply mb-6;
+    }
+}
+
+/* Custom styles */
+.bg-primary {
+    background-color: #810000;
+}
+.hover\:bg-primary-dark:hover {
+    background-color: #6a0000;
+}
+.text-primary {
+    color: #810000;
+}

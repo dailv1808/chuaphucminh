@@ -1,3 +1,4 @@
+import { getApiUrl } from './config.js';
 // Hàm load partials
 async function loadPartials() {
     try {

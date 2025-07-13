@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký Hành Thiền - Chùa Phúc Minh Theravāda</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/css/dangkythien.css">
+</head>
+<body class="bg-gray-50 font-alegreya">
+    <!-- Header sẽ được thêm bằng JS -->
+    <header id="header-container"></header>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-[#810000] mb-2">ĐĂNG KÝ HÀNH THIỀN</h1>
+            <div class="w-24 h-1 bg-[#810000] mx-auto mt-4"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8 border-l-4 border-[#810000]">
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-[#810000] mb-4">CÁC BƯỚC ĐĂNG KÝ:</h2>
+                <ol class="list-decimal pl-5 space-y-2 text-gray-700">
+                    <li>Quý hành giả vui lòng đọc kỹ nội quy tu tập ở đây: 
+                        <a href="#" class="text-[#810000] underline">Nội Quy Tu Tập Chùa Phúc Minh</a>
+                    </li>
+                    <li>Sau khi đồng ý sẽ chấp nhận tuân thủ nghiêm túc nội quy, quý hành giả điền đầy đủ thông tin trong biểu mẫu đăng ký dưới đây:</li>
+                </ol>
+            </div>
+
+            <form id="registerForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="fullname" class="block text-gray-700 font-medium mb-2">Họ và tên *</label>
+                        <input 
+                            type="text" 
+                            id="fullname" 
+                            required 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]"
+                            placeholder="Nhập họ và tên đầy đủ">
+                    </div>
+                    <div>
+                        <label for="cccd" class="block text-gray-700 font-medium mb-2">Số CCCD *</label>
+                        <input 
+                            type="text" 
+                            id="cccd" 
+                            required 
+                            pattern="\d{12}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]"
+                            placeholder="Nhập số CCCD 12 chữ số">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="phone" class="block text-gray-700 font-medium mb-2">Số điện thoại *</label>
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            required 
+                            pattern="[0-9]{10,15}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]"
+                            placeholder="Nhập số điện thoại">
+                    </div>
+                    <div>
+                        <label for="emergency_phone" class="block text-gray-700 font-medium mb-2">SĐT liên hệ khẩn cấp *</label>
+                        <input 
+                            type="tel" 
+                            id="emergency_phone" 
+                            required 
+                            pattern="[0-9]{10,15}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]"
+                            placeholder="Nhập số điện thoại khẩn cấp">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]"
+                            placeholder="Nhập email">
+                    </div>
+                    <div>
+                        <label for="gender" class="block text-gray-700 font-medium mb-2">Giới tính *</label>
+                        <select 
+                            id="gender" 
+                            required 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]">
+                            <option value="">-- Chọn giới tính --</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="birthday" class="block text-gray-700 font-medium mb-2">Ngày sinh *</label>
+                        <input 
+                            type="date" 
+                            id="birthday" 
+                            required 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]">
+                    </div>
+                    <div>
+                        <label for="start_date" class="block text-gray-700 font-medium mb-2">Ngày đến *</label>
+                        <input 
+                            type="date" 
+                            id="start_date" 
+                            required 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="end_date" class="block text-gray-700 font-medium mb-2">Ngày về (dự kiến) *</label>
+                        <input 
+                            type="date" 
+                            id="end_date" 
+                            required 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]">
+                    </div>
+                    <div>
+                        <label for="address" class="block text-gray-700 font-medium mb-2">Địa chỉ *</label>
+                        <input 
+                            type="text" 
+                            id="address" 
+                            required 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]"
+                            placeholder="Nhập địa chỉ">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="note" class="block text-gray-700 font-medium mb-2">Ghi chú</label>
+                    <textarea 
+                        id="note" 
+                        rows="3" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#810000]"
+                        placeholder="Ghi chú đặc biệt (nếu có)"></textarea>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <input 
+                            type="checkbox" 
+                            id="agree_rules" 
+                            required 
+                            class="w-4 h-4 text-[#810000] border-gray-300 rounded focus:ring-[#810000]">
+                        <label for="agree_rules" class="ml-2 text-gray-700">Tôi đồng ý với các điều khoản và quy định của khóa thiền</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input 
+                            type="checkbox" 
+                            id="confirm_info" 
+                            required 
+                            class="w-4 h-4 text-[#810000] border-gray-300 rounded focus:ring-[#810000]">
+                        <label for="confirm_info" class="ml-2 text-gray-700">Tôi xin cam đoan các thông tin trên là hoàn toàn đúng sự thật. Tôi hiểu và đồng ý tuân thủ theo nội quy sinh hoạt, nội quy tu tập tại chùa cũng như sự chỉ dẫn tu tập của Sư Thanh Minh.</label>
+                    </div>
+                </div>
+
+                <button 
+                    type="submit" 
+                    id="submitBtn"
+                    class="w-full bg-[#810000] hover:bg-[#6a0000] text-white font-bold py-3 px-4 rounded-md transition duration-200">
+                    ĐĂNG KÝ THAM DỰ
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer sẽ được thêm bằng JS -->
+    <footer id="footer-container"></footer>
+
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="text-center">
+                <svg class="mx-auto h-16 w-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <h3 class="text-xl font-bold text-gray-900 mt-4">Đăng ký thành công!</h3>
+                <div class="mt-4 text-gray-600 text-left space-y-2">
+                    <p>Cảm ơn quý hành giả đã đăng ký khóa thiền.</p>
+                    <p>Hệ thống đã tự động tạo tài khoản:</p>
+                    <p class="font-medium">Tên đăng nhập: Là số điện thoại đã đăng ký<span id="successUsername" class="text-[#810000]"></span></p>
+                    <p class="font-medium">Mật khẩu: Là số điện thoại đã đăng ký<span id="successPassword" class="text-[#810000]"></span></p>
+                    <p>Quý hành giả có thể <a href="/login.html" class="text-[#810000] underline font-medium">đăng nhập tại đây</a> để theo dõi trạng thái đăng ký.</p>
+                </div>
+                <button id="closeModalBtn" class="mt-6 px-4 py-2 bg-[#810000] text-white rounded-md hover:bg-[#6a0000] transition">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="/src/js/baseURL.js"></script>
+    <!-- Load toàn bộ JS -->
+    <script src="/src/js/dangkythien.js"></script>
+</body>
+</html>

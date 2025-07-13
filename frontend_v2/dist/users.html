@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi" x-data="usersData()">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Người dùng - CPM Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="/js/auth.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/users-Ep31S1x7.css">
+  <link rel="stylesheet" crossorigin href="/assets/main-ClyXk76z.css">
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800">
+  <!-- Header -->
+  <div x-html="await (await fetch('./partials/header.html')).text()"></div>
+  
+  <!-- Sidebar -->
+  <div x-html="await (await fetch('./partials/sidebar.html')).text()"></div>
+
+  <!-- Notification Popup -->
+  <div x-show="showNotification" x-transition class="fixed top-4 right-4 z-50">
+    <div class="px-6 py-4 rounded-lg shadow-lg" 
+         :class="{
+           'bg-green-100 text-green-800': notificationType === 'success',
+           'bg-red-100 text-red-800': notificationType === 'error'
+         }">
+      <div class="flex items-center">
+        <span x-text="notificationMessage"></span>
+        <button @click="showNotification = false" class="ml-4">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit User Modal -->
+  <div x-show="showUserModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex justify-between items-start">
+          <h3 class="text-xl font-bold text-blue-600" x-text="selectedUser ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'"></h3>
+          <button @click="closeUserModal" class="text-gray-400 hover:text-gray-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="mt-6 space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-500">Họ và tên</label>
+              <input type="text" x-model="userForm.full_name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-500">Tên đăng nhập</label>
+              <input type="text" x-model="userForm.username" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" :disabled="selectedUser">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-500">Email</label>
+              <input type="email" x-model="userForm.email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-500">Số điện thoại</label>
+              <input type="tel" x-model="userForm.phone_number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div x-show="!selectedUser">
+              <label class="block text-sm font-medium text-gray-500">Mật khẩu</label>
+              <input type="password" x-model="userForm.password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div x-show="!selectedUser">
+              <label class="block text-sm font-medium text-gray-500">Nhập lại mật khẩu</label>
+              <input type="password" x-model="userForm.password2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-500">Vai trò</label>
+              <select x-model="userForm.is_admin" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="false">Người dùng thường</option>
+                <option value="true">Quản trị viên</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-500">Trạng thái</label>
+              <select x-model="userForm.is_active" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="true">Kích hoạt</option>
+                <option value="false">Vô hiệu hóa</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6 flex justify-end space-x-3">
+          <button @click="closeUserModal" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Hủy</button>
+          <button @click="saveUser" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            <span x-text="selectedUser ? 'Cập nhật' : 'Thêm mới'"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div x-show="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+      <div class="p-6">
+        <div class="flex justify-between items-start">
+          <h3 class="text-xl font-bold text-red-600">Xác nhận xóa</h3>
+          <button @click="showDeleteModal = false" class="text-gray-400 hover:text-gray-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="mt-4">
+          <p>Bạn có chắc chắn muốn xóa người dùng <span class="font-semibold" x-text="selectedUser?.username"></span>?</p>
+          <p class="text-sm text-red-500 mt-2">Hành động này không thể hoàn tác.</p>
+        </div>
+        
+        <div class="mt-6 flex justify-end space-x-3">
+          <button @click="showDeleteModal = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Hủy</button>
+          <button @click="deleteUser" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Xóa</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-4 sm:ml-64 pt-20">
+    <div class="p-6 bg-white rounded-xl card-shadow border border-gray-100 hover-scale">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gradient bg-gradient-to-r from-blue-600 to-blue-400">Quản lý Người dùng</h1>
+          <p class="text-gray-500 text-sm mt-1" x-text="`Tổng cộng ${users.length} người dùng`"></p>
+        </div>
+        <div class="flex space-x-3">
+          <div class="relative w-full md:w-64">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+              </svg>
+            </div>
+            <input type="text" x-model="searchQuery" @input="filterUsers" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" placeholder="Tìm kiếm...">
+          </div>
+          <button @click="openAddUserModal" class="px-4 py-2.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 flex items-center">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Thêm mới
+          </button>
+        </div>
+      </div>
+
+      <div class="relative overflow-x-auto rounded-lg border border-gray-200">
+        <table class="w-full text-sm text-left">
+          <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-500 to-blue-400">
+            <tr>
+              <th scope="col" class="px-6 py-3">STT</th>
+              <th scope="col" class="px-6 py-3">Tên đăng nhập</th>
+              <th scope="col" class="px-6 py-3">Họ tên</th>
+              <th scope="col" class="px-6 py-3">Email</th>
+              <th scope="col" class="px-6 py-3">Số điện thoại</th>
+              <th scope="col" class="px-6 py-3">Vai trò</th>
+              <th scope="col" class="px-6 py-3">Trạng thái</th>
+              <th scope="col" class="px-6 py-3 text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="(user, index) in filteredUsers" :key="user.id">
+              <tr class="bg-white border-b hover:bg-blue-50 transition-colors">
+                <td class="px-6 py-4 font-medium" x-text="index + 1"></td>
+                <td class="px-6 py-4 font-medium text-blue-600" x-text="user.username"></td>
+                <td class="px-6 py-4" x-text="user.full_name || 'N/A'"></td>
+                <td class="px-6 py-4" x-text="user.email || 'N/A'"></td>
+                <td class="px-6 py-4" x-text="user.phone_number || 'N/A'"></td>
+                <td class="px-6 py-4">
+                  <span class="px-2 py-1 text-xs rounded-full" 
+                        :class="user.is_admin ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'"
+                        x-text="user.is_admin ? 'Quản trị' : 'Người dùng'"></span>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="px-2 py-1 text-xs rounded-full" 
+                        :class="user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                        x-text="user.is_active ? 'Đang hoạt động' : 'Vô hiệu hóa'"></span>
+                </td>
+                <td class="px-6 py-4 text-right space-x-2">
+                  <button @click="openEditUserModal(user)" class="px-3 py-1.5 bg-blue-100 text-blue-800 text-xs rounded-md hover:bg-blue-200">Sửa</button>
+                  <button @click="confirmDelete(user)" class="px-3 py-1.5 bg-red-100 text-red-800 text-xs rounded-md hover:bg-red-200">Xóa</button>
+                </td>
+              </tr>
+            </template>
+            <tr x-show="filteredUsers.length === 0">
+              <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                <span x-show="isLoading">Đang tải dữ liệu...</span>
+                <span x-show="!isLoading && filteredUsers.length === 0">Không có dữ liệu</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('alpine:initialized', () => {
+      Alpine.store('sidebar', {
+        open: window.innerWidth >= 640,
+        toggle() {
+          this.open = !this.open;
+        }
+      });
+    });
+  </script>
+  <script src="/js/users.js"></script>
+</body>
+</html>

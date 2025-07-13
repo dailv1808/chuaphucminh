@@ -17,11 +17,18 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    emptyOutDir: true, // Xóa thư mục dist trước khi build
+    assetsInclude: ['partials/**/*'],
     rollupOptions: {
       input: {
-        main: 'trinhphap.htm',
-        // Thêm các file HTML khác nếu cần
+        main: 'index.html',
+        dangkythien: 'dangkythien.html',
+        trinhphap: 'trinhphap.html'
       },
     },
+    preserveEntrySignatures: 'strict',
+    minify: 'terser', // Minify code
+    sourcemap: false, // Tắt sourcemap cho production
+    chunkSizeWarningLimit: 1000, // Cảnh báo khi chunk lớn
   }
 })
