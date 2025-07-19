@@ -1,1 +1,0 @@
-document.addEventListener("DOMContentLoaded",()=>{const o=window.location.pathname.split("/").pop();["/login.html"].includes(`/${o}`)||localStorage.getItem("access_token")||(window.location.href="/login.html")});
