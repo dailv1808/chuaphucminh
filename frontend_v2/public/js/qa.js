@@ -18,26 +18,28 @@ document.addEventListener('alpine:init', function() {
       currentPage: 1,
       perPage: 10,
       selectedQuestion: null,
-      statusLabels: {
-        pending: 'Chờ trả lời',
-        answered: 'Đã trả lời',
-        archived: 'Lưu trữ'
-      },
-      priorityLabels: {
-        high: 'Ưu tiên cao',
-        medium: 'Ưu tiên trung',
-        low: 'Ưu tiên thấp'
-      },
+      statusOptions: [
+        { value: 'answered', label: 'Đã trả lời' },
+        { value: 'pending', label: 'Chưa trả lời' },
+        { value: 'archive', label: 'Lưu trữ' },
+        { value: 'reject', label: 'Từ chối' },
+        { value: 'review', label: 'Cần xem xét' }
+      ],
+      priorityOptions: [
+        { value: 'high', label: 'Cao' },
+        { value: 'medium', label: 'Trung bình' },
+        { value: 'low', label: 'Thấp' }
+      ],
       currentQuestion: {
         id: null,
         name: '',
         email: '',
         content: '',
-        short_content: '',
         answer: '',
         answered_at: null,
         status: 'pending',
         priority: 'medium',
+        slideshow: false,
         group: null,
         tags: [],
         created_at: new Date().toISOString()
@@ -95,7 +97,6 @@ document.addEventListener('alpine:init', function() {
           results = results.filter(q => 
             q.name.toLowerCase().includes(query) || 
             q.content.toLowerCase().includes(query) ||
-            (q.short_content && q.short_content.toLowerCase().includes(query)) ||
             (q.answer && q.answer.toLowerCase().includes(query))
           );
         }
@@ -139,11 +140,11 @@ document.addEventListener('alpine:init', function() {
           name: '',
           email: '',
           content: '',
-          short_content: '',
           answer: '',
           answered_at: null,
           status: 'pending',
           priority: 'medium',
+          slideshow: false,
           group: null,
           tags: [],
           created_at: new Date().toISOString()

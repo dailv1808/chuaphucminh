@@ -31,38 +31,6 @@
   @apply input-field flex-1 min-w-0;
 }
 
-.question-status {
-  @apply px-3 py-1 rounded-full text-xs font-medium border;
-}
-
-.question-status.pending {
-  @apply bg-yellow-50 text-yellow-800 border-yellow-200;
-}
-
-.question-status.answered {
-  @apply bg-green-50 text-green-800 border-green-200;
-}
-
-.question-status.archived {
-  @apply bg-gray-50 text-gray-800 border-gray-200;
-}
-
-.question-priority {
-  @apply px-3 py-1 rounded-full text-xs font-medium border;
-}
-
-.question-priority.high {
-  @apply bg-red-50 text-red-800 border-red-200;
-}
-
-.question-priority.medium {
-  @apply bg-blue-50 text-blue-800 border-blue-200;
-}
-
-.question-priority.low {
-  @apply bg-gray-50 text-gray-800 border-gray-200;
-}
-
 .empty-state {
   @apply flex flex-col items-center justify-center p-8 text-gray-500;
 }
@@ -105,7 +73,40 @@ td, th {
 }
 
 tr {
-  @apply border-b border-gray-200;
+  @apply border-b border-gray-200 transition-colors duration-200;
+}
+
+/* Status colors */
+.bg-green-50 {
+  background-color: #f0fdf4;
+}
+.bg-yellow-50 {
+  background-color: #fefce8;
+}
+.bg-gray-50 {
+  background-color: #f9fafb;
+}
+.bg-red-50 {
+  background-color: #fef2f2;
+}
+.bg-blue-50 {
+  background-color: #eff6ff;
+}
+
+.hover\:bg-green-100:hover {
+  background-color: #dcfce7;
+}
+.hover\:bg-yellow-100:hover {
+  background-color: #fef9c3;
+}
+.hover\:bg-gray-100:hover {
+  background-color: #f3f4f6;
+}
+.hover\:bg-red-100:hover {
+  background-color: #fee2e2;
+}
+.hover\:bg-blue-100:hover {
+  background-color: #dbeafe;
 }
 
 /* Animation */
