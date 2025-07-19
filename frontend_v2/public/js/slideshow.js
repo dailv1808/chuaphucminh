@@ -21,24 +21,24 @@ document.addEventListener('alpine:init', function() {
       fetchQuestions: function() {
         this.isLoading = true;
         fetch('http://192.168.0.200:8000/api/questions/')
-            .then(response => {
+          .then(response => {
             if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
             return response.json();
-            })
-            .then(data => {
+          })
+          .then(data => {
             this.questions = data;
             this.slideshowQuestions = data.filter(q => 
-                q.status === "pending" && q.slideshow === true
+              q.status === "pending" && q.slideshow === true
             );
-            })
-            .catch(error => {
+          })
+          .catch(error => {
             console.error('Error:', error);
             this.showNotificationMessage(error.message, 'error');
-            })
-            .finally(() => {
+          })
+          .finally(() => {
             this.isLoading = false;
-            });
-        },
+          });
+      },
       
       updateQuestionOrder: function() {
         const token = localStorage.getItem('access_token');
@@ -125,30 +125,27 @@ document.addEventListener('alpine:init', function() {
       },
       
       handleKeyDown: function(e) {
+        // Convert to lowercase for case-insensitive check
+        const key = e.key.toLowerCase();
+        
         // Prevent default for all keys we handle
-        if (['n', 'p', 's'].includes(e.key.toLowerCase())) {
-          e.preventDefault();
+        if (['n', 'p', 's', 'arrowright', 'arrowleft', 'escape'].includes(key)) {
+            e.preventDefault();
         }
 
-        switch (e.key.toLowerCase()) {
-          case 'n':
-            this.nextSlide();
-            break;
-          case 'p':
-            this.prevSlide();
-            break;
-          case 's':
-            this.stopSlideshow();
-            break;
-          case 'arrowright':
-            this.nextSlide();
-            break;
-          case 'arrowleft':
-            this.prevSlide();
-            break;
-          case 'escape':
-            this.stopSlideshow();
-            break;
+        switch (key) {
+            case 'n':
+            case 'arrowright':
+                this.nextSlide();
+                break;
+            case 'p':
+            case 'arrowleft':
+                this.prevSlide();
+                break;
+            case 's':
+            case 'escape':
+                this.stopSlideshow();
+                break;
         }
       }.bind(this),
       
