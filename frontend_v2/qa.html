@@ -365,11 +365,16 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Nhóm câu hỏi</label>
-              <input type="text" x-model="currentQuestion.group.name" class="w-full input-field">
+              <select x-model="currentQuestion.group_id" class="w-full input-field">
+                <option value="">Chọn nhóm</option>
+                <template x-for="group in questionGroups" :key="group.id">
+                  <option :value="group.id" x-text="group.name"></option>
+                </template>
+              </select>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Tags (cách nhau bằng dấu phẩy)</label>
-              <input type="text" x-model="currentQuestion.tagsInput" class="w-full input-field">
+              <input type="text" x-model="currentQuestion.tagsInput" placeholder="Nhập tags, cách nhau bằng dấu phẩy" class="w-full input-field">
             </div>
           </div>
           

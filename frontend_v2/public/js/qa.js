@@ -18,6 +18,7 @@ document.addEventListener('alpine:init', function() {
       currentPage: 1,
       perPage: 10,
       selectedQuestion: null,
+      questionGroups: [],
       statusOptions: [
         { value: 'answered', label: 'Đã trả lời' },
         { value: 'pending', label: 'Chưa trả lời' },
@@ -42,13 +43,16 @@ document.addEventListener('alpine:init', function() {
         status: 'pending',
         priority: 'medium',
         slideshow: false,
-        group: '',
-        tags: '',
+        group_id: null,
+        group: null,
+        tags: [],
+        tagsInput: '',
         created_at: new Date().toISOString()
       },
 
       init: function() {
         this.fetchQuestions();
+        this.fetchQuestionGroups();
       },
 
       get paginatedQuestions() {
@@ -72,7 +76,8 @@ document.addEventListener('alpine:init', function() {
             this.questions = data.map(q => ({
               ...q,
               showAnswerSection: false,
-              newAnswer: ''
+              newAnswer: '',
+              tagsInput: q.tags ? q.tags.map(tag => tag.name).join(', ') : ''
             }));
             this.applyFilters();
           })
@@ -82,6 +87,17 @@ document.addEventListener('alpine:init', function() {
           })
           .finally(() => {
             this.isLoading = false;
+          });
+      },
+
+      fetchQuestionGroups: function() {
+        fetch('http://192.168.0.200:8000/api/question-groups/')
+          .then(response => response.json())
+          .then(data => {
+            this.questionGroups = data;
+          })
+          .catch(error => {
+            console.error('Error fetching question groups:', error);
           });
       },
 
@@ -151,8 +167,10 @@ document.addEventListener('alpine:init', function() {
           status: 'pending',
           priority: 'medium',
           slideshow: false,
-          group: '',
-          tags: '',
+          group_id: null,
+          group: null,
+          tags: [],
+          tagsInput: '',
           created_at: new Date().toISOString()
         };
         this.showQuestionModal = true;
@@ -181,12 +199,17 @@ document.addEventListener('alpine:init', function() {
 
       preparePayload: function() {
         const payload = { 
-          ...this.currentQuestion
+          ...this.currentQuestion,
+          tags: this.currentQuestion.tagsInput 
+            ? this.currentQuestion.tagsInput.split(',').map(tag => tag.trim())
+            : []
         };
         
         this.updateAnsweredAt();
         
         // Clean up payload before sending
+        delete payload.tagsInput;
+        delete payload.group;
         delete payload.showAnswerSection;
         delete payload.newAnswer;
         

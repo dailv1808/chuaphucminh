@@ -159,7 +159,19 @@ tr {
 }
 
 .tag-badge {
-  @apply px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full;
+  @apply px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full flex items-center gap-1;
+}
+
+.tag-badge i {
+  @apply text-gray-500 hover:text-red-500 cursor-pointer;
+}
+
+.tag-input {
+  @apply input-field;
+}
+
+.group-select {
+  @apply input-field;
 }
 
 /* Animation */
