@@ -9,6 +9,7 @@ document.addEventListener('alpine:init', function() {
       showNotification: false,
       notificationMessage: '',
       notificationType: 'success',
+      keyboardHandler: null, // Thêm biến lưu trữ hàm xử lý sự kiện bàn phím
       
       init: function() {
         this.fetchQuestions();
@@ -99,20 +100,50 @@ document.addEventListener('alpine:init', function() {
         this.currentSlideIndex = 0;
         this.isSlideshowActive = true;
         
-        // Prevent exiting with ESC key
-        document.addEventListener('keydown', this.handleKeyDown);
+        // Tạo và gán hàm xử lý sự kiện bàn phím
+        this.keyboardHandler = (e) => {
+          const key = e.key.toLowerCase();
+          
+          // Chỉ xử lý khi trình chiếu đang active
+          if (!this.isSlideshowActive) return;
+          
+          switch (key) {
+            case 'n':
+            case 'arrowright':
+              e.preventDefault();
+              this.nextSlide();
+              break;
+            case 'p':
+            case 'arrowleft':
+              e.preventDefault();
+              this.prevSlide();
+              break;
+            case 's':
+            case 'escape':
+              e.preventDefault();
+              this.stopSlideshow();
+              break;
+          }
+        };
+        
+        // Thêm sự kiện bàn phím
+        document.addEventListener('keydown', this.keyboardHandler);
       },
       
       stopSlideshow: function() {
         this.isSlideshowActive = false;
-        document.removeEventListener('keydown', this.handleKeyDown);
+        // Xóa sự kiện bàn phím
+        if (this.keyboardHandler) {
+          document.removeEventListener('keydown', this.keyboardHandler);
+          this.keyboardHandler = null;
+        }
       },
       
       nextSlide: function() {
         if (this.currentSlideIndex < this.slideshowQuestions.length - 1) {
           this.currentSlideIndex++;
         } else {
-          this.currentSlideIndex = 0; // Loop back to first question
+          this.currentSlideIndex = 0; // Về câu đầu tiên
         }
       },
       
@@ -120,34 +151,9 @@ document.addEventListener('alpine:init', function() {
         if (this.currentSlideIndex > 0) {
           this.currentSlideIndex--;
         } else {
-          this.currentSlideIndex = this.slideshowQuestions.length - 1; // Loop to last question
+          this.currentSlideIndex = this.slideshowQuestions.length - 1; // Đến câu cuối cùng
         }
       },
-      
-      handleKeyDown: function(e) {
-        // Convert to lowercase for case-insensitive check
-        const key = e.key.toLowerCase();
-        
-        // Prevent default for all keys we handle
-        if (['n', 'p', 's', 'arrowright', 'arrowleft', 'escape'].includes(key)) {
-            e.preventDefault();
-        }
-
-        switch (key) {
-            case 'n':
-            case 'arrowright':
-                this.nextSlide();
-                break;
-            case 'p':
-            case 'arrowleft':
-                this.prevSlide();
-                break;
-            case 's':
-            case 'escape':
-                this.stopSlideshow();
-                break;
-        }
-      }.bind(this),
       
       showNotificationMessage: function(message, type) {
         this.notificationMessage = message;
