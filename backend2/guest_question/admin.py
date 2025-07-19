@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import GuestQuestion, QuestionGroup, QuestionTag
+from .models import GuestQuestion
 
 @admin.register(GuestQuestion)
 class GuestQuestionAdmin(admin.ModelAdmin):
