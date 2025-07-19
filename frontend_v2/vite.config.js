@@ -44,6 +44,8 @@ export default defineConfig({
         login: 'login.html',
         pending: 'pending.html',
         qa: 'qa.html',
+        users: 'slideshow.html',
+        users: 'qa_approval.html',
         users: 'users.html',
       },
     },
