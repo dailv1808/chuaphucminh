@@ -63,7 +63,7 @@ document.addEventListener('alpine:init', function() {
 
       fetchQuestions: function() {
         this.isLoading = true;
-        fetch('http://192.168.0.200:8000/api/questions/')
+        fetch('https://api.chuaphucminh.xyz/api/questions/')
           .then(response => {
             if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
             return response.json();
@@ -196,7 +196,7 @@ document.addEventListener('alpine:init', function() {
       },
 
       createQuestion: function(payload) {
-        fetch('http://192.168.0.200:8000/api/questions/', {
+        fetch('https://api.chuaphucminh.xyz/api/questions/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -218,7 +218,7 @@ document.addEventListener('alpine:init', function() {
 
       updateQuestion: function(payload) {
         const token = localStorage.getItem('access_token');
-        fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
+        fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
           method: 'PUT',
           headers: { 
             'Authorization': `Bearer ${token}`, 
@@ -248,7 +248,7 @@ document.addEventListener('alpine:init', function() {
 
       deleteQuestion: function() {
         const token = localStorage.getItem('access_token');
-        fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
+        fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}`}
         })
