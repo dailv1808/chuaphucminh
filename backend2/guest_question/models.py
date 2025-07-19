@@ -1,17 +1,17 @@
 from django.db import models
 from django.utils import timezone
 
-# class QuestionGroup(models.Model):
-#     name = models.CharField(max_length=100)
+class QuestionGroup(models.Model):
+    name = models.CharField(max_length=100)
 
-#     def __str__(self):
-#         return self.name
+    def __str__(self):
+        return self.name
 
-# class QuestionTag(models.Model):
-#     name = models.CharField(max_length=50)
+class QuestionTag(models.Model):
+    name = models.CharField(max_length=50)
 
-#     def __str__(self):
-#         return self.name
+    def __str__(self):
+        return self.name
 
 class GuestQuestion(models.Model):
     PRIORITY_CHOICES = [
@@ -35,8 +35,8 @@ class GuestQuestion(models.Model):
     answer = models.TextField("Nội dung câu trả lời", blank=True, null=True)
     short_content = models.CharField("Nội dung rút gọn", max_length=300, blank=True)
     answered_at = models.DateTimeField("Thời điểm trả lời", blank=True, null=True)
-    tags = models.CharField("Tags", blank=True, null=True)
-    group = models.CharField("Nhóm câu hỏi", blank=True, null=True)
+    tags = models.ManyToManyField(QuestionTag, blank=True, verbose_name="Tag")
+    group = models.ForeignKey(QuestionGroup, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Nhóm câu hỏi")
     status = models.CharField("Trạng thái", max_length=10, choices=STATUS_CHOICES, default='pending')
     priority = models.CharField("Độ ưu tiên", max_length=10, choices=PRIORITY_CHOICES, default='medium')
     slideshow = models.BooleanField("Hiển thị slideshow", default=False)
