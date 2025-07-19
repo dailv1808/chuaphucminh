@@ -27,7 +27,7 @@ document.addEventListener('alpine:init', function() {
       ],
       priorityOptions: [
         { value: 'high', label: 'Cao' },
-        { value: 'medium', label: 'Trung bình' },
+        { value: 'medium', label: 'Vừa' },
         { value: 'low', label: 'Thấp' }
       ],
       currentQuestion: {
@@ -36,14 +36,16 @@ document.addEventListener('alpine:init', function() {
         email: '',
         content: '',
         short_content: '',
+        contact: '',
         answer: '',
         answered_at: null,
         status: 'pending',
         priority: 'medium',
         slideshow: false,
-        group: { name: '' },
+        group: null,
+        group_name: '',
         tags: [],
-        tagsInput: '',
+        tags_input: '',
         created_at: new Date().toISOString()
       },
 
@@ -72,7 +74,9 @@ document.addEventListener('alpine:init', function() {
             this.questions = data.map(q => ({
               ...q,
               showAnswerSection: false,
-              newAnswer: ''
+              newAnswer: '',
+              group_name: q.group ? q.group.name : '',
+              tags_input: q.tags.map(t => t.name).join(', ')
             }));
             this.applyFilters();
           })
@@ -145,14 +149,16 @@ document.addEventListener('alpine:init', function() {
           email: '',
           content: '',
           short_content: '',
+          contact: '',
           answer: '',
           answered_at: null,
           status: 'pending',
           priority: 'medium',
           slideshow: false,
-          group: { name: '' },
+          group: null,
+          group_name: '',
           tags: [],
-          tagsInput: '',
+          tags_input: '',
           created_at: new Date().toISOString()
         };
         this.showQuestionModal = true;
@@ -161,8 +167,8 @@ document.addEventListener('alpine:init', function() {
       openEditQuestionModal: function(question) {
         this.isEditing = true;
         this.currentQuestion = JSON.parse(JSON.stringify(question));
-        this.currentQuestion.tagsInput = this.currentQuestion.tags.map(t => t.name).join(', ');
-        this.currentQuestion.group = this.currentQuestion.group || { name: '' };
+        this.currentQuestion.tags_input = this.currentQuestion.tags.map(t => t.name).join(', ');
+        this.currentQuestion.group_name = this.currentQuestion.group ? this.currentQuestion.group.name : '';
         this.showQuestionModal = true;
         this.showDetailModal = false;
       },
@@ -184,16 +190,17 @@ document.addEventListener('alpine:init', function() {
       preparePayload: function() {
         const payload = { 
           ...this.currentQuestion,
-          group: this.currentQuestion.group.name ? { name: this.currentQuestion.group.name } : null,
-          tags: this.currentQuestion.tagsInput 
-            ? this.currentQuestion.tagsInput.split(',').map(t => ({ name: t.trim() })).filter(t => t.name)
+          group: this.currentQuestion.group_name ? { name: this.currentQuestion.group_name } : null,
+          tags: this.currentQuestion.tags_input 
+            ? this.currentQuestion.tags_input.split(',').map(t => ({ name: t.trim() })).filter(t => t.name)
             : []
         };
         
         this.updateAnsweredAt();
         
         // Remove unnecessary fields
-        delete payload.tagsInput;
+        delete payload.group_name;
+        delete payload.tags_input;
         delete payload.showAnswerSection;
         delete payload.newAnswer;
         
