@@ -83,6 +83,11 @@ document.addEventListener('alpine:init', function() {
           });
       },
 
+      showQuestionDetail: function(question) {
+        this.selectedQuestion = JSON.parse(JSON.stringify(question));
+        this.showDetailModal = true;
+      },
+
       applyFilters: function() {
         this.currentPage = 1;
         this.sortAndFilterQuestions();
@@ -91,7 +96,6 @@ document.addEventListener('alpine:init', function() {
       sortAndFilterQuestions: function() {
         let results = [...this.questions];
         
-        // Filter by search query
         if (this.searchQuery) {
           const query = this.searchQuery.toLowerCase();
           results = results.filter(q => 
@@ -101,17 +105,14 @@ document.addEventListener('alpine:init', function() {
           );
         }
         
-        // Filter by status
         if (this.statusFilter) {
           results = results.filter(q => q.status === this.statusFilter);
         }
         
-        // Filter by priority
         if (this.priorityFilter) {
           results = results.filter(q => q.priority === this.priorityFilter);
         }
         
-        // Sort results
         if (this.sortBy === 'newest') {
           results.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         } else {
@@ -159,6 +160,7 @@ document.addEventListener('alpine:init', function() {
           this.currentQuestion.tags = this.currentQuestion.tags.join(', ');
         }
         this.showQuestionModal = true;
+        this.showDetailModal = false;
       },
 
       closeQuestionModal: function() {
@@ -166,7 +168,7 @@ document.addEventListener('alpine:init', function() {
       },
 
       saveQuestion: function() {
-        if (!this.currentQuestion.name.trim() || !this.currentQuestion.email.trim() || !this.currentQuestion.content.trim()) {
+        if (!this.currentQuestion.name.trim() || !this.currentQuestion.content.trim()) {
           this.showNotificationMessage('Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
           return;
         }
@@ -174,24 +176,10 @@ document.addEventListener('alpine:init', function() {
         this.isEditing ? this.updateQuestion() : this.createQuestion();
       },
 
-      saveQuestionDetail: function() {
-        if (this.selectedQuestion.newAnswer) {
-          this.selectedQuestion.answer = this.selectedQuestion.newAnswer;
-          this.selectedQuestion.answered_at = new Date().toISOString();
-          this.selectedQuestion.status = 'answered';
-          this.selectedQuestion.newAnswer = '';
-          this.selectedQuestion.showAnswerSection = false;
-        }
-        
-        this.currentQuestion = { ...this.selectedQuestion };
-        this.updateQuestion();
-      },
-
       preparePayload: function() {
         const payload = { ...this.currentQuestion };
         this.updateAnsweredAt();
         
-        // Process tags
         payload.tags = typeof payload.tags === 'string' 
           ? payload.tags.split(',').map(t => t.trim()).filter(t => t)
           : Array.isArray(payload.tags) ? payload.tags : [];
@@ -237,7 +225,6 @@ document.addEventListener('alpine:init', function() {
         .then(() => {
           this.showNotificationMessage('Cập nhật câu hỏi thành công', 'success');
           this.showQuestionModal = false;
-          this.showDetailModal = false;
           this.fetchQuestions();
         })
         .catch(error => {

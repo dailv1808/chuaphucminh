@@ -52,6 +52,7 @@
               <th scope="col" class="px-6 py-3">STT</th>
               <th scope="col" class="px-6 py-3">Người hỏi</th>
               <th scope="col" class="px-6 py-3">Nội dung</th>
+              <th scope="col" class="px-6 py-3">Nhóm</th>
               <th scope="col" class="px-6 py-3">Ngày tạo</th>
               <th scope="col" class="px-6 py-3 text-right">Thao tác</th>
             </tr>
@@ -66,13 +67,14 @@
                     'bg-red-50 hover:bg-red-100': question.status === 'reject',
                     'bg-blue-50 hover:bg-blue-100': question.status === 'review'
                   }"
-                  @click="selectedQuestion = question; showDetailModal = true">
+                  @click="showQuestionDetail(question)">
                 <td class="px-6 py-4" x-text="(currentPage - 1) * perPage + index + 1"></td>
                 <td class="px-6 py-4">
                   <div class="font-medium text-gray-900" x-text="question.name"></div>
                   <div class="text-gray-500 text-xs" x-text="question.email"></div>
                 </td>
                 <td class="px-6 py-4" x-text="question.content.substring(0, 100) + (question.content.length > 100 ? '...' : '')"></td>
+                <td class="px-6 py-4" x-text="question.group || 'N/A'"></td>
                 <td class="px-6 py-4" x-text="formatDateTime(question.created_at)"></td>
                 <td class="px-6 py-4 text-right">
                   <div class="flex justify-end gap-2">
@@ -137,20 +139,16 @@
           </button>
         </div>
         
-        <div class="space-y-4" x-data="{ editing: false }">
+        <div class="space-y-4">
           <!-- Question Info -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Tên người hỏi</label>
-              <input type="text" x-model="selectedQuestion.name" :readonly="!editing" 
-                     :class="{'bg-gray-50': !editing, 'bg-white border': editing}" 
-                     class="w-full px-3 py-2 rounded-lg text-sm">
+              <div x-text="selectedQuestion.name" class="text-gray-900"></div>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input type="email" x-model="selectedQuestion.email" :readonly="!editing" 
-                     :class="{'bg-gray-50': !editing, 'bg-white border': editing}" 
-                     class="w-full px-3 py-2 rounded-lg text-sm">
+              <div x-text="selectedQuestion.email || 'N/A'" class="text-gray-900"></div>
             </div>
           </div>
           
@@ -160,84 +158,38 @@
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Câu hỏi <span class="text-red-500">*</span></label>
-            <textarea x-model="selectedQuestion.content" :readonly="!editing" rows="8"
-                     :class="{'bg-gray-50': !editing, 'bg-white border': editing}" 
-                     class="w-full px-3 py-2 rounded-lg text-sm"></textarea>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nhóm câu hỏi</label>
+            <div x-text="selectedQuestion.group || 'N/A'" class="text-gray-700"></div>
           </div>
           
-          <!-- Status and Priority -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
-              <div class="flex flex-wrap gap-2">
-                <template x-for="status in statusOptions" :key="status.value">
-                  <label class="flex items-center">
-                    <input type="radio" x-model="selectedQuestion.status" :value="status.value" 
-                           :disabled="!editing" class="sr-only peer">
-                    <span class="px-3 py-1 rounded-full text-xs font-medium border cursor-pointer"
-                          :class="{
-                            'bg-green-50 text-green-800 border-green-200 peer-checked:bg-green-100 peer-checked:border-green-300': status.value === 'answered',
-                            'bg-yellow-50 text-yellow-800 border-yellow-200 peer-checked:bg-yellow-100 peer-checked:border-yellow-300': status.value === 'pending',
-                            'bg-gray-50 text-gray-800 border-gray-200 peer-checked:bg-gray-100 peer-checked:border-gray-300': status.value === 'archive',
-                            'bg-red-50 text-red-800 border-red-200 peer-checked:bg-red-100 peer-checked:border-red-300': status.value === 'reject',
-                            'bg-blue-50 text-blue-800 border-blue-200 peer-checked:bg-blue-100 peer-checked:border-blue-300': status.value === 'review'
-                          }">
-                      <span x-text="status.label"></span>
-                    </span>
-                  </label>
-                </template>
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Độ ưu tiên</label>
-              <div class="flex flex-wrap gap-2">
-                <template x-for="priority in priorityOptions" :key="priority.value">
-                  <label class="flex items-center">
-                    <input type="radio" x-model="selectedQuestion.priority" :value="priority.value" 
-                           :disabled="!editing" class="sr-only peer">
-                    <span class="px-3 py-1 rounded-full text-xs font-medium border cursor-pointer"
-                          :class="{
-                            'bg-red-50 text-red-800 border-red-200 peer-checked:bg-red-100 peer-checked:border-red-300': priority.value === 'high',
-                            'bg-blue-50 text-blue-800 border-blue-200 peer-checked:bg-blue-100 peer-checked:border-blue-300': priority.value === 'medium',
-                            'bg-gray-50 text-gray-800 border-gray-200 peer-checked:bg-gray-100 peer-checked:border-gray-300': priority.value === 'low'
-                          }">
-                      <span x-text="priority.label"></span>
-                    </span>
-                  </label>
-                </template>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Slideshow -->
           <div>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" x-model="selectedQuestion.slideshow" :disabled="!editing" 
-                     class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-              <span class="text-sm font-medium text-gray-700">Hiển thị slideshow</span>
-            </label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+            <div x-text="statusOptions.find(s => s.value === selectedQuestion.status)?.label" class="text-gray-700"></div>
           </div>
           
-          <!-- Tags -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Độ ưu tiên</label>
+            <div x-text="priorityOptions.find(p => p.value === selectedQuestion.priority)?.label" class="text-gray-700"></div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Hiển thị slideshow</label>
+            <div x-text="selectedQuestion.slideshow ? 'Có' : 'Không'" class="text-gray-700"></div>
+          </div>
+          
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
-            <input type="text" x-model="selectedQuestion.tags" :readonly="!editing" 
-                   :class="{'bg-gray-50': !editing, 'bg-white border': editing}" 
-                   class="w-full px-3 py-2 rounded-lg text-sm">
+            <div x-text="selectedQuestion.tags?.join(', ') || 'N/A'" class="text-gray-700"></div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Câu hỏi</label>
+            <div x-text="selectedQuestion.content" class="text-gray-700 whitespace-pre-line"></div>
           </div>
           
           <!-- Answer Section -->
           <div class="mt-6 border-t pt-4">
-            <div class="flex justify-between items-center mb-2">
-              <h4 class="text-lg font-medium text-gray-800">Câu trả lời</h4>
-              <template x-if="selectedQuestion.status !== 'answered' && !editing">
-                <button @click="editing = true; selectedQuestion.showAnswerSection = true" 
-                        class="btn-primary px-3 py-1 text-sm">
-                  <i class="fas fa-reply mr-1"></i> Trả lời
-                </button>
-              </template>
-            </div>
+            <h4 class="text-lg font-medium text-gray-800 mb-2">Câu trả lời</h4>
             
             <template x-if="selectedQuestion.answer">
               <div>
@@ -245,54 +197,35 @@
                   <span class="text-sm text-gray-500">
                     Đã trả lời: <span x-text="formatDateTime(selectedQuestion.answered_at)"></span>
                   </span>
-                  <button x-show="!editing" @click="editing = true" 
-                          class="text-blue-600 hover:text-blue-800 text-sm">
-                    <i class="fas fa-edit mr-1"></i> Sửa
-                  </button>
                 </div>
-                <textarea x-model="selectedQuestion.answer" :readonly="!editing" rows="8"
-                         :class="{'bg-gray-50': !editing, 'bg-white border': editing}" 
-                         class="w-full px-3 py-2 rounded-lg text-sm"></textarea>
+                <div x-text="selectedQuestion.answer" class="text-gray-700 whitespace-pre-line"></div>
               </div>
             </template>
             
-            <template x-if="!selectedQuestion.answer && (editing || selectedQuestion.showAnswerSection)">
-              <div>
-                <textarea x-model="selectedQuestion.newAnswer" rows="8" 
-                          class="w-full input-field mt-2" placeholder="Nhập câu trả lời..."></textarea>
-              </div>
+            <template x-if="!selectedQuestion.answer">
+              <div class="text-gray-500 italic">Chưa có câu trả lời</div>
             </template>
           </div>
           
           <!-- Action Buttons -->
           <div class="flex justify-end gap-3 mt-6 sticky bottom-0 bg-white py-4 border-t">
-            <template x-if="editing">
-              <div>
-                <button @click="editing = false; selectedQuestion.showAnswerSection = false" 
-                        class="btn-secondary">
-                  Hủy
-                </button>
-                <button @click="saveQuestionDetail()" class="btn-primary">
-                  Lưu thay đổi
-                </button>
-              </div>
-            </template>
-            <template x-if="!editing">
-              <button @click="showDetailModal = false" class="btn-secondary">
-                Đóng
-              </button>
-            </template>
+            <button @click="openEditQuestionModal(selectedQuestion)" class="btn-primary">
+              <i class="fas fa-edit mr-1"></i> Chỉnh sửa
+            </button>
+            <button @click="showDetailModal = false" class="btn-secondary">
+              Đóng
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Add/Edit Modal -->
+  <!-- Add/Edit Question Modal -->
   <div x-show="showQuestionModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-    <div @click.outside="closeQuestionModal()" class="bg-white rounded-xl shadow-xl w-full max-w-2xl">
+    <div @click.outside="closeQuestionModal()" class="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
       <div class="p-6">
-        <div class="flex justify-between items-center mb-6">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-white py-4 border-b">
           <h3 class="text-xl font-semibold text-gray-800" x-text="isEditing ? 'Chỉnh sửa câu hỏi' : 'Thêm câu hỏi mới'"></h3>
           <button @click="closeQuestionModal()" class="text-gray-400 hover:text-gray-500">
             <i class="fas fa-times"></i>
@@ -306,13 +239,18 @@
               <input type="text" x-model="currentQuestion.name" required class="w-full input-field">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
-              <input type="email" x-model="currentQuestion.email" required class="w-full input-field">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input type="email" x-model="currentQuestion.email" class="w-full input-field">
             </div>
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nội dung <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nhóm câu hỏi</label>
+            <input type="text" x-model="currentQuestion.group" class="w-full input-field">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Câu hỏi <span class="text-red-500">*</span></label>
             <textarea x-model="currentQuestion.content" rows="8" required class="w-full input-field"></textarea>
           </div>
           
@@ -330,11 +268,8 @@
                     <input type="radio" x-model="currentQuestion.status" :value="status.value" class="sr-only peer">
                     <span class="px-3 py-1 rounded-full text-xs font-medium border cursor-pointer"
                           :class="{
-                            'bg-green-50 text-green-800 border-green-200 peer-checked:bg-green-100 peer-checked:border-green-300': status.value === 'answered',
-                            'bg-yellow-50 text-yellow-800 border-yellow-200 peer-checked:bg-yellow-100 peer-checked:border-yellow-300': status.value === 'pending',
-                            'bg-gray-50 text-gray-800 border-gray-200 peer-checked:bg-gray-100 peer-checked:border-gray-300': status.value === 'archive',
-                            'bg-red-50 text-red-800 border-red-200 peer-checked:bg-red-100 peer-checked:border-red-300': status.value === 'reject',
-                            'bg-blue-50 text-blue-800 border-blue-200 peer-checked:bg-blue-100 peer-checked:border-blue-300': status.value === 'review'
+                            'bg-gray-100 border-gray-300': currentQuestion.status === status.value,
+                            'bg-white border-gray-200': currentQuestion.status !== status.value
                           }">
                       <span x-text="status.label"></span>
                     </span>
@@ -350,9 +285,8 @@
                     <input type="radio" x-model="currentQuestion.priority" :value="priority.value" class="sr-only peer">
                     <span class="px-3 py-1 rounded-full text-xs font-medium border cursor-pointer"
                           :class="{
-                            'bg-red-50 text-red-800 border-red-200 peer-checked:bg-red-100 peer-checked:border-red-300': priority.value === 'high',
-                            'bg-blue-50 text-blue-800 border-blue-200 peer-checked:bg-blue-100 peer-checked:border-blue-300': priority.value === 'medium',
-                            'bg-gray-50 text-gray-800 border-gray-200 peer-checked:bg-gray-100 peer-checked:border-gray-300': priority.value === 'low'
+                            'bg-gray-100 border-gray-300': currentQuestion.priority === priority.value,
+                            'bg-white border-gray-200': currentQuestion.priority !== priority.value
                           }">
                       <span x-text="priority.label"></span>
                     </span>
@@ -376,7 +310,7 @@
           </div>
         </div>
         
-        <div class="mt-6 flex justify-end gap-3">
+        <div class="mt-6 flex justify-end gap-3 sticky bottom-0 bg-white py-4 border-t">
           <button @click="closeQuestionModal()" class="btn-secondary">
             Hủy bỏ
           </button>
