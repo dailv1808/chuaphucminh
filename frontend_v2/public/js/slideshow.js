@@ -21,22 +21,24 @@ document.addEventListener('alpine:init', function() {
       fetchQuestions: function() {
         this.isLoading = true;
         fetch('http://192.168.0.200:8000/api/questions/')
-          .then(response => {
+            .then(response => {
             if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
             return response.json();
-          })
-          .then(data => {
+            })
+            .then(data => {
             this.questions = data;
-            this.slideshowQuestions = data.filter(q => q.slideshow);
-          })
-          .catch(error => {
+            this.slideshowQuestions = data.filter(q => 
+                q.status === "pending" && q.slideshow === true
+            );
+            })
+            .catch(error => {
             console.error('Error:', error);
             this.showNotificationMessage(error.message, 'error');
-          })
-          .finally(() => {
+            })
+            .finally(() => {
             this.isLoading = false;
-          });
-      },
+            });
+        },
       
       updateQuestionOrder: function() {
         const token = localStorage.getItem('access_token');
