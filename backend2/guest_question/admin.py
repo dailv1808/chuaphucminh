@@ -9,11 +9,11 @@ class GuestQuestionAdmin(admin.ModelAdmin):
     autocomplete_fields = ['tags', 'group']
     readonly_fields = ['created_at', 'answered_at']
 
-@admin.register(QuestionGroup)
-class QuestionGroupAdmin(admin.ModelAdmin):
-    search_fields = ['name']
+# @admin.register(QuestionGroup)
+# class QuestionGroupAdmin(admin.ModelAdmin):
+#     search_fields = ['name']
 
-@admin.register(QuestionTag)
-class QuestionTagAdmin(admin.ModelAdmin):
-    search_fields = ['name']
+# @admin.register(QuestionTag)
+# class QuestionTagAdmin(admin.ModelAdmin):
+#     search_fields = ['name']
 
