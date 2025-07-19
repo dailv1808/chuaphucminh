@@ -75,104 +75,55 @@
         </div>
       </div>
 
-      <!-- Questions List -->
-      <div class="space-y-4">
-        <template x-for="(question, index) in paginatedQuestions" :key="question.id">
-          <div class="question-card" :class="{
-            'border-l-4 border-yellow-500': question.status === 'pending',
-            'border-l-4 border-green-500': question.status === 'answered',
-            'border-l-4 border-gray-500': question.status === 'archived'
-          }">
-            <div class="question-header">
-              <div class="flex items-start gap-4">
-                <span class="question-index" x-text="(currentPage - 1) * perPage + index + 1"></span>
-                <div>
-                  <h3 class="question-title" x-text="question.name"></h3>
-                  <span class="question-email" x-text="question.email"></span>
-                </div>
-              </div>
-              <div class="flex items-center gap-2 mt-2 sm:mt-0">
-                <span class="question-status" 
-                      :class="question.status"
-                      x-text="statusLabels[question.status]"></span>
-                <span class="question-priority"
-                      :class="question.priority"
-                      x-text="priorityLabels[question.priority]"></span>
-              </div>
-            </div>
-            
-            <div class="question-content">
-              <div class="question-meta">
-                <div class="meta-item">
-                  <i class="far fa-calendar-plus"></i>
-                  <span x-text="formatDateTime(question.created_at)"></span>
-                </div>
-                <template x-if="question.answered_at">
-                  <div class="meta-item">
-                    <i class="fas fa-check-circle"></i>
-                    <span x-text="'Đã trả lời: ' + formatDateTime(question.answered_at)"></span>
+      <!-- Questions List Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-500">
+          <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3">STT</th>
+              <th scope="col" class="px-6 py-3">Người hỏi</th>
+              <th scope="col" class="px-6 py-3">Nội dung ngắn</th>
+              <th scope="col" class="px-6 py-3">Trạng thái</th>
+              <th scope="col" class="px-6 py-3">Độ ưu tiên</th>
+              <th scope="col" class="px-6 py-3">Ngày tạo</th>
+              <th scope="col" class="px-6 py-3 text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="(question, index) in paginatedQuestions" :key="question.id">
+              <tr class="bg-white border-b hover:bg-gray-50 cursor-pointer" 
+                  @click="selectedQuestion = question; showDetailModal = true">
+                <td class="px-6 py-4" x-text="(currentPage - 1) * perPage + index + 1"></td>
+                <td class="px-6 py-4">
+                  <div class="font-medium text-gray-900" x-text="question.name"></div>
+                  <div class="text-gray-500 text-xs" x-text="question.email"></div>
+                </td>
+                <td class="px-6 py-4" x-text="question.short_content || question.content.substring(0, 50) + '...'"></td>
+                <td class="px-6 py-4">
+                  <span class="question-status" 
+                        :class="question.status"
+                        x-text="statusLabels[question.status]"></span>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="question-priority"
+                        :class="question.priority"
+                        x-text="priorityLabels[question.priority]"></span>
+                </td>
+                <td class="px-6 py-4" x-text="formatDateTime(question.created_at)"></td>
+                <td class="px-6 py-4 text-right">
+                  <div class="flex justify-end gap-2">
+                    <button @click.stop="openEditQuestionModal(question)" class="action-btn edit-btn">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button @click.stop="confirmDelete(question)" class="action-btn delete-btn">
+                      <i class="fas fa-trash"></i>
+                    </button>
                   </div>
-                </template>
-              </div>
-              
-              <div class="question-text-section">
-                <p class="question-text" x-text="question.content"></p>
-              </div>
-              
-              <template x-if="question.answer || question.showAnswerSection">
-                <div class="answer-section">
-                  <div class="answer-header">
-                    <span class="answer-title">Câu trả lời</span>
-                  </div>
-                  <template x-if="question.answer">
-                    <p class="answer-text" x-text="question.answer"></p>
-                  </template>
-                  <template x-if="!question.answer && question.showAnswerSection">
-                    <div>
-                      <textarea x-model="question.newAnswer" rows="3" class="w-full input-field mt-2"></textarea>
-                      <div class="flex justify-end gap-2 mt-2">
-                        <button @click="cancelReply(question)" class="btn-secondary px-3 py-1 text-sm">Hủy</button>
-                        <button @click="submitReply(question)" class="btn-primary px-3 py-1 text-sm">Gửi trả lời</button>
-                      </div>
-                    </div>
-                  </template>
-                </div>
-              </template>
-              
-              <div class="question-footer">
-                <div class="question-meta">
-                  <template x-if="question.group">
-                    <span class="meta-item">
-                      <i class="fas fa-users"></i>
-                      <span x-text="'Nhóm ' + question.group"></span>
-                    </span>
-                  </template>
-                  <template x-if="question.tags?.length > 0">
-                    <span class="meta-item">
-                      <i class="fas fa-tags"></i>
-                      <span x-text="question.tags.join(', ')"></span>
-                    </span>
-                  </template>
-                </div>
-                
-                <div class="question-actions">
-                  <button x-show="!question.answer" @click="showReplySection(question)" class="action-btn reply-btn">
-                    <i class="fas fa-reply"></i>
-                    <span>Trả lời</span>
-                  </button>
-                  <button @click="openEditQuestionModal(question)" class="action-btn edit-btn">
-                    <i class="fas fa-edit"></i>
-                    <span>Sửa</span>
-                  </button>
-                  <button @click="confirmDelete(question)" class="action-btn delete-btn">
-                    <i class="fas fa-trash"></i>
-                    <span>Xóa</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </template>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
         
         <div x-show="filteredQuestions.length === 0" class="empty-state">
           <i class="far fa-folder-open text-4xl text-gray-400"></i>
@@ -206,6 +157,141 @@
                   :class="{'disabled': currentPage === totalPages}">
             Sau
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Question Detail Modal -->
+  <div x-show="showDetailModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div @click.outside="showDetailModal = false" class="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-white py-4 border-b">
+          <h3 class="text-xl font-semibold text-gray-800">Chi tiết câu hỏi</h3>
+          <button @click="showDetailModal = false" class="text-gray-400 hover:text-gray-500">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <div class="space-y-4" x-data="{ editing: false }">
+          <!-- Question Info -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Tên người hỏi</label>
+              <input type="text" x-model="selectedQuestion.name" :readonly="!editing" 
+                     :class="{'bg-gray-50': !editing, 'bg-white border': editing}" 
+                     class="w-full px-3 py-2 rounded-lg text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input type="email" x-model="selectedQuestion.email" :readonly="!editing" 
+                     :class="{'bg-gray-50': !editing, 'bg-white border': editing}" 
+                     class="w-full px-3 py-2 rounded-lg text-sm">
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ngày tạo</label>
+            <div x-text="formatDateTime(selectedQuestion.created_at)" class="text-gray-700"></div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Câu hỏi</label>
+            <textarea x-model="selectedQuestion.content" :readonly="!editing" rows="5"
+                     :class="{'bg-gray-50': !editing, 'bg-white border': editing}" 
+                     class="w-full px-3 py-2 rounded-lg text-sm"></textarea>
+          </div>
+          
+          <!-- Status and Priority -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+              <select x-model="selectedQuestion.status" :disabled="!editing" class="w-full input-field">
+                <option value="pending">Chờ trả lời</option>
+                <option value="answered">Đã trả lời</option>
+                <option value="archived">Lưu trữ</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Độ ưu tiên</label>
+              <select x-model="selectedQuestion.priority" :disabled="!editing" class="w-full input-field">
+                <option value="high">Cao</option>
+                <option value="medium">Trung bình</option>
+                <option value="low">Thấp</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nhóm</label>
+              <input type="number" x-model="selectedQuestion.group" :readonly="!editing" 
+                     :class="{'bg-gray-50': !editing, 'bg-white border': editing}" 
+                     class="w-full px-3 py-2 rounded-lg text-sm">
+            </div>
+          </div>
+          
+          <!-- Tags -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+            <input type="text" x-model="selectedQuestion.tags" :readonly="!editing" 
+                   :class="{'bg-gray-50': !editing, 'bg-white border': editing}" 
+                   class="w-full px-3 py-2 rounded-lg text-sm">
+          </div>
+          
+          <!-- Answer Section -->
+          <div class="mt-6 border-t pt-4">
+            <div class="flex justify-between items-center mb-2">
+              <h4 class="text-lg font-medium text-gray-800">Câu trả lời</h4>
+              <template x-if="selectedQuestion.status !== 'answered' && !editing">
+                <button @click="editing = true; selectedQuestion.showAnswerSection = true" 
+                        class="btn-primary px-3 py-1 text-sm">
+                  <i class="fas fa-reply mr-1"></i> Trả lời
+                </button>
+              </template>
+            </div>
+            
+            <template x-if="selectedQuestion.answer">
+              <div>
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm text-gray-500">
+                    Đã trả lời: <span x-text="formatDateTime(selectedQuestion.answered_at)"></span>
+                  </span>
+                  <button x-show="!editing" @click="editing = true" 
+                          class="text-blue-600 hover:text-blue-800 text-sm">
+                    <i class="fas fa-edit mr-1"></i> Sửa
+                  </button>
+                </div>
+                <textarea x-model="selectedQuestion.answer" :readonly="!editing" rows="5"
+                         :class="{'bg-gray-50': !editing, 'bg-white border': editing}" 
+                         class="w-full px-3 py-2 rounded-lg text-sm"></textarea>
+              </div>
+            </template>
+            
+            <template x-if="!selectedQuestion.answer && (editing || selectedQuestion.showAnswerSection)">
+              <div>
+                <textarea x-model="selectedQuestion.newAnswer" rows="5" 
+                          class="w-full input-field mt-2" placeholder="Nhập câu trả lời..."></textarea>
+              </div>
+            </template>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="flex justify-end gap-3 mt-6 sticky bottom-0 bg-white py-4 border-t">
+            <template x-if="editing">
+              <>
+                <button @click="editing = false; selectedQuestion.showAnswerSection = false" 
+                        class="btn-secondary">
+                  Hủy
+                </button>
+                <button @click="saveQuestionDetail()" class="btn-primary">
+                  Lưu thay đổi
+                </button>
+              </>
+            </template>
+            <template x-if="!editing">
+              <button @click="showDetailModal = false" class="btn-secondary">
+                Đóng
+              </button>
+            </template>
+          </div>
         </div>
       </div>
     </div>

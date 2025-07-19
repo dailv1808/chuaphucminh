@@ -8,6 +8,7 @@ document.addEventListener('alpine:init', function() {
       priorityFilter: '',
       sortBy: 'newest',
       showQuestionModal: false,
+      showDetailModal: false,
       showConfirmModal: false,
       isEditing: false,
       isLoading: true,
@@ -16,6 +17,7 @@ document.addEventListener('alpine:init', function() {
       notificationType: 'success',
       currentPage: 1,
       perPage: 10,
+      selectedQuestion: null,
       statusLabels: {
         pending: 'Chờ trả lời',
         answered: 'Đã trả lời',
@@ -130,42 +132,6 @@ document.addEventListener('alpine:init', function() {
         if (this.currentPage < this.totalPages) this.currentPage++;
       },
 
-      showReplySection: function(question) {
-        this.questions.forEach(q => q.showAnswerSection = false);
-        question.showAnswerSection = true;
-        question.newAnswer = '';
-      },
-
-      cancelReply: function(question) {
-        question.showAnswerSection = false;
-        question.newAnswer = '';
-      },
-
-      submitReply: function(question) {
-        if (!question.newAnswer.trim()) {
-          this.showNotificationMessage('Vui lòng nhập nội dung trả lời', 'error');
-          return;
-        }
-        
-        question.answer = question.newAnswer;
-        question.answered_at = new Date().toISOString();
-        question.status = 'answered';
-        question.showAnswerSection = false;
-        
-        this.currentQuestion = { ...question };
-        this.updateQuestion();
-      },
-
-      updateAnsweredAt: function() {
-        if (this.currentQuestion.answer && !this.currentQuestion.answered_at) {
-          this.currentQuestion.answered_at = new Date().toISOString();
-          this.currentQuestion.status = 'answered';
-        } else if (!this.currentQuestion.answer) {
-          this.currentQuestion.answered_at = null;
-          this.currentQuestion.status = 'pending';
-        }
-      },
-
       openAddQuestionModal: function() {
         this.isEditing = false;
         this.currentQuestion = {
@@ -205,6 +171,19 @@ document.addEventListener('alpine:init', function() {
         }
 
         this.isEditing ? this.updateQuestion() : this.createQuestion();
+      },
+
+      saveQuestionDetail: function() {
+        if (this.selectedQuestion.newAnswer) {
+          this.selectedQuestion.answer = this.selectedQuestion.newAnswer;
+          this.selectedQuestion.answered_at = new Date().toISOString();
+          this.selectedQuestion.status = 'answered';
+          this.selectedQuestion.newAnswer = '';
+          this.selectedQuestion.showAnswerSection = false;
+        }
+        
+        this.currentQuestion = { ...this.selectedQuestion };
+        this.updateQuestion();
       },
 
       preparePayload: function() {
@@ -257,6 +236,7 @@ document.addEventListener('alpine:init', function() {
         .then(() => {
           this.showNotificationMessage('Cập nhật câu hỏi thành công', 'success');
           this.showQuestionModal = false;
+          this.showDetailModal = false;
           this.fetchQuestions();
         })
         .catch(error => {
@@ -271,7 +251,7 @@ document.addEventListener('alpine:init', function() {
       },
 
       deleteQuestion: function() {
-	const token = localStorage.getItem('access_token');
+        const token = localStorage.getItem('access_token');
         fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}`}
@@ -280,12 +260,23 @@ document.addEventListener('alpine:init', function() {
           if (!response.ok) throw new Error('Xóa câu hỏi thất bại');
           this.showNotificationMessage('Xóa câu hỏi thành công', 'success');
           this.showConfirmModal = false;
+          this.showDetailModal = false;
           this.fetchQuestions();
         })
         .catch(error => {
           console.error('Error:', error);
           this.showNotificationMessage(error.message, 'error');
         });
+      },
+
+      updateAnsweredAt: function() {
+        if (this.currentQuestion.answer && !this.currentQuestion.answered_at) {
+          this.currentQuestion.answered_at = new Date().toISOString();
+          this.currentQuestion.status = 'answered';
+        } else if (!this.currentQuestion.answer) {
+          this.currentQuestion.answered_at = null;
+          this.currentQuestion.status = 'pending';
+        }
       },
 
       formatDateTime: function(dateString) {
