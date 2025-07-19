@@ -35,13 +35,15 @@ document.addEventListener('alpine:init', function() {
         name: '',
         email: '',
         content: '',
+        short_content: '',
         answer: '',
         answered_at: null,
         status: 'pending',
         priority: 'medium',
         slideshow: false,
-        group: null,
+        group: { name: '' },
         tags: [],
+        tagsInput: '',
         created_at: new Date().toISOString()
       },
 
@@ -101,6 +103,7 @@ document.addEventListener('alpine:init', function() {
           results = results.filter(q => 
             q.name.toLowerCase().includes(query) || 
             q.content.toLowerCase().includes(query) ||
+            (q.short_content && q.short_content.toLowerCase().includes(query)) ||
             (q.answer && q.answer.toLowerCase().includes(query))
           );
         }
@@ -141,13 +144,15 @@ document.addEventListener('alpine:init', function() {
           name: '',
           email: '',
           content: '',
+          short_content: '',
           answer: '',
           answered_at: null,
           status: 'pending',
           priority: 'medium',
           slideshow: false,
-          group: null,
+          group: { name: '' },
           tags: [],
+          tagsInput: '',
           created_at: new Date().toISOString()
         };
         this.showQuestionModal = true;
@@ -156,9 +161,8 @@ document.addEventListener('alpine:init', function() {
       openEditQuestionModal: function(question) {
         this.isEditing = true;
         this.currentQuestion = JSON.parse(JSON.stringify(question));
-        if (Array.isArray(this.currentQuestion.tags)) {
-          this.currentQuestion.tags = this.currentQuestion.tags.join(', ');
-        }
+        this.currentQuestion.tagsInput = this.currentQuestion.tags.map(t => t.name).join(', ');
+        this.currentQuestion.group = this.currentQuestion.group || { name: '' };
         this.showQuestionModal = true;
         this.showDetailModal = false;
       },
@@ -173,23 +177,30 @@ document.addEventListener('alpine:init', function() {
           return;
         }
 
-        this.isEditing ? this.updateQuestion() : this.createQuestion();
+        const payload = this.preparePayload();
+        this.isEditing ? this.updateQuestion(payload) : this.createQuestion(payload);
       },
 
       preparePayload: function() {
-        const payload = { ...this.currentQuestion };
+        const payload = { 
+          ...this.currentQuestion,
+          group: this.currentQuestion.group.name ? { name: this.currentQuestion.group.name } : null,
+          tags: this.currentQuestion.tagsInput 
+            ? this.currentQuestion.tagsInput.split(',').map(t => ({ name: t.trim() })).filter(t => t.name)
+            : []
+        };
+        
         this.updateAnsweredAt();
         
-        payload.tags = typeof payload.tags === 'string' 
-          ? payload.tags.split(',').map(t => t.trim()).filter(t => t)
-          : Array.isArray(payload.tags) ? payload.tags : [];
+        // Remove unnecessary fields
+        delete payload.tagsInput;
+        delete payload.showAnswerSection;
+        delete payload.newAnswer;
         
         return payload;
       },
 
-      createQuestion: function() {
-        const payload = this.preparePayload();
-        
+      createQuestion: function(payload) {
         fetch('http://192.168.0.200:8000/api/questions/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -210,12 +221,14 @@ document.addEventListener('alpine:init', function() {
         });
       },
 
-      updateQuestion: function() {
-        const payload = this.preparePayload();
+      updateQuestion: function(payload) {
         const token = localStorage.getItem('access_token');
         fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
           method: 'PUT',
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          headers: { 
+            'Authorization': `Bearer ${token}`, 
+            'Content-Type': 'application/json' 
+          },
           body: JSON.stringify(payload)
         })
         .then(response => {
