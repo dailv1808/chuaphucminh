@@ -4,8 +4,8 @@ import autoprefixer from 'autoprefixer'
 
 export default defineConfig({
   define: {
-    'window.API_BASE_URL': JSON.stringify('https://api.chuaphucminh.xyz'),
-//    'window.API_BASE_URL': JSON.stringify(process.env.VITE_API_URL || 'https://api.chuaphucminh.xyz')
+    'window.API_BASE_URL': JSON.stringify('http://192.168.0.200:8000'),
+//    'window.API_BASE_URL': JSON.stringify(process.env.VITE_API_URL || 'http://192.168.0.200:8000')
   },
   server: {
     host: '0.0.0.0',
