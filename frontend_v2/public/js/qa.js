@@ -42,10 +42,8 @@ document.addEventListener('alpine:init', function() {
         status: 'pending',
         priority: 'medium',
         slideshow: false,
-        group: null,
-        group_name: '',
-        tags: [],
-        tags_input: '',
+        group: '',
+        tags: '',
         created_at: new Date().toISOString()
       },
 
@@ -74,9 +72,7 @@ document.addEventListener('alpine:init', function() {
             this.questions = data.map(q => ({
               ...q,
               showAnswerSection: false,
-              newAnswer: '',
-              group_name: q.group ? q.group.name : '',
-              tags_input: q.tags.map(t => t.name).join(', ')
+              newAnswer: ''
             }));
             this.applyFilters();
           })
@@ -155,10 +151,8 @@ document.addEventListener('alpine:init', function() {
           status: 'pending',
           priority: 'medium',
           slideshow: false,
-          group: null,
-          group_name: '',
-          tags: [],
-          tags_input: '',
+          group: '',
+          tags: '',
           created_at: new Date().toISOString()
         };
         this.showQuestionModal = true;
@@ -167,8 +161,6 @@ document.addEventListener('alpine:init', function() {
       openEditQuestionModal: function(question) {
         this.isEditing = true;
         this.currentQuestion = JSON.parse(JSON.stringify(question));
-        this.currentQuestion.tags_input = this.currentQuestion.tags.map(t => t.name).join(', ');
-        this.currentQuestion.group_name = this.currentQuestion.group ? this.currentQuestion.group.name : '';
         this.showQuestionModal = true;
         this.showDetailModal = false;
       },
@@ -189,18 +181,12 @@ document.addEventListener('alpine:init', function() {
 
       preparePayload: function() {
         const payload = { 
-          ...this.currentQuestion,
-          group: this.currentQuestion.group_name ? { name: this.currentQuestion.group_name } : null,
-          tags: this.currentQuestion.tags_input 
-            ? this.currentQuestion.tags_input.split(',').map(t => ({ name: t.trim() })).filter(t => t.name)
-            : []
+          ...this.currentQuestion
         };
         
         this.updateAnsweredAt();
         
-        // Remove unnecessary fields
-        delete payload.group_name;
-        delete payload.tags_input;
+        // Clean up payload before sending
         delete payload.showAnswerSection;
         delete payload.newAnswer;
         
