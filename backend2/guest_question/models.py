@@ -23,6 +23,9 @@ class GuestQuestion(models.Model):
     STATUS_CHOICES = [
         ('answered', 'Đã trả lời'),
         ('pending', 'Chưa trả lời'),
+        ('archive', 'Lưu trữ'),
+        ('reject', 'Từ chối'),
+        ('review', 'Cần xem xét'),
     ]
 
     name = models.CharField("Tên", max_length=255)
@@ -36,6 +39,7 @@ class GuestQuestion(models.Model):
     group = models.ForeignKey(QuestionGroup, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Nhóm câu hỏi")
     status = models.CharField("Trạng thái", max_length=10, choices=STATUS_CHOICES, default='pending')
     priority = models.CharField("Độ ưu tiên", max_length=10, choices=PRIORITY_CHOICES, default='medium')
+    slideshow = models.BooleanField("Hiển thị slideshow", default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
