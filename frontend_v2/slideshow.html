@@ -25,11 +25,11 @@
       <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
         <div>
           <h1 class="text-2xl font-bold text-gray-800">Trình Chiếu Hỏi Đáp</h1>
-          <p class="text-gray-500 text-sm mt-1" x-text="`Tổng cộng ${questions.length} câu hỏi`"></p>
+          <p class="text-gray-500 text-sm mt-1" x-text="`Tổng cộng ${slideshowQuestions.length} câu hỏi`"></p>
         </div>
         
         <div class="flex items-center gap-3">
-          <button @click="startSlideshow()" class="btn-primary">
+          <button @click="startSlideshow()" class="btn-primary" :disabled="slideshowQuestions.length === 0">
             <i class="fas fa-play mr-2"></i>
             <span>Bắt đầu trình chiếu</span>
           </button>
@@ -55,14 +55,14 @@
           
           handleDrop() {
             if (this.draggedQuestion && this.dragOverQuestion) {
-              const draggedIndex = questions.findIndex(q => q.id === this.draggedQuestion.id);
-              const dropIndex = questions.findIndex(q => q.id === this.dragOverQuestion.id);
+              const draggedIndex = slideshowQuestions.findIndex(q => q.id === this.draggedQuestion.id);
+              const dropIndex = slideshowQuestions.findIndex(q => q.id === this.dragOverQuestion.id);
               
               if (draggedIndex > -1 && dropIndex > -1) {
                 // Remove the dragged item
-                const [removed] = questions.splice(draggedIndex, 1);
+                const [removed] = slideshowQuestions.splice(draggedIndex, 1);
                 // Insert it at the drop position
-                questions.splice(dropIndex, 0, removed);
+                slideshowQuestions.splice(dropIndex, 0, removed);
                 
                 // Update order in database
                 updateQuestionOrder();
@@ -81,13 +81,12 @@
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
               <tr>
                 <th scope="col" class="px-6 py-3">STT</th>
-                <th scope="col" class="px-6 py-3">Nội dung rút gọn</th>
-                <th scope="col" class="px-6 py-3">Nhóm</th>
+                <th scope="col" class="px-6 py-3">Nội dung</th>
                 <th scope="col" class="px-6 py-3 text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              <template x-for="(question, index) in questions" :key="question.id">
+              <template x-for="(question, index) in slideshowQuestions" :key="question.id">
                 <tr class="border-b hover:bg-gray-50 transition-colors duration-200"
                     :class="{
                       'bg-blue-50': draggedQuestion?.id === question.id,
@@ -99,8 +98,7 @@
                     @drop="handleDrop()"
                     @dragend="handleDragEnd()">
                   <td class="px-6 py-4" x-text="index + 1"></td>
-                  <td class="px-6 py-4" x-text="question.short_content || question.content.substring(0, 100) + (question.content.length > 100 ? '...' : '')"></td>
-                  <td class="px-6 py-4" x-text="question.group || 'N/A'"></td>
+                  <td class="px-6 py-4" x-text="question.content"></td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-2">
                       <button @click.stop="removeFromSlideshow(question)" class="action-btn delete-btn">
@@ -113,10 +111,10 @@
             </tbody>
           </table>
           
-          <div x-show="questions.length === 0" class="empty-state">
+          <div x-show="slideshowQuestions.length === 0" class="empty-state">
             <i class="far fa-folder-open text-4xl text-gray-400"></i>
             <p x-show="isLoading">Đang tải dữ liệu...</p>
-            <p x-show="!isLoading && questions.length === 0">Không có câu hỏi nào trong trình chiếu</p>
+            <p x-show="!isLoading && slideshowQuestions.length === 0">Không có câu hỏi nào trong trình chiếu</p>
           </div>
         </div>
       </div>
@@ -129,17 +127,17 @@
       <!-- Slideshow Controls -->
       <div class="flex justify-between items-center p-4 bg-gray-100">
         <div class="text-gray-700">
-          Câu hỏi <span x-text="currentSlideIndex + 1"></span>/<span x-text="questions.length"></span>
+          Câu hỏi <span x-text="currentSlideIndex + 1"></span>/<span x-text="slideshowQuestions.length"></span>
         </div>
         <div class="flex gap-4">
           <button @click="prevSlide()" class="btn-secondary">
-            <i class="fas fa-chevron-left mr-1"></i> Trước
+            <i class="fas fa-chevron-left mr-1"></i> Trước (P)
           </button>
           <button @click="nextSlide()" class="btn-primary">
-            Tiếp <i class="fas fa-chevron-right ml-1"></i>
+            Tiếp (N) <i class="fas fa-chevron-right ml-1"></i>
           </button>
           <button @click="stopSlideshow()" class="btn-danger">
-            <i class="fas fa-stop mr-1"></i> Dừng
+            <i class="fas fa-stop mr-1"></i> Dừng (S)
           </button>
         </div>
       </div>
@@ -149,15 +147,10 @@
         <div class="max-w-4xl w-full">
           <template x-if="currentQuestion">
             <div class="text-center">
-              <div class="mb-8">
-                <h2 class="text-3xl font-bold text-gray-800 mb-4" x-text="currentQuestion.short_content || 'Câu hỏi'"></h2>
-                <div class="text-xl text-gray-600 whitespace-pre-line" x-text="currentQuestion.content"></div>
+              <div class="mb-4">
+                <h3 class="text-xl text-gray-600 mb-8" x-text="currentQuestion.name"></h3>
               </div>
-              
-              <div class="mt-12 border-t pt-8">
-                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Câu trả lời</h3>
-                <div class="text-xl text-gray-700 whitespace-pre-line" x-text="currentQuestion.answer || 'Chưa có câu trả lời'"></div>
-              </div>
+              <div class="text-3xl font-medium text-gray-800 whitespace-pre-line" x-text="currentQuestion.content"></div>
             </div>
           </template>
         </div>

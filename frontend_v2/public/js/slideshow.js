@@ -2,6 +2,7 @@ document.addEventListener('alpine:init', function() {
   Alpine.data('slideshowData', function() {
     return {
       questions: [],
+      slideshowQuestions: [],
       isLoading: true,
       isSlideshowActive: false,
       currentSlideIndex: 0,
@@ -10,22 +11,23 @@ document.addEventListener('alpine:init', function() {
       notificationType: 'success',
       
       init: function() {
-        this.fetchSlideshowQuestions();
+        this.fetchQuestions();
       },
       
       get currentQuestion() {
-        return this.questions[this.currentSlideIndex];
+        return this.slideshowQuestions[this.currentSlideIndex];
       },
       
-      fetchSlideshowQuestions: function() {
+      fetchQuestions: function() {
         this.isLoading = true;
-        fetch('http://192.168.0.200:8000/api/questions/?slideshow=true')
+        fetch('http://192.168.0.200:8000/api/questions/')
           .then(response => {
-            if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi trình chiếu');
+            if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
             return response.json();
           })
           .then(data => {
             this.questions = data;
+            this.slideshowQuestions = data.filter(q => q.slideshow);
           })
           .catch(error => {
             console.error('Error:', error);
@@ -38,7 +40,7 @@ document.addEventListener('alpine:init', function() {
       
       updateQuestionOrder: function() {
         const token = localStorage.getItem('access_token');
-        const questionIds = this.questions.map(q => q.id);
+        const questionIds = this.slideshowQuestions.map(q => q.id);
         
         fetch('http://192.168.0.200:8000/api/questions/update_order/', {
           method: 'POST',
@@ -77,7 +79,7 @@ document.addEventListener('alpine:init', function() {
           return response.json();
         })
         .then(() => {
-          this.questions = this.questions.filter(q => q.id !== question.id);
+          this.slideshowQuestions = this.slideshowQuestions.filter(q => q.id !== question.id);
           this.showNotificationMessage('Đã xóa câu hỏi khỏi trình chiếu', 'success');
         })
         .catch(error => {
@@ -87,7 +89,7 @@ document.addEventListener('alpine:init', function() {
       },
       
       startSlideshow: function() {
-        if (this.questions.length === 0) {
+        if (this.slideshowQuestions.length === 0) {
           this.showNotificationMessage('Không có câu hỏi nào để trình chiếu', 'error');
           return;
         }
@@ -105,7 +107,7 @@ document.addEventListener('alpine:init', function() {
       },
       
       nextSlide: function() {
-        if (this.currentSlideIndex < this.questions.length - 1) {
+        if (this.currentSlideIndex < this.slideshowQuestions.length - 1) {
           this.currentSlideIndex++;
         } else {
           this.currentSlideIndex = 0; // Loop back to first question
@@ -116,20 +118,35 @@ document.addEventListener('alpine:init', function() {
         if (this.currentSlideIndex > 0) {
           this.currentSlideIndex--;
         } else {
-          this.currentSlideIndex = this.questions.length - 1; // Loop to last question
+          this.currentSlideIndex = this.slideshowQuestions.length - 1; // Loop to last question
         }
       },
       
       handleKeyDown: function(e) {
-        if (e.key === 'Escape') {
+        // Prevent default for all keys we handle
+        if (['n', 'p', 's'].includes(e.key.toLowerCase())) {
           e.preventDefault();
-          this.stopSlideshow();
-        } else if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          this.nextSlide();
-        } else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          this.prevSlide();
+        }
+
+        switch (e.key.toLowerCase()) {
+          case 'n':
+            this.nextSlide();
+            break;
+          case 'p':
+            this.prevSlide();
+            break;
+          case 's':
+            this.stopSlideshow();
+            break;
+          case 'arrowright':
+            this.nextSlide();
+            break;
+          case 'arrowleft':
+            this.prevSlide();
+            break;
+          case 'escape':
+            this.stopSlideshow();
+            break;
         }
       }.bind(this),
       
