@@ -226,18 +226,16 @@
           
           <div class="border-t pt-4">
             <label class="block text-sm font-medium text-gray-500 mb-1">Nhóm câu hỏi</label>
-            <div x-text="selectedQuestion.group?.name || 'N/A'" class="text-gray-900"></div>
+            <div x-text="selectedQuestion.group || 'N/A'" class="text-gray-900"></div>
           </div>
           
           <div class="border-t pt-4">
             <label class="block text-sm font-medium text-gray-500 mb-1">Tags</label>
             <div class="flex flex-wrap gap-2">
-              <template x-for="tag in selectedQuestion.tags" :key="tag.id">
-                <span class="tag-badge">
-                  <span x-text="tag.name"></span>
-                </span>
+              <template x-if="selectedQuestion.tags">
+                <span class="tag-badge" x-text="selectedQuestion.tags"></span>
               </template>
-              <template x-if="!selectedQuestion.tags || selectedQuestion.tags.length === 0">
+              <template x-if="!selectedQuestion.tags">
                 <span class="text-gray-500">N/A</span>
               </template>
             </div>
@@ -365,16 +363,11 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Nhóm câu hỏi</label>
-              <select x-model="currentQuestion.group_id" class="w-full input-field">
-                <option value="">Chọn nhóm</option>
-                <template x-for="group in questionGroups" :key="group.id">
-                  <option :value="group.id" x-text="group.name"></option>
-                </template>
-              </select>
+              <input type="text" x-model="currentQuestion.group" class="w-full input-field" placeholder="Nhập tên nhóm">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Tags (cách nhau bằng dấu phẩy)</label>
-              <input type="text" x-model="currentQuestion.tagsInput" placeholder="Nhập tags, cách nhau bằng dấu phẩy" class="w-full input-field">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+              <input type="text" x-model="currentQuestion.tags" class="w-full input-field" placeholder="Nhập tags, cách nhau bằng dấu phẩy">
             </div>
           </div>
           
