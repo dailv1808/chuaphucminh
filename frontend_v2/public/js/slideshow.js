@@ -69,7 +69,11 @@ document.addEventListener('alpine:init', function() {
         }
 
         try {
-          const timestamp = await this.getCurrentTime();
+          let timestamp = 0;
+          if (this.youtubePlayer) {
+            timestamp = await this.getCurrentTime();
+          }
+
           const videoId = this.extractYouTubeId(this.youtubeLink);
           if (!videoId) {
             this.showNotificationMessage('Link YouTube không hợp lệ', 'error');
@@ -93,6 +97,32 @@ document.addEventListener('alpine:init', function() {
         } catch (error) {
           console.error('Error:', error);
           this.showNotificationMessage('Lỗi khi đánh dấu câu hỏi: ' + error.message, 'error');
+        }
+      },
+      
+      removeFromSlideshow: async function(question) {
+        try {
+          const token = localStorage.getItem('access_token');
+          const response = await fetch(`http://192.168.0.200:8000/api/questions/${question.id}/`, {
+            method: 'PATCH',
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+              slideshow: false
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Cập nhật câu hỏi thất bại');
+          }
+
+          this.showNotificationMessage('Đã xóa câu hỏi khỏi trình chiếu', 'success');
+          this.fetchQuestions();
+        } catch (error) {
+          console.error('Error:', error);
+          this.showNotificationMessage('Lỗi khi xóa câu hỏi: ' + error.message, 'error');
         }
       },
       

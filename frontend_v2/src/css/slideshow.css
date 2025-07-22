@@ -52,7 +52,7 @@ tr {
 .welcome-slide {
   background-color: rgba(106, 0, 0, 1);
   @apply text-white;
-  @apply flex items-center justify-center;
+  @apply flex items-start justify-start;
   @apply h-full w-full;
   @apply p-8;
 }
@@ -60,14 +60,16 @@ tr {
 .welcome-slide h1 {
   font-family: 'Alegreya', serif;
   @apply text-[70px] font-bold;
-  @apply text-center;
+  @apply text-left;
   @apply uppercase;
+  @apply leading-tight;
   letter-spacing: 0.2em;
 }
 
 .question-content {
   @apply text-3xl;
   @apply leading-relaxed;
+  @apply pt-8;
 }
 
 .question-author {
