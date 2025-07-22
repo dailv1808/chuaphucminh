@@ -50,37 +50,26 @@ tr {
 
 /* Custom Slideshow Styles */
 .welcome-slide {
-  background-color: rgba(106, 0, 0, 1);
+  @apply bg-gradient-to-r from-blue-800 to-blue-600 text-white;
   @apply flex items-center justify-center;
   @apply h-full w-full;
   @apply p-8;
 }
 
 .welcome-slide h1 {
-  font-family: 'Alegreya', serif;
-  @apply text-7xl font-bold;
+  @apply text-5xl font-bold;
   @apply text-center;
   @apply uppercase;
-  @apply text-white;
-  letter-spacing: 0.1em;
-  line-height: 1.2;
+  letter-spacing: 0.2em;
 }
 
 .question-content {
   @apply text-3xl;
   @apply leading-relaxed;
-  @apply text-gray-800;
-  @apply h-full;
-  @apply flex flex-col justify-center;
 }
 
 .question-author {
   @apply font-bold;
-  @apply mb-6;
+  @apply mb-4;
   @apply text-3xl;
-}
-
-.question-text {
-  @apply text-3xl;
-  @apply whitespace-pre-line;
 }
