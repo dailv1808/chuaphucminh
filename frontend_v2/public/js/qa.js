@@ -3,6 +3,8 @@ document.addEventListener('alpine:init', function() {
     return {
       questions: [],
       filteredQuestions: [],
+      slideshowFilter: '',
+      faqFilter: '',
       searchQuery: '',
       statusFilter: '',
       priorityFilter: '',
@@ -76,7 +78,7 @@ document.addEventListener('alpine:init', function() {
       fetchQuestions: function() {
         this.isLoading = true;
         const token = localStorage.getItem('access_token');
-        fetch('https://api.chuaphucminh.xyz/api/questions/', {
+        fetch('http://192.168.0.200:8000/api/questions/', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -142,7 +144,29 @@ document.addEventListener('alpine:init', function() {
           results = results.filter(q => q.priority === this.priorityFilter);
         }
         
+
+
+
+        // Thêm filter slideshow
+        if (this.slideshowFilter === 'yes') {
+          results = results.filter(q => q.slideshow);
+        } else if (this.slideshowFilter === 'no') {
+          results = results.filter(q => !q.slideshow);
+        }
+        
+        // Thêm filter FAQ
+        if (this.faqFilter === 'yes') {
+          results = results.filter(q => q.is_faq);
+        } else if (this.faqFilter === 'no') {
+          results = results.filter(q => !q.is_faq);
+        }
+        
+        // Sắp xếp theo thời gian cập nhật
         if (this.sortBy === 'newest') {
+          results.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+        } else if (this.sortBy === 'oldest') {
+          results.sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
+        } else if (this.sortBy === 'newest_created') {
           results.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         } else {
           results.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -150,6 +174,23 @@ document.addEventListener('alpine:init', function() {
         
         this.filteredQuestions = results;
       },
+
+
+
+
+
+      //   if (this.sortBy === 'newest') {
+      //     results.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      //   } else {
+      //     results.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      //   }
+        
+      //   this.filteredQuestions = results;
+      // },
+
+
+
+
 
       goToPage: function(page) {
         this.currentPage = page;
@@ -240,7 +281,7 @@ document.addEventListener('alpine:init', function() {
 
       createQuestion: function(payload) {
         const token = localStorage.getItem('access_token');
-        fetch('https://api.chuaphucminh.xyz/api/questions/', {
+        fetch('http://192.168.0.200:8000/api/questions/', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -265,7 +306,7 @@ document.addEventListener('alpine:init', function() {
 
       updateQuestion: function(payload) {
         const token = localStorage.getItem('access_token');
-        fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
+        fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
           method: 'PUT',
           headers: { 
             'Authorization': `Bearer ${token}`, 
@@ -295,7 +336,7 @@ document.addEventListener('alpine:init', function() {
 
       deleteQuestion: function() {
         const token = localStorage.getItem('access_token');
-        fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
+        fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         })

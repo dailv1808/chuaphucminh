@@ -181,3 +181,78 @@ tr {
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
 }
+
+/* Main Content */
+.main-content {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Table improvements */
+table {
+  @apply w-full text-sm;
+}
+
+th {
+  @apply sticky top-0 bg-gray-50 z-10;
+}
+
+/* Better modal sizing */
+.modal-content {
+  max-height: 90vh;
+  height: 90vh;
+}
+
+/* Better spacing */
+.empty-state {
+  @apply py-12;
+}
+
+
+/* Enhanced buttons */
+.btn-primary {
+  @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center shadow-sm hover:shadow-md;
+}
+
+/* Better input fields */
+.input-field {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200;
+}
+
+/* Improved table row hover */
+tr:hover {
+  @apply bg-gray-50 shadow-sm;
+}
+
+/* Better status badges */
+.status-badge {
+  @apply px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap shadow-sm;
+}
+
+/* Enhanced pagination */
+.pagination-btn {
+  @apply px-3 py-1 border rounded-md hover:bg-gray-100 transition-colors shadow-sm;
+}
+
+/* Better modal styling */
+.modal-container {
+  @apply bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto;
+}
+
+@media (max-width: 768px) {
+  .filter-item {
+    @apply min-w-full;
+  }
+  
+  .main-content {
+    @apply p-2;
+  }
+  
+  table {
+    @apply text-xs;
+  }
+  
+  td, th {
+    @apply px-2 py-3;
+  }
+}

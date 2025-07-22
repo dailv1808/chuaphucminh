@@ -34,7 +34,7 @@ document.addEventListener('alpine:init', function() {
 
       fetchQuestions: function() {
         this.isLoading = true;
-        fetch('https://api.chuaphucminh.xyz/api/questions/')
+        fetch('http://192.168.0.200:8000/api/questions/')
           .then(response => {
             if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
             return response.json();
@@ -110,7 +110,7 @@ document.addEventListener('alpine:init', function() {
           status: newStatus
         };
         
-        fetch(`https://api.chuaphucminh.xyz/api/questions/${question.id}/`, {
+        fetch(`http://192.168.0.200:8000/api/questions/${question.id}/`, {
           method: 'PUT',
           headers: { 
             'Authorization': `Bearer ${token}`, 
