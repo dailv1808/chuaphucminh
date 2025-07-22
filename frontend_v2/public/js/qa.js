@@ -85,15 +85,18 @@ document.addEventListener('alpine:init', function() {
             if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
             return response.json();
           })
+
+
           .then(data => {
             this.questions = data.map(q => ({
               ...q,
               showAnswerSection: false,
               newAnswer: '',
-              // Thêm fallback nếu created_by/updated_by là ID số
-              created_by: typeof q.created_by === 'object' ? q.created_by : {id: q.created_by},
-              updated_by: typeof q.updated_by === 'object' ? q.updated_by : {id: q.updated_by}
+              created_by: q.created_by || {username: 'Khách', full_name: 'Khách'},
+              updated_by: q.updated_by || q.created_by || {username: 'Khách', full_name: 'Khách'}
             }));
+
+            
             this.applyFilters();
           })
           .catch(error => {

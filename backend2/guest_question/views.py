@@ -19,3 +19,17 @@ class GuestQuestionViewSet(viewsets.ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
+## 2 phan nay de xu ly viec gan created_by va updated_by vao cau hoi
+    def perform_create(self, serializer):
+        # Chỉ gán user nếu đã đăng nhập
+        if self.request.user.is_authenticated:
+            serializer.save(created_by=self.request.user, updated_by=self.request.user)
+        else:
+            serializer.save()
+    
+    def perform_update(self, serializer):
+        # Chỉ gán user nếu đã đăng nhập
+        if self.request.user.is_authenticated:
+            serializer.save(updated_by=self.request.user)
+        else:
+            serializer.save()
