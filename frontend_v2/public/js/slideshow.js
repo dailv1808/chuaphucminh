@@ -69,15 +69,7 @@ document.addEventListener('alpine:init', function() {
         }
 
         try {
-          let timestamp = 0;
-          if (this.youtubePlayer) {
-            try {
-              timestamp = await this.getCurrentTime();
-            } catch (error) {
-              console.error('Không thể lấy thời gian video, sử dụng mặc định 0s');
-            }
-          }
-
+          const timestamp = this.youtubePlayer ? await this.getCurrentTime() : 0;
           const videoId = this.extractYouTubeId(this.youtubeLink);
           if (!videoId) {
             this.showNotificationMessage('Link YouTube không hợp lệ', 'error');
@@ -101,6 +93,12 @@ document.addEventListener('alpine:init', function() {
         } catch (error) {
           console.error('Error:', error);
           this.showNotificationMessage('Lỗi khi đánh dấu câu hỏi: ' + error.message, 'error');
+        }
+      },
+
+      markCurrentAsAnswered: function() {
+        if (this.currentQuestion) {
+          this.markAsAnswered(this.currentQuestion);
         }
       },
       
@@ -142,7 +140,7 @@ document.addEventListener('alpine:init', function() {
               break;
             case 'r':
               e.preventDefault();
-              this.saveCurrentTimestamp();
+              this.markCurrentAsAnswered();
               break;
           }
         };
@@ -204,32 +202,6 @@ document.addEventListener('alpine:init', function() {
         if (this.youtubePlayer) {
           this.youtubePlayer.destroy();
           this.youtubePlayer = null;
-        }
-      },
-      
-      saveCurrentTimestamp: async function() {
-        if (!this.youtubePlayer) {
-          this.showNotificationMessage('YouTube Player chưa sẵn sàng', 'error');
-          return;
-        }
-
-        try {
-          const currentTime = await this.getCurrentTime();
-          const cleanUrl = this.youtubeLink.split('&')[0];
-          const timestampLink = `${cleanUrl}&t=${Math.floor(currentTime)}s`;
-          
-          await this.updateQuestionAnswer(
-            this.currentQuestion.id, 
-            `Tham khảo video tại: ${timestampLink}`
-          );
-          
-          this.showNotificationMessage(
-            `Đã lưu thời điểm ${this.formatTime(currentTime)} vào câu trả lời`, 
-            'success'
-          );
-        } catch (error) {
-          console.error('Error:', error);
-          this.showNotificationMessage('Lỗi khi lấy thời gian video: ' + error.message, 'error');
         }
       },
       

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trình Chiếu Hỏi Đáp - CPM Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@700&display=swap" rel="stylesheet">
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="./src/css/slideshow.css">
@@ -21,12 +22,21 @@
   <!-- Main Content -->
   <div class="p-4 sm:ml-64 pt-20">
     <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-      <!-- Header Section -->
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-800">Trình Chiếu Hỏi Đáp</h1>
-          <p class="text-gray-500 text-sm mt-1" x-text="`Tổng cộng ${slideshowQuestions.length} câu hỏi`"></p>
+      <!-- Controls Section -->
+      <div class="flex flex-col gap-4 mb-6">
+        <!-- YouTube Link -->
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Link YouTube Livestream</label>
+          <input type="text" x-model="youtubeLink" placeholder="https://www.youtube.com/watch?v=..." 
+                class="w-full input-field">
         </div>
+        
+        <!-- Action Buttons -->
+        <button @click="startSlideshow()" class="btn-primary" 
+                :disabled="slideshowQuestions.length === 0 || !youtubeLink">
+          <i class="fas fa-play mr-2"></i>
+          <span>Bắt đầu trình chiếu</span>
+        </button>
       </div>
 
       <!-- Questions List -->
@@ -90,10 +100,10 @@
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-2">
                       <button @click.stop="markAsAnswered(question)" class="action-btn bg-green-50 text-green-600 hover:bg-green-100">
-                        <i class="fas fa-check-circle mr-1"></i> Đã trả lời
+                        <i class="fas fa-check-circle mr-1"></i> Đánh dấu đã trả lời
                       </button>
                       <button @click.stop="removeFromSlideshow(question)" class="action-btn delete-btn">
-                        <i class="fas fa-times mr-1"></i> Xóa
+                        <i class="fas fa-times mr-1"></i> Xóa khỏi trình chiếu
                       </button>
                     </div>
                   </td>
@@ -109,37 +119,43 @@
           </div>
         </div>
       </div>
-
-      <!-- Controls Section -->
-      <div class="flex flex-col gap-4 bg-gray-50 p-4 rounded-lg">
-        <!-- YouTube Link -->
-        <div class="flex-1">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Link YouTube Livestream</label>
-          <input type="text" x-model="youtubeLink" placeholder="https://www.youtube.com/watch?v=..." 
-                class="w-full input-field">
-        </div>
-        
-        <!-- Action Buttons -->
-        <button @click="startSlideshow()" class="btn-primary" 
-                :disabled="slideshowQuestions.length === 0 || !youtubeLink">
-          <i class="fas fa-play mr-2"></i>
-          <span>Bắt đầu trình chiếu</span>
-        </button>
-      </div>
     </div>
   </div>
 
   <!-- Slideshow Fullscreen Modal -->
-  <div x-show="isSlideshowActive" x-transition class="fixed inset-0 z-50 bg-white">
+  <div x-show="isSlideshowActive" x-transition class="fixed inset-0 z-50">
     <div class="h-full w-full flex flex-col">
+      <!-- Slideshow Content -->
+      <div class="flex-1 flex items-center justify-center p-8 overflow-auto">
+        <div class="max-w-4xl w-full h-full">
+          <template x-if="currentSlideIndex === 0">
+            <div class="welcome-slide h-full flex items-center justify-center">
+              <h1>HỎI PHÁP TRÌNH PHÁP</h1>
+            </div>
+          </template>
+          
+          <template x-if="currentSlideIndex > 0 && currentQuestion">
+            <div class="question-content h-full flex flex-col justify-center">
+              <div class="question-author">
+                Câu hỏi (Hành giả <span x-text="currentQuestion.name"></span>):
+              </div>
+              <div class="question-text" x-text="currentQuestion.content"></div>
+            </div>
+          </template>
+        </div>
+      </div>
+
       <!-- Slideshow Controls -->
-      <div class="flex justify-between items-center p-4 bg-gray-100">
-        <div class="text-gray-700">
+      <div class="flex justify-between items-center p-4 bg-gray-900">
+        <div class="text-white">
           Câu hỏi <span x-text="currentSlideIndex + 1"></span>/<span x-text="slideshowQuestions.length"></span>
         </div>
         <div class="flex gap-4">
           <button @click="prevSlide()" class="btn-secondary">
             <i class="fas fa-chevron-left mr-1"></i> Trước (P)
+          </button>
+          <button @click="markCurrentAsAnswered()" class="btn-primary">
+            <i class="fas fa-check-circle mr-1"></i> Đánh dấu đã trả lời
           </button>
           <button @click="nextSlide()" class="btn-primary">
             Tiếp (N) <i class="fas fa-chevron-right ml-1"></i>
@@ -147,26 +163,6 @@
           <button @click="stopSlideshow()" class="btn-danger">
             <i class="fas fa-stop mr-1"></i> Dừng (S)
           </button>
-        </div>
-      </div>
-      
-      <!-- Slideshow Content -->
-      <div class="flex-1 flex items-center justify-center p-8 overflow-auto">
-        <div class="max-w-4xl w-full">
-          <template x-if="currentSlideIndex === 0">
-            <div class="welcome-slide">
-              <h1>HỎI PHÁP TRÌNH PHÁP</h1>
-            </div>
-          </template>
-          
-          <template x-if="currentSlideIndex > 0 && currentQuestion">
-            <div class="question-content">
-              <div class="question-author">
-                Câu hỏi (Hành giả <span x-text="currentQuestion.name"></span>):
-              </div>
-              <div class="whitespace-pre-line" x-text="currentQuestion.content"></div>
-            </div>
-          </template>
         </div>
       </div>
     </div>
