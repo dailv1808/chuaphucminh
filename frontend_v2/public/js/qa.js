@@ -24,7 +24,7 @@ document.addEventListener('alpine:init', function() {
         { value: 'pending', label: 'Chưa trả lời' },
         { value: 'archive', label: 'Lưu trữ' },
         { value: 'reject', label: 'Từ chối' },
-        { value: 'review', label: 'Cần xem xét' }
+        { value: 'review', label: 'Xem xét' }
       ],
       priorityOptions: [
         { value: 'high', label: 'Cao' },
@@ -34,7 +34,6 @@ document.addEventListener('alpine:init', function() {
       currentQuestion: {
         id: null,
         name: '',
-        email: '',
         content: '',
         short_content: '',
         contact: '',
@@ -43,6 +42,7 @@ document.addEventListener('alpine:init', function() {
         status: 'pending',
         priority: 'medium',
         slideshow: false,
+        is_faq: false,
         group: '',
         tags: '',
         created_at: new Date().toISOString(),
@@ -63,6 +63,11 @@ document.addEventListener('alpine:init', function() {
 
       get totalPages() {
         return Math.ceil(this.filteredQuestions.length / this.perPage);
+      },
+
+      getStatusLabel: function(status) {
+        const option = this.statusOptions.find(s => s.value === status);
+        return option ? option.label : status;
       },
 
       fetchQuestions: function() {
@@ -146,10 +151,10 @@ document.addEventListener('alpine:init', function() {
 
       openAddQuestionModal: function() {
         this.isEditing = false;
+        const user = JSON.parse(localStorage.getItem('user'));
         this.currentQuestion = {
           id: null,
           name: '',
-          email: '',
           content: '',
           short_content: '',
           contact: '',
@@ -158,11 +163,12 @@ document.addEventListener('alpine:init', function() {
           status: 'pending',
           priority: 'medium',
           slideshow: false,
+          is_faq: false,
           group: '',
           tags: '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          created_by: null,
+          created_by: user ? { username: user.username } : null,
           updated_by: null
         };
         this.showQuestionModal = true;

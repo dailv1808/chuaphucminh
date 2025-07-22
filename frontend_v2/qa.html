@@ -97,10 +97,11 @@
               <th scope="col" class="px-6 py-3">Câu hỏi</th>
               <th scope="col" class="px-6 py-3">Liên Lạc</th>
               <th scope="col" class="px-6 py-3">Slide</th>
-              <th scope="col" class="px-6 py-3">Duyệt</th>
+              <th scope="col" class="px-6 py-3">Trạng Thái</th>
               <th scope="col" class="px-6 py-3">Ngày sửa</th>
               <th scope="col" class="px-6 py-3">Người tạo</th>
-              <th scope="col" class="px-6 py-3">Người sửa</th>
+              <th scope="col" class="px-6 py-3">Người biên tập</th>
+              <th scope="col" class="px-6 py-3">FAQ</th>
               <th scope="col" class="px-6 py-3 text-right">Thao tác</th>
             </tr>
           </thead>
@@ -128,12 +129,15 @@
                 </td>
                 <td class="px-6 py-4">
                   <span class="status-badge" :class="question.status">
-                    <span x-text="statusOptions.find(s => s.value === question.status)?.label"></span>
+                    <span x-text="getStatusLabel(question.status)"></span>
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap" x-text="formatDate(question.updated_at)"></td>
-                <td class="px-6 py-4" x-text="question.created_by?.full_name || 'N/A'"></td>
-                <td class="px-6 py-4" x-text="question.updated_by?.full_name || 'N/A'"></td>
+                <td class="px-6 py-4" x-text="question.created_by?.username || 'N/A'"></td>
+                <td class="px-6 py-4" x-text="question.updated_by?.username || 'N/A'"></td>
+                <td class="px-6 py-4 text-center">
+                  <i class="fas" :class="question.is_faq ? 'fa-check text-green-500' : 'fa-times text-gray-400'"></i>
+                </td>
                 <td class="px-6 py-4 text-right">
                   <div class="flex justify-end gap-2">
                     <button @click.stop="openEditQuestionModal(question)" class="action-btn edit-btn">
@@ -215,8 +219,8 @@
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-500 mb-1">Email</label>
-                <div x-text="selectedQuestion.email || 'N/A'" class="text-gray-900"></div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Liên Lạc</label>
+                <div x-text="selectedQuestion.contact || 'N/A'" class="text-gray-900"></div>
               </div>
               
               <div>
@@ -226,16 +230,16 @@
 
               <div>
                 <label class="block text-sm font-medium text-gray-500 mb-1">Người tạo</label>
-                <div x-text="selectedQuestion.created_by?.full_name || 'N/A'" class="text-gray-900"></div>
+                <div x-text="selectedQuestion.created_by?.username || 'N/A'" class="text-gray-900"></div>
               </div>
             </div>
             
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-500 mb-1">Trạng thái</label>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Trạng Thái</label>
                 <div class="flex items-center gap-2">
                   <span class="status-badge" :class="selectedQuestion.status">
-                    <span x-text="statusOptions.find(s => s.value === selectedQuestion.status)?.label"></span>
+                    <span x-text="getStatusLabel(selectedQuestion.status)"></span>
                   </span>
                 </div>
               </div>
@@ -249,14 +253,20 @@
                 </div>
               </div>
               
-              <div>
-                <label class="block text-sm font-medium text-gray-500 mb-1">Hiển thị slideshow</label>
-                <div x-text="selectedQuestion.slideshow ? 'Có' : 'Không'" class="text-gray-900"></div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-1">Hiển thị slideshow</label>
+                  <div x-text="selectedQuestion.slideshow ? 'Có' : 'Không'" class="text-gray-900"></div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-1">Câu hỏi thường gặp</label>
+                  <div x-text="selectedQuestion.is_faq ? 'Có' : 'Không'" class="text-gray-900"></div>
+                </div>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-500 mb-1">Người sửa</label>
-                <div x-text="selectedQuestion.updated_by?.full_name || 'N/A'" class="text-gray-900"></div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Người biên tập</label>
+                <div x-text="selectedQuestion.updated_by?.username || 'N/A'" class="text-gray-900"></div>
               </div>
             </div>
           </div>
@@ -276,11 +286,6 @@
                 <span class="text-gray-500">N/A</span>
               </template>
             </div>
-          </div>
-          
-          <div class="border-t pt-4">
-            <label class="block text-sm font-medium text-gray-500 mb-1">Liên Lạc</label>
-            <div x-text="selectedQuestion.contact || 'N/A'" class="text-gray-900"></div>
           </div>
           
           <div class="border-t pt-4">
@@ -353,19 +358,19 @@
               <input type="text" x-model="currentQuestion.name" required class="w-full input-field">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input type="email" x-model="currentQuestion.email" class="w-full input-field">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Liên Lạc</label>
+              <input type="text" x-model="currentQuestion.contact" class="w-full input-field">
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Liên Lạc</label>
-              <input type="text" x-model="currentQuestion.contact" class="w-full input-field">
-            </div>
-            <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Phân Loại</label>
               <input type="text" x-model="currentQuestion.group" class="w-full input-field" placeholder="Nhập phân loại">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+              <input type="text" x-model="currentQuestion.tags" class="w-full input-field" placeholder="Nhập tags, cách nhau bằng dấu phẩy">
             </div>
           </div>
           
@@ -386,7 +391,7 @@
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Trạng Thái</label>
               <div class="flex flex-wrap gap-2">
                 <template x-for="status in statusOptions" :key="status.value">
                   <label class="flex items-center">
@@ -396,7 +401,7 @@
                             'bg-blue-100 border-blue-300': currentQuestion.status === status.value,
                             'bg-white border-gray-200': currentQuestion.status !== status.value
                           }">
-                      <span x-text="status.label"></span>
+                      <span x-text="getStatusLabel(status.value)"></span>
                     </span>
                   </label>
                 </template>
@@ -422,18 +427,17 @@
           </div>
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
-              <input type="text" x-model="currentQuestion.tags" class="w-full input-field" placeholder="Nhập tags, cách nhau bằng dấu phẩy">
-            </div>
-            <div class="flex items-end gap-4">
-              <div>
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" x-model="currentQuestion.slideshow" 
-                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                  <span class="text-sm font-medium text-gray-700">Hiển thị slideshow</span>
-                </label>
-              </div>
+            <div class="flex items-center gap-4">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" x-model="currentQuestion.slideshow" 
+                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                <span class="text-sm font-medium text-gray-700">Hiển thị slideshow</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" x-model="currentQuestion.is_faq" 
+                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                <span class="text-sm font-medium text-gray-700">Câu hỏi thường gặp</span>
+              </label>
             </div>
           </div>
         </div>
