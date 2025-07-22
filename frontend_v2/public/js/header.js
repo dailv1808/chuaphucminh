@@ -34,7 +34,7 @@ document.addEventListener('alpine:init', () => {
           return;
         }
 
-        const response = await fetch('http://192.168.0.200:8000/api/accounts/profile/', {
+        const response = await fetch('https://api.chuaphucminh.xyz/api/accounts/profile/', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -77,7 +77,7 @@ document.addEventListener('alpine:init', () => {
       try {
         const token = localStorage.getItem('access_token');
         if (token) {
-          await fetch('http://192.168.0.200:8000/api/accounts/logout/', {
+          await fetch('https://api.chuaphucminh.xyz/api/accounts/logout/', {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
