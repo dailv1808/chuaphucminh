@@ -62,45 +62,6 @@ document.addEventListener('alpine:init', function() {
           });
       },
       
-      markAsAnswered: async function() {
-        if (this.slideshowQuestions.length === 0) {
-          this.showNotificationMessage('Không có câu hỏi nào để đánh dấu', 'error');
-          return;
-        }
-        
-        if (!this.youtubeLink) {
-          this.showNotificationMessage('Vui lòng nhập link YouTube livestream', 'error');
-          return;
-        }
-
-        try {
-          const videoId = this.extractYouTubeId(this.youtubeLink);
-          if (!videoId) {
-            this.showNotificationMessage('Link YouTube không hợp lệ', 'error');
-            return;
-          }
-
-          const cleanUrl = this.youtubeLink.split('&')[0];
-          const timestampLink = `${cleanUrl}&t=0s`;
-          
-          await this.updateQuestionAnswer(
-            this.slideshowQuestions[0].id, 
-            `Tham khảo video tại: ${timestampLink}`
-          );
-          
-          this.showNotificationMessage(
-            'Đã đánh dấu câu hỏi là đã trả lời',
-            'success'
-          );
-          
-          // Refresh questions list
-          this.fetchQuestions();
-        } catch (error) {
-          console.error('Error:', error);
-          this.showNotificationMessage('Lỗi khi đánh dấu câu hỏi: ' + error.message, 'error');
-        }
-      },
-      
       startSlideshow: function() {
         if (this.slideshowQuestions.length === 0) {
           this.showNotificationMessage('Không có câu hỏi nào để trình chiếu', 'error');
