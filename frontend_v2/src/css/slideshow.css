@@ -50,14 +50,16 @@ tr {
 
 /* Custom Slideshow Styles */
 .welcome-slide {
-  @apply bg-gradient-to-r from-blue-800 to-blue-600 text-white;
+  background-color: rgba(106, 0, 0, 1);
+  @apply text-white;
   @apply flex items-center justify-center;
   @apply h-full w-full;
   @apply p-8;
 }
 
 .welcome-slide h1 {
-  @apply text-5xl font-bold;
+  font-family: 'Alegreya', serif;
+  @apply text-[70px] font-bold;
   @apply text-center;
   @apply uppercase;
   letter-spacing: 0.2em;

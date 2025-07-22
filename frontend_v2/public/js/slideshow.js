@@ -37,7 +37,7 @@ document.addEventListener('alpine:init', function() {
       },
       
       get currentQuestion() {
-        return this.slideshowQuestions[this.currentSlideIndex];
+        return this.slideshowQuestions[this.currentSlideIndex - 1];
       },
       
       fetchQuestions: function() {
@@ -69,15 +69,7 @@ document.addEventListener('alpine:init', function() {
         }
 
         try {
-          let timestamp = 0;
-          if (this.youtubePlayer) {
-            try {
-              timestamp = await this.getCurrentTime();
-            } catch (error) {
-              console.error('Không thể lấy thời gian video, sử dụng mặc định 0s');
-            }
-          }
-
+          const timestamp = await this.getCurrentTime();
           const videoId = this.extractYouTubeId(this.youtubeLink);
           if (!videoId) {
             this.showNotificationMessage('Link YouTube không hợp lệ', 'error');
@@ -307,7 +299,7 @@ document.addEventListener('alpine:init', function() {
       },
       
       nextSlide: function() {
-        if (this.currentSlideIndex < this.slideshowQuestions.length - 1) {
+        if (this.currentSlideIndex < this.slideshowQuestions.length) {
           this.currentSlideIndex++;
         } else {
           this.currentSlideIndex = 0;
@@ -318,7 +310,7 @@ document.addEventListener('alpine:init', function() {
         if (this.currentSlideIndex > 0) {
           this.currentSlideIndex--;
         } else {
-          this.currentSlideIndex = this.slideshowQuestions.length - 1;
+          this.currentSlideIndex = this.slideshowQuestions.length;
         }
       },
       
