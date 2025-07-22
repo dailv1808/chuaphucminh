@@ -52,11 +52,9 @@ document.addEventListener('alpine:init', function() {
       },
 
       init: function() {
-        // Kiểm tra đăng nhập
         if (!localStorage.getItem('access_token')) {
           window.location.href = '/login.html?next=' + encodeURIComponent(window.location.pathname);
-          }
-
+        }
         this.fetchQuestions();
       },
 
@@ -77,7 +75,12 @@ document.addEventListener('alpine:init', function() {
 
       fetchQuestions: function() {
         this.isLoading = true;
-        fetch('http://192.168.0.200:8000/api/questions/')
+        const token = localStorage.getItem('access_token');
+        fetch('http://192.168.0.200:8000/api/questions/', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
           .then(response => {
             if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
             return response.json();
@@ -86,7 +89,17 @@ document.addEventListener('alpine:init', function() {
             this.questions = data.map(q => ({
               ...q,
               showAnswerSection: false,
-              newAnswer: ''
+              newAnswer: '',
+              created_by: q.created_by ? {
+                id: q.created_by.id,
+                username: q.created_by.username,
+                full_name: q.created_by.full_name
+              } : null,
+              updated_by: q.updated_by ? {
+                id: q.updated_by.id,
+                username: q.updated_by.username,
+                full_name: q.updated_by.full_name
+              } : null
             }));
             this.applyFilters();
           })
@@ -175,7 +188,8 @@ document.addEventListener('alpine:init', function() {
           updated_at: new Date().toISOString(),
           created_by: user ? { 
             id: user.id, 
-            username: user.username 
+            username: user.username,
+            full_name: user.full_name
           } : null,
           updated_by: null
         };
@@ -222,14 +236,20 @@ document.addEventListener('alpine:init', function() {
         // Clean up payload before sending
         delete payload.showAnswerSection;
         delete payload.newAnswer;
+        delete payload.created_by_obj;
+        delete payload.updated_by_obj;
         
         return payload;
       },
 
       createQuestion: function(payload) {
+        const token = localStorage.getItem('access_token');
         fetch('http://192.168.0.200:8000/api/questions/', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify(payload)
         })
         .then(response => {
@@ -281,7 +301,7 @@ document.addEventListener('alpine:init', function() {
         const token = localStorage.getItem('access_token');
         fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
           method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}`}
+          headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(response => {
           if (!response.ok) throw new Error('Xóa câu hỏi thất bại');
