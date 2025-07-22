@@ -63,7 +63,7 @@ tr {
   @apply text-left;
   @apply uppercase;
   @apply leading-tight;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.1em;
   width: 100%; /* Đảm bảo chiều rộng đầy đủ */
   max-width: 1200px; /* Giới hạn chiều rộng tối đa */
   margin: 0 auto; /* Căn giữa khối */

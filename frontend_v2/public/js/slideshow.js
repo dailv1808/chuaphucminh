@@ -70,19 +70,22 @@ document.addEventListener('alpine:init', function() {
         }
 
         try {
-          let timestamp = 0;
-          if (this.youtubePlayer) {
-            timestamp = await this.getCurrentTime();
+          // Đảm bảo YouTube player đã sẵn sàng
+          if (!this.youtubePlayer) {
+            await this.initializeYouTubePlayer();
           }
 
+          // Lấy thời gian hiện tại từ video
+          const currentTime = await this.getCurrentTime();
           const videoId = this.extractYouTubeId(this.youtubeLink);
+          
           if (!videoId) {
             this.showNotificationMessage('Link YouTube không hợp lệ', 'error');
             return;
           }
 
           const cleanUrl = this.youtubeLink.split('&')[0];
-          const timestampLink = `${cleanUrl}&t=${Math.floor(timestamp)}s`;
+          const timestampLink = `${cleanUrl}&t=${Math.floor(currentTime)}s`;
           
           await this.updateQuestionAnswer(
             question.id, 
@@ -90,7 +93,7 @@ document.addEventListener('alpine:init', function() {
           );
           
           this.showNotificationMessage(
-            `Đã đánh dấu câu hỏi là đã trả lời tại ${this.formatTime(timestamp)}`,
+            `Đã đánh dấu câu hỏi là đã trả lời tại ${this.formatTime(currentTime)}`,
             'success'
           );
           
@@ -294,28 +297,59 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage('Lỗi khi lấy thời gian video: ' + error.message, 'error');
         }
       },
-      
+
+      // Cập nhật hàm getCurrentTime để xử lý tốt hơn
       getCurrentTime: function() {
         return new Promise((resolve, reject) => {
-          try {
-            if (this.youtubePlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
-              this.youtubePlayer.playVideo();
-            }
-            
-            setTimeout(() => {
+          if (!this.youtubePlayer) {
+            reject(new Error('YouTube Player chưa khởi tạo'));
+            return;
+          }
+
+          // Thử lấy thời gian nhiều lần nếu cần
+          const tryGetTime = (attempts = 0) => {
+            try {
               const time = this.youtubePlayer.getCurrentTime();
-              console.log('Current video time:', time);
-              if (time > 0) {
+              
+              if (time > 0 || attempts >= 3) {
                 resolve(time);
               } else {
-                reject(new Error('Không thể lấy thời gian hiện tại'));
+                setTimeout(() => tryGetTime(attempts + 1), 500);
               }
-            }, 500);
-          } catch (error) {
-            reject(error);
-          }
+            } catch (error) {
+              if (attempts >= 3) {
+                reject(error);
+              } else {
+                setTimeout(() => tryGetTime(attempts + 1), 500);
+              }
+            }
+          };
+
+          tryGetTime();
         });
       },
+            
+      // getCurrentTime: function() {
+      //   return new Promise((resolve, reject) => {
+      //     try {
+      //       if (this.youtubePlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
+      //         this.youtubePlayer.playVideo();
+      //       }
+            
+      //       setTimeout(() => {
+      //         const time = this.youtubePlayer.getCurrentTime();
+      //         console.log('Current video time:', time);
+      //         if (time > 0) {
+      //           resolve(time);
+      //         } else {
+      //           reject(new Error('Không thể lấy thời gian hiện tại'));
+      //         }
+      //       }, 500);
+      //     } catch (error) {
+      //       reject(error);
+      //     }
+      //   });
+      // },
       
       extractYouTubeId: function(url) {
         const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|v=)([^#&?]*).*/;
