@@ -105,9 +105,8 @@
                   <td class="px-6 py-4" x-text="question.short_content"></td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-2">
-                      <!-- <button @click.stop="markAsAnswered(question)" class="action-btn bg-green-50 text-green-600 hover:bg-green-100"> -->
-                      <button @click="saveCurrentTimestamp()" class="action-btn bg-green-50 text-green-600 hover:bg-green-100"></button>
-         
+                      <button @click.stop="markAsAnswered(question)" class="action-btn bg-green-50 text-green-600 hover:bg-green-100">
+                   
                         <i class="fas fa-check-circle mr-1"></i> Đánh dấu đã trả lời
                       </button>
                       <button @click.stop="removeFromSlideshow(question)" class="action-btn delete-btn">
