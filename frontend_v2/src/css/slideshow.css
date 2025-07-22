@@ -52,18 +52,21 @@ tr {
 .welcome-slide {
   background-color: rgba(106, 0, 0, 1);
   @apply text-white;
-  @apply flex items-start justify-start;
+  @apply flex items-center justify-center; /* Căn giữa cả chiều ngang và dọc */
   @apply h-full w-full;
   @apply p-8;
 }
 
 .welcome-slide h1 {
   font-family: 'Alegreya', serif;
-  @apply text-[70px] font-bold;
+  @apply text-[90px] font-bold; /* Tăng size chữ từ 70px lên 90px */
   @apply text-left;
   @apply uppercase;
   @apply leading-tight;
   letter-spacing: 0.2em;
+  width: 100%; /* Đảm bảo chiều rộng đầy đủ */
+  max-width: 1200px; /* Giới hạn chiều rộng tối đa */
+  margin: 0 auto; /* Căn giữa khối */
 }
 
 .question-content {
