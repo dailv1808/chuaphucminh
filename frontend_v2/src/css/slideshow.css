@@ -47,3 +47,29 @@ td, th {
 tr {
   @apply border-b border-gray-200 transition-colors duration-200;
 }
+
+/* Custom Slideshow Styles */
+.welcome-slide {
+  @apply bg-gradient-to-r from-blue-800 to-blue-600 text-white;
+  @apply flex items-center justify-center;
+  @apply h-full w-full;
+  @apply p-8;
+}
+
+.welcome-slide h1 {
+  @apply text-5xl font-bold;
+  @apply text-center;
+  @apply uppercase;
+  letter-spacing: 0.2em;
+}
+
+.question-content {
+  @apply text-3xl;
+  @apply leading-relaxed;
+}
+
+.question-author {
+  @apply font-bold;
+  @apply mb-4;
+  @apply text-3xl;
+}

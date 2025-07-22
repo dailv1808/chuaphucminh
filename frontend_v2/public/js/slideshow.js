@@ -62,18 +62,22 @@ document.addEventListener('alpine:init', function() {
           });
       },
       
-      markAsAnswered: async function() {
-        if (this.slideshowQuestions.length === 0) {
-          this.showNotificationMessage('Không có câu hỏi nào để đánh dấu', 'error');
-          return;
-        }
-        
+      markAsAnswered: async function(question) {
         if (!this.youtubeLink) {
           this.showNotificationMessage('Vui lòng nhập link YouTube livestream', 'error');
           return;
         }
 
         try {
+          let timestamp = 0;
+          if (this.youtubePlayer) {
+            try {
+              timestamp = await this.getCurrentTime();
+            } catch (error) {
+              console.error('Không thể lấy thời gian video, sử dụng mặc định 0s');
+            }
+          }
+
           const videoId = this.extractYouTubeId(this.youtubeLink);
           if (!videoId) {
             this.showNotificationMessage('Link YouTube không hợp lệ', 'error');
@@ -81,19 +85,18 @@ document.addEventListener('alpine:init', function() {
           }
 
           const cleanUrl = this.youtubeLink.split('&')[0];
-          const timestampLink = `${cleanUrl}&t=0s`;
+          const timestampLink = `${cleanUrl}&t=${Math.floor(timestamp)}s`;
           
           await this.updateQuestionAnswer(
-            this.slideshowQuestions[0].id, 
+            question.id, 
             `Tham khảo video tại: ${timestampLink}`
           );
           
           this.showNotificationMessage(
-            'Đã đánh dấu câu hỏi là đã trả lời',
+            `Đã đánh dấu câu hỏi là đã trả lời tại ${this.formatTime(timestamp)}`,
             'success'
           );
           
-          // Refresh questions list
           this.fetchQuestions();
         } catch (error) {
           console.error('Error:', error);

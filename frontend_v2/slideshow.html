@@ -8,7 +8,6 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="./src/css/slideshow.css">
-  
   <script src="/js/auth.js"></script>
 </head>
 
@@ -55,7 +54,6 @@
               if (draggedIndex > -1 && dropIndex > -1) {
                 const [removed] = slideshowQuestions.splice(draggedIndex, 1);
                 slideshowQuestions.splice(dropIndex, 0, removed);
-                updateQuestionOrder();
               }
             }
             this.draggedQuestion = null;
@@ -91,8 +89,11 @@
                   <td class="px-6 py-4" x-text="question.short_content"></td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-2">
+                      <button @click.stop="markAsAnswered(question)" class="action-btn bg-green-50 text-green-600 hover:bg-green-100">
+                        <i class="fas fa-check-circle mr-1"></i> Đã trả lời
+                      </button>
                       <button @click.stop="removeFromSlideshow(question)" class="action-btn delete-btn">
-                        <i class="fas fa-times"></i> Xóa khỏi trình chiếu
+                        <i class="fas fa-times mr-1"></i> Xóa
                       </button>
                     </div>
                   </td>
@@ -119,19 +120,11 @@
         </div>
         
         <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4">
-          <button @click="markAsAnswered()" class="btn-primary flex-1" 
-                  :disabled="slideshowQuestions.length === 0 || !youtubeLink">
-            <i class="fas fa-check-circle mr-2"></i>
-            <span>Đánh dấu đã trả lời</span>
-          </button>
-          
-          <button @click="startSlideshow()" class="btn-primary flex-1" 
-                  :disabled="slideshowQuestions.length === 0 || !youtubeLink">
-            <i class="fas fa-play mr-2"></i>
-            <span>Bắt đầu trình chiếu</span>
-          </button>
-        </div>
+        <button @click="startSlideshow()" class="btn-primary" 
+                :disabled="slideshowQuestions.length === 0 || !youtubeLink">
+          <i class="fas fa-play mr-2"></i>
+          <span>Bắt đầu trình chiếu</span>
+        </button>
       </div>
     </div>
   </div>
@@ -160,12 +153,18 @@
       <!-- Slideshow Content -->
       <div class="flex-1 flex items-center justify-center p-8 overflow-auto">
         <div class="max-w-4xl w-full">
-          <template x-if="currentQuestion">
-            <div class="text-left">
-              <div class="mb-4">
-                <h3 class="text-xl text-gray-600 mb-8" x-text="currentQuestion.name"></h3>
+          <template x-if="currentSlideIndex === 0">
+            <div class="welcome-slide">
+              <h1>HỎI PHÁP TRÌNH PHÁP</h1>
+            </div>
+          </template>
+          
+          <template x-if="currentSlideIndex > 0 && currentQuestion">
+            <div class="question-content">
+              <div class="question-author">
+                Câu hỏi (Hành giả <span x-text="currentQuestion.name"></span>):
               </div>
-              <div class="text-3xl font-medium text-gray-800 whitespace-pre-line" x-text="currentQuestion.content"></div>
+              <div class="whitespace-pre-line" x-text="currentQuestion.content"></div>
             </div>
           </template>
         </div>
