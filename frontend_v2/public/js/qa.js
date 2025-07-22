@@ -52,6 +52,10 @@ document.addEventListener('alpine:init', function() {
       },
 
       init: function() {
+        // Kiểm tra đăng nhập
+        if (!localStorage.getItem('access_token')) {
+          window.location.href = '/login.html?next=' + encodeURIComponent(window.location.pathname);
+        }
         this.fetchQuestions();
       },
 
@@ -72,7 +76,11 @@ document.addEventListener('alpine:init', function() {
 
       fetchQuestions: function() {
         this.isLoading = true;
-        fetch('http://192.168.0.200:8000/api/questions/')
+        fetch('http://192.168.0.200:8000/api/questions/', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        })
           .then(response => {
             if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
             return response.json();
@@ -152,6 +160,7 @@ document.addEventListener('alpine:init', function() {
       openAddQuestionModal: function() {
         this.isEditing = false;
         const user = JSON.parse(localStorage.getItem('user'));
+        
         this.currentQuestion = {
           id: null,
           name: '',
@@ -168,7 +177,10 @@ document.addEventListener('alpine:init', function() {
           tags: '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          created_by: user ? { username: user.username } : null,
+          created_by: user ? { 
+            id: user.id, 
+            username: user.username 
+          } : null,
           updated_by: null
         };
         this.showQuestionModal = true;
@@ -197,16 +209,23 @@ document.addEventListener('alpine:init', function() {
       },
 
       preparePayload: function() {
-        const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
         
         const payload = { 
           ...this.currentQuestion,
-          updated_by: user?.id || null
+          updated_at: new Date().toISOString(),
+          updated_by: user ? { 
+            id: user.id, 
+            username: user.username 
+          } : null
         };
         
         if (!this.isEditing) {
-          payload.created_by = user?.id || null;
+          payload.created_at = new Date().toISOString();
+          payload.created_by = user ? { 
+            id: user.id, 
+            username: user.username 
+          } : null;
         }
         
         this.updateAnsweredAt();
@@ -221,7 +240,10 @@ document.addEventListener('alpine:init', function() {
       createQuestion: function(payload) {
         fetch('http://192.168.0.200:8000/api/questions/', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          },
           body: JSON.stringify(payload)
         })
         .then(response => {
@@ -240,11 +262,10 @@ document.addEventListener('alpine:init', function() {
       },
 
       updateQuestion: function(payload) {
-        const token = localStorage.getItem('access_token');
         fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
           method: 'PUT',
           headers: { 
-            'Authorization': `Bearer ${token}`, 
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`, 
             'Content-Type': 'application/json' 
           },
           body: JSON.stringify(payload)
