@@ -134,9 +134,15 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap" x-text="formatDate(question.updated_at)"></td>
 
-                <td class="px-6 py-4" x-text="question.created_by?.full_name || question.created_by?.username || 'N/A'"></td>
-                <td class="px-6 py-4" x-text="question.updated_by?.full_name || question.updated_by?.username || 'N/A'"></td>
+                <!-- <td class="px-6 py-4" x-text="question.created_by?.full_name || question.created_by?.username || 'N/A'"></td>
+                <td class="px-6 py-4" x-text="question.updated_by?.full_name || question.updated_by?.username || 'N/A'"></td> -->
 
+                <td class="px-6 py-4">
+                  <span x-text="question.created_by?.full_name || question.created_by?.username || question.created_by?.id || 'Chưa xác định'"></span>
+                </td>
+                <td class="px-6 py-4">
+                  <span x-text="question.updated_by?.full_name || question.updated_by?.username || question.updated_by?.id || 'Chưa xác định'"></span>
+                </td>
                 <!-- <td class="px-6 py-4" x-text="question.created_by?.username || 'N/A'"></td>
                 <td class="px-6 py-4" x-text="question.updated_by?.username || 'N/A'"></td> -->
 
@@ -236,7 +242,10 @@
 
               <div>
                 <label class="block text-sm font-medium text-gray-500 mb-1">Người tạo</label>
-                <div x-text="selectedQuestion.created_by?.full_name || selectedQuestion.created_by?.username || 'N/A'" class="text-gray-900"></div>
+                <div x-text="selectedQuestion.created_by?.full_name || selectedQuestion.created_by?.username || selectedQuestion.created_by?.id || 'Chưa xác định'" 
+                      class="text-gray-900"></div>
+                </div>
+                <!-- <div x-text="selectedQuestion.created_by?.full_name || selectedQuestion.created_by?.username || 'N/A'" class="text-gray-900"></div> -->
 
                 <!-- <div x-text="selectedQuestion.created_by?.username || 'N/A'" class="text-gray-900"></div> -->
               </div>
@@ -274,7 +283,9 @@
 
               <div>
                 <label class="block text-sm font-medium text-gray-500 mb-1">Người biên tập</label>
-                <div x-text="selectedQuestion.updated_by?.full_name || selectedQuestion.updated_by?.username || 'N/A'" class="text-gray-900"></div>
+                <div x-text="selectedQuestion.updated_by?.full_name || selectedQuestion.updated_by?.username || selectedQuestion.updated_by?.id || 'Chưa xác định'" 
+                  class="text-gray-900"></div>
+                <!-- <div x-text="selectedQuestion.updated_by?.full_name || selectedQuestion.updated_by?.username || 'N/A'" class="text-gray-900"></div> -->
                 <!-- <div x-text="selectedQuestion.updated_by?.username || 'N/A'" class="text-gray-900"></div> -->
               </div>
             </div>

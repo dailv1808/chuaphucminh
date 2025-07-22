@@ -90,16 +90,9 @@ document.addEventListener('alpine:init', function() {
               ...q,
               showAnswerSection: false,
               newAnswer: '',
-              created_by: q.created_by ? {
-                id: q.created_by.id,
-                username: q.created_by.username,
-                full_name: q.created_by.full_name
-              } : null,
-              updated_by: q.updated_by ? {
-                id: q.updated_by.id,
-                username: q.updated_by.username,
-                full_name: q.updated_by.full_name
-              } : null
+              // Thêm fallback nếu created_by/updated_by là ID số
+              created_by: typeof q.created_by === 'object' ? q.created_by : {id: q.created_by},
+              updated_by: typeof q.updated_by === 'object' ? q.updated_by : {id: q.updated_by}
             }));
             this.applyFilters();
           })
