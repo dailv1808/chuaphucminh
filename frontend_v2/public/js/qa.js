@@ -18,6 +18,7 @@ document.addEventListener('alpine:init', function() {
       currentPage: 1,
       perPage: 10,
       selectedQuestion: null,
+      currentQuestionIndex: 0,
       statusOptions: [
         { value: 'answered', label: 'Đã trả lời' },
         { value: 'pending', label: 'Chưa trả lời' },
@@ -44,7 +45,10 @@ document.addEventListener('alpine:init', function() {
         slideshow: false,
         group: '',
         tags: '',
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: null,
+        updated_by: null
       },
 
       init: function() {
@@ -87,6 +91,7 @@ document.addEventListener('alpine:init', function() {
 
       showQuestionDetail: function(question) {
         this.selectedQuestion = JSON.parse(JSON.stringify(question));
+        this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
         this.showDetailModal = true;
       },
 
@@ -155,7 +160,10 @@ document.addEventListener('alpine:init', function() {
           slideshow: false,
           group: '',
           tags: '',
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          created_by: null,
+          updated_by: null
         };
         this.showQuestionModal = true;
       },
@@ -163,6 +171,7 @@ document.addEventListener('alpine:init', function() {
       openEditQuestionModal: function(question) {
         this.isEditing = true;
         this.currentQuestion = JSON.parse(JSON.stringify(question));
+        this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
         this.showQuestionModal = true;
         this.showDetailModal = false;
       },
@@ -182,9 +191,17 @@ document.addEventListener('alpine:init', function() {
       },
 
       preparePayload: function() {
+        const token = localStorage.getItem('access_token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        
         const payload = { 
-          ...this.currentQuestion
+          ...this.currentQuestion,
+          updated_by: user?.id || null
         };
+        
+        if (!this.isEditing) {
+          payload.created_by = user?.id || null;
+        }
         
         this.updateAnsweredAt();
         
@@ -285,6 +302,36 @@ document.addEventListener('alpine:init', function() {
           hour: '2-digit',
           minute: '2-digit'
         });
+      },
+
+      formatDate: function(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN');
+      },
+
+      navigateQuestion: function(direction) {
+        const newIndex = this.currentQuestionIndex + direction;
+        if (newIndex >= 0 && newIndex < this.filteredQuestions.length) {
+          const question = this.filteredQuestions[newIndex];
+          if (this.showDetailModal) {
+            this.showQuestionDetail(question);
+          } else if (this.showQuestionModal) {
+            this.openEditQuestionModal(question);
+          }
+        }
+      },
+
+      handleKeyNavigation: function(event) {
+        if (this.showDetailModal || this.showQuestionModal) {
+          if (event.key === 'ArrowLeft') {
+            this.navigateQuestion(-1);
+            event.preventDefault();
+          } else if (event.key === 'ArrowRight') {
+            this.navigateQuestion(1);
+            event.preventDefault();
+          }
+        }
       },
 
       showNotificationMessage: function(message, type) {
