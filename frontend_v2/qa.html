@@ -229,13 +229,27 @@
                 
 
                 <!-- Thay thế dòng hiện tại -->
-                <td class="px-6 py-4">
+                <!-- <td class="px-6 py-4">
                   <select x-model="question.status" 
                           @change="quickEditField(question, 'status', question.status)"
                           @click.stop
                           class="bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-2 w-full text-sm">
                     <template x-for="status in statusOptions" :key="status.value">
                       <option :value="status.value" x-text="status.label"></option>
+                    </template>
+                  </select>
+                </td> -->
+
+
+                <td class="px-6 py-4">
+                  <select x-model="question.status" 
+                          @change="quickEditField(question, 'status', question.status)"
+                          @click.stop
+                          class="status-select w-full" 
+                          :class="question.status">
+                    <template x-for="status in statusOptions" :key="status.value">
+                      <option :value="status.value" x-text="status.label" 
+                              :selected="status.value === question.status"></option>
                     </template>
                   </select>
                 </td>

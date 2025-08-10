@@ -292,10 +292,13 @@ table select {
   appearance: none;
 }
 
-/* Style cho status select */
 .status-select {
-  @apply status-badge px-2 py-1 cursor-pointer;
-  appearance: none;
+  @apply px-3 py-1 rounded-full text-xs font-medium border cursor-pointer appearance-none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
 }
 
 .status-select.answered {
@@ -304,8 +307,15 @@ table select {
 .status-select.pending {
   @apply bg-yellow-50 text-yellow-800 border-yellow-200;
 }
-/* Thêm các class status khác tương tự */
-
+.status-select.archive {
+  @apply bg-gray-50 text-gray-800 border-gray-200;
+}
+.status-select.reject {
+  @apply bg-red-50 text-red-800 border-red-200;
+}
+.status-select.review {
+  @apply bg-blue-50 text-blue-800 border-blue-200;
+}
 
 
 
