@@ -256,3 +256,12 @@ tr:hover {
     @apply px-2 py-3;
   }
 }
+
+/* Thêm vào cuối file */
+table input[type="text"] {
+  @apply bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-2 w-full;
+}
+
+table input[type="checkbox"] {
+  @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
+}

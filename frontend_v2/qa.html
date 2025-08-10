@@ -205,12 +205,42 @@
                 <td class="px-6 py-4">
                   <div class="font-medium text-gray-900" x-text="question.name"></div>
                 </td>
-                <td class="px-6 py-4" x-text="question.group || 'N/A'"></td>
+                <!-- <td class="px-6 py-4" x-text="question.group || 'N/A'"></td> -->
+                <!-- Thay thế dòng trên bằng -->
+
+                <td class="px-6 py-4">
+                  <input type="text" 
+                        x-model="question.group" 
+                        @change.debounce.500ms="quickEditField(question, 'group', question.group)"
+                        @click.stop
+                        class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-2">
+                </td>
+
                 <!-- <td class="px-6 py-4" x-text="question.short_content || question.content.substring(0, 50) + (question.content.length > 50 ? '...' : '')"></td> -->
-                <td class="px-6 py-4" x-text="question.edited_content || question.short_content || question.content.substring(0, 50) + (question.content.length > 50 ? '...' : '')"></td>
+                <!-- <td class="px-6 py-4" x-text="question.edited_content || question.short_content || question.content.substring(0, 50) + (question.content.length > 50 ? '...' : '')"></td> -->
+
+                <!-- Thay thế dòng hiện tại bằng -->
+                <td class="px-6 py-4">
+                  <input type="text" 
+                        x-model="question.edited_content || question.short_content || question.content" 
+                        @change.debounce.500ms="quickEditField(question, 'content', question.edited_content || question.short_content || question.content)"
+                        @click.stop
+                        class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-2">
+                </td>
+
+
                 <td class="px-6 py-4" x-text="question.contact || 'N/A'"></td>
-                <td class="px-6 py-4 text-center">
+                <!-- <td class="px-6 py-4 text-center">
                   <i class="fas" :class="question.slideshow ? 'fa-check text-green-500' : 'fa-times text-gray-400'"></i>
+                </td> -->
+
+                <!-- Thay thế toàn bộ td hiện tại bằng -->
+                <td class="px-6 py-4 text-center">
+                  <input type="checkbox" 
+                        x-model="question.slideshow" 
+                        @change="quickEditField(question, 'slideshow', question.slideshow)"
+                        @click.stop
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                 </td>
                 <td class="px-6 py-4">
                   <span class="status-badge" :class="question.status">
@@ -219,22 +249,25 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap" x-text="formatDate(question.updated_at)"></td>
 
-       
-<!-- 
-                <td class="px-6 py-4">
-                  <span x-text="question.created_by?.full_name || question.created_by?.username || question.created_by?.id || 'Chưa xác định'"></span>
-                </td>
-                <td class="px-6 py-4">
-                  <span x-text="question.updated_by?.full_name || question.updated_by?.username || question.updated_by?.id || 'Chưa xác định'"></span>
-                </td> -->
-                
+                       
                 <td class="px-6 py-4" x-text="question.created_by?.full_name || question.created_by?.username || 'Khách'"></td>
                 <td class="px-6 py-4" x-text="question.updated_by?.full_name || question.updated_by?.username || 'Khách'"></td>
 
 
-                <td class="px-6 py-4 text-center">
+                <!-- <td class="px-6 py-4 text-center">
                   <i class="fas" :class="question.is_faq ? 'fa-check text-green-500' : 'fa-times text-gray-400'"></i>
+                </td> -->
+
+                <!-- Thay thế toàn bộ td hiện tại bằng -->
+                <td class="px-6 py-4 text-center">
+                  <input type="checkbox" 
+                        x-model="question.is_faq" 
+                        @change="quickEditField(question, 'is_faq', question.is_faq)"
+                        @click.stop
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                 </td>
+
+
                 <td class="px-6 py-4 text-right">
                   <div class="flex justify-end gap-2">
                     <button @click.stop="openEditQuestionModal(question)" class="action-btn edit-btn">

@@ -52,6 +52,46 @@ document.addEventListener('alpine:init', function() {
         created_by: null,
         updated_by: null
       },
+      
+
+
+      
+      
+      // Thêm vào Alpine.data('qaData', function() {
+      quickEditField: async function(question, field, value) {
+        const token = localStorage.getItem('access_token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        // Nếu là trường content, cập nhật edited_content thay vì content
+        const payload = {
+          [field === 'content' ? 'edited_content' : field]: value,
+          updated_by: user?.id || null
+        };
+
+        try {
+          const response = await fetch(`http://192.168.0.200:8000/api/questions/${question.id}/`, {
+            method: 'PATCH',
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) throw new Error('Cập nhật thất bại');
+          
+          this.showNotificationMessage('Cập nhật thành công', 'success');
+          this.fetchQuestions();
+        } catch (error) {
+          console.error('Error:', error);
+          this.showNotificationMessage(error.message, 'error');
+        }
+      },
+
+
+
+
+
 
       init: function() {
         if (!localStorage.getItem('access_token')) {
@@ -174,22 +214,6 @@ document.addEventListener('alpine:init', function() {
         
         this.filteredQuestions = results;
       },
-
-
-
-
-
-      //   if (this.sortBy === 'newest') {
-      //     results.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      //   } else {
-      //     results.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-      //   }
-        
-      //   this.filteredQuestions = results;
-      // },
-
-
-
 
 
       goToPage: function(page) {
