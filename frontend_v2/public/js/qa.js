@@ -37,6 +37,7 @@ document.addEventListener('alpine:init', function() {
         id: null,
         name: '',
         content: '',
+        edited_content: '',
         short_content: '',
         contact: '',
         answer: '',
@@ -52,26 +53,26 @@ document.addEventListener('alpine:init', function() {
         created_by: null,
         updated_by: null
       },
-      
-
-
-
-      
-      // Thêm vào Alpine.data('qaData', function() {
-
-
 
       quickEditField: async function(question, field, value) {
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
         
-        // Đặc biệt xử lý cho trường content
+        // Tạo payload với edited_content nếu là trường content
         const payload = {
           [field === 'content' ? 'edited_content' : field]: value,
+          updated_at: new Date().toISOString(),
           updated_by: user?.id || null
         };
 
         try {
+          // Cập nhật giá trị ngay lập tức trên giao diện
+          if (field === 'content') {
+            question.edited_content = value;
+          } else {
+            question[field] = value;
+          }
+
           const response = await fetch(`http://192.168.0.200:8000/api/questions/${question.id}/`, {
             method: 'PATCH',
             headers: { 
@@ -83,24 +84,18 @@ document.addEventListener('alpine:init', function() {
 
           if (!response.ok) throw new Error('Cập nhật thất bại');
           
-          // Cập nhật lại dữ liệu cục bộ ngay lập tức
-          if (field === 'content') {
-            question.edited_content = value;
-          } else {
-            question[field] = value;
-          }
+          // Cập nhật lại toàn bộ dữ liệu từ server
+          const updatedData = await response.json();
+          Object.assign(question, updatedData);
           
           this.showNotificationMessage('Cập nhật thành công', 'success');
         } catch (error) {
           console.error('Error:', error);
           this.showNotificationMessage(error.message, 'error');
-          // Rollback giá trị nếu có lỗi
+          // Nếu có lỗi, làm mới lại dữ liệu từ server
           this.fetchQuestions();
         }
       },
-
-
-
 
       init: function() {
         if (!localStorage.getItem('access_token')) {
@@ -136,8 +131,6 @@ document.addEventListener('alpine:init', function() {
             if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
             return response.json();
           })
-
-
           .then(data => {
             this.questions = data.map(q => ({
               ...q,
@@ -146,7 +139,6 @@ document.addEventListener('alpine:init', function() {
               created_by: q.created_by || {username: 'Khách', full_name: 'Khách'},
               updated_by: q.updated_by || q.created_by || {username: 'Khách', full_name: 'Khách'}
             }));
-
             
             this.applyFilters();
           })
@@ -193,24 +185,18 @@ document.addEventListener('alpine:init', function() {
           results = results.filter(q => q.priority === this.priorityFilter);
         }
         
-
-
-
-        // Thêm filter slideshow
         if (this.slideshowFilter === 'yes') {
           results = results.filter(q => q.slideshow);
         } else if (this.slideshowFilter === 'no') {
           results = results.filter(q => !q.slideshow);
         }
         
-        // Thêm filter FAQ
         if (this.faqFilter === 'yes') {
           results = results.filter(q => q.is_faq);
         } else if (this.faqFilter === 'no') {
           results = results.filter(q => !q.is_faq);
         }
         
-        // Sắp xếp theo thời gian cập nhật
         if (this.sortBy === 'newest') {
           results.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
         } else if (this.sortBy === 'oldest') {
@@ -223,7 +209,6 @@ document.addEventListener('alpine:init', function() {
         
         this.filteredQuestions = results;
       },
-
 
       goToPage: function(page) {
         this.currentPage = page;
@@ -240,8 +225,6 @@ document.addEventListener('alpine:init', function() {
       openAddQuestionModal: function() {
         this.isEditing = false;
         const user = JSON.parse(localStorage.getItem('user'));
-
-
         
         this.currentQuestion = {
           id: null,
@@ -315,11 +298,6 @@ document.addEventListener('alpine:init', function() {
         
         return payload;
       },
-
-
-
-
-
 
       createQuestion: function(payload) {
         const token = localStorage.getItem('access_token');
