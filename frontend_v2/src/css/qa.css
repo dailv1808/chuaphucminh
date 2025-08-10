@@ -187,7 +187,7 @@ tr {
   max-height: 90vh;
   overflow-y: auto;
 } */
- 
+
 .main-content {
   max-height: calc(100vh - 5rem); /* Thay đổi từ 90vh */
   overflow-y: auto;
@@ -305,3 +305,61 @@ table select {
   @apply bg-yellow-50 text-yellow-800 border-yellow-200;
 }
 /* Thêm các class status khác tương tự */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Thay thế hoặc bổ sung các quy tắc CSS sau */
+
+/* Xóa hoặc ghi đè quy tắc .main-content cũ */
+.main-content {
+  min-height: calc(100vh - 5rem);
+  overflow-y: visible; /* Thay đổi từ auto sang visible */
+  padding-bottom: 2rem;
+}
+
+/* Đảm bảo table không bị tràn */
+table {
+  @apply w-full text-sm;
+  table-layout: auto;
+}
+
+/* Đảm bảo modal không ảnh hưởng đến layout chính */
+.modal-container {
+  @apply bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[85vh] overflow-y-auto;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Điều chỉnh footer pagination */
+.flex.justify-between.items-center.mt-6 {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 1rem 0;
+  border-top: 1px solid #e5e7eb;
+  z-index: 10;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .p-4.sm\:ml-64.pt-20 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .p-6.bg-white.rounded-xl {
+    padding: 1rem;
+  }
+}
