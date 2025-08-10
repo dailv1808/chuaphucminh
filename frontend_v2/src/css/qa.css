@@ -4,7 +4,7 @@
 
 /* Custom Styles */
 .btn-primary {
-  @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center shadow-sm hover:shadow-md;
+  @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center;
 }
 
 .btn-secondary {
@@ -16,7 +16,7 @@
 }
 
 .input-field {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200;
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm;
 }
 
 .filter-item {
@@ -44,7 +44,7 @@
 }
 
 .pagination-btn {
-  @apply px-3 py-1 border rounded-md hover:bg-gray-100 transition-colors shadow-sm;
+  @apply px-3 py-1 border rounded-md hover:bg-gray-100 transition-colors;
 }
 
 .pagination-btn.active {
@@ -69,11 +69,11 @@
 
 /* Table styles */
 table {
-  @apply w-full text-sm;
+  @apply w-full;
 }
 
 th {
-  @apply font-medium text-gray-700 sticky top-0 bg-gray-50 z-10;
+  @apply font-medium text-gray-700;
 }
 
 td, th {
@@ -82,10 +82,6 @@ td, th {
 
 tr {
   @apply border-b border-gray-200 transition-colors duration-200;
-}
-
-tr:hover {
-  @apply bg-gray-50 shadow-sm;
 }
 
 /* Status colors */
@@ -123,7 +119,7 @@ tr:hover {
 
 /* Badges */
 .status-badge {
-  @apply px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap shadow-sm;
+  @apply px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap;
 }
 
 .status-badge.answered {
@@ -192,9 +188,19 @@ tr:hover {
   overflow-y: auto;
 }
 
-/* Modal */
-.modal-container {
-  @apply bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto;
+/* Table improvements */
+table {
+  @apply w-full text-sm;
+}
+
+th {
+  @apply sticky top-0 bg-gray-50 z-10;
+}
+
+/* Better modal sizing */
+.modal-content {
+  max-height: 90vh;
+  height: 90vh;
 }
 
 /* Better spacing */
@@ -202,17 +208,35 @@ tr:hover {
   @apply py-12;
 }
 
-/* Inline edit styles */
-input, textarea {
-  @apply transition-all duration-200;
+
+/* Enhanced buttons */
+.btn-primary {
+  @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center shadow-sm hover:shadow-md;
 }
 
-input:focus, textarea:focus {
-  @apply outline-none ring-0;
+/* Better input fields */
+.input-field {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200;
 }
 
-.border-transparent {
-  border-color: transparent;
+/* Improved table row hover */
+tr:hover {
+  @apply bg-gray-50 shadow-sm;
+}
+
+/* Better status badges */
+.status-badge {
+  @apply px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap shadow-sm;
+}
+
+/* Enhanced pagination */
+.pagination-btn {
+  @apply px-3 py-1 border rounded-md hover:bg-gray-100 transition-colors shadow-sm;
+}
+
+/* Better modal styling */
+.modal-container {
+  @apply bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto;
 }
 
 @media (max-width: 768px) {
