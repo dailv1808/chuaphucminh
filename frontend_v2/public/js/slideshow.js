@@ -40,6 +40,29 @@ document.addEventListener('alpine:init', function() {
         return this.slideshowQuestions[this.currentSlideIndex - 1];
       },
       
+      // fetchQuestions: function() {
+      //   this.isLoading = true;
+      //   fetch('http://192.168.0.200:8000/api/questions/')
+      //     .then(response => {
+      //       if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
+      //       return response.json();
+      //     })
+      //     .then(data => {
+      //       this.questions = data;
+      //       this.slideshowQuestions = data.filter(q => 
+      //         q.status === "pending" && q.slideshow === true
+      //       );
+      //     })
+      //     .catch(error => {
+      //       console.error('Error:', error);
+      //       this.showNotificationMessage(error.message, 'error');
+      //     })
+      //     .finally(() => {
+      //       this.isLoading = false;
+      //     });
+      // },
+
+
       fetchQuestions: function() {
         this.isLoading = true;
         fetch('http://192.168.0.200:8000/api/questions/')
@@ -48,7 +71,11 @@ document.addEventListener('alpine:init', function() {
             return response.json();
           })
           .then(data => {
-            this.questions = data;
+            this.questions = data.map(q => ({
+              ...q,
+              // Đảm bảo có edited_content nếu không có thì dùng content
+              displayContent: q.edited_content || q.content
+            }));
             this.slideshowQuestions = data.filter(q => 
               q.status === "pending" && q.slideshow === true
             );
