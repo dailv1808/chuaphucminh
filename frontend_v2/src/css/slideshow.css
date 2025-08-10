@@ -98,12 +98,13 @@ tr {
 .welcome-slide h1 {
   font-family: 'Alegreya', serif;
   @apply text-[90px] font-bold;
-  @apply text-center;
+  @apply text-left;
   @apply uppercase;
   @apply leading-tight;
   letter-spacing: 0.1em;
   width: 100%;
   max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* Question Content Styles */
@@ -113,7 +114,7 @@ tr {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding-top: 2rem;
 }
 
 .question-author {
