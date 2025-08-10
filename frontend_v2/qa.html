@@ -208,25 +208,47 @@
                 <!-- <td class="px-6 py-4" x-text="question.group || 'N/A'"></td> -->
                 <!-- Thay thế dòng trên bằng -->
 
-                <td class="px-6 py-4">
+                <!-- <td class="px-6 py-4">
                   <input type="text" 
                         x-model="question.group" 
                         @change.debounce.500ms="quickEditField(question, 'group', question.group)"
                         @click.stop
                         class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-2">
+                </td> -->
+
+
+                <td class="px-6 py-4">
+                  <input type="text" 
+                        x-model="question.group" 
+                        @change.debounce.500ms="quickEditField(question, 'group', question.group)"
+                        @click.stop
+                        class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2 text-sm">
                 </td>
 
                 <!-- <td class="px-6 py-4" x-text="question.short_content || question.content.substring(0, 50) + (question.content.length > 50 ? '...' : '')"></td> -->
                 <!-- <td class="px-6 py-4" x-text="question.edited_content || question.short_content || question.content.substring(0, 50) + (question.content.length > 50 ? '...' : '')"></td> -->
 
                 <!-- Thay thế dòng hiện tại bằng -->
-                <td class="px-6 py-4">
+                <!-- <td class="px-6 py-4">
                   <input type="text" 
                         x-model="question.edited_content || question.short_content || question.content" 
                         @change.debounce.500ms="quickEditField(question, 'content', question.edited_content || question.short_content || question.content)"
                         @click.stop
                         class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-2">
+                </td> -->
+                
+
+
+                <td class="px-6 py-4">
+                  <textarea x-model="question.edited_content || question.short_content || question.content" 
+                            @change.debounce.500ms="quickEditField(question, 'content', question.edited_content || question.short_content || question.content)"
+                            @click.stop
+                            rows="2"
+                            class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2 text-sm resize-y min-h-[60px]"></textarea>
                 </td>
+
+
+
 
 
                 <td class="px-6 py-4" x-text="question.contact || 'N/A'"></td>
@@ -242,11 +264,29 @@
                         @click.stop
                         class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                 </td>
-                <td class="px-6 py-4">
+
+                <!-- <td class="px-6 py-4">
                   <span class="status-badge" :class="question.status">
                     <span x-text="getStatusLabel(question.status)"></span>
                   </span>
+                </td> -->
+
+                <!-- Thay thế dòng hiện tại -->
+                <td class="px-6 py-4">
+                  <select x-model="question.status" 
+                          @change="quickEditField(question, 'status', question.status)"
+                          @click.stop
+                          class="bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-2 w-full text-sm">
+                    <template x-for="status in statusOptions" :key="status.value">
+                      <option :value="status.value" x-text="status.label"></option>
+                    </template>
+                  </select>
                 </td>
+
+
+
+
+
                 <td class="px-6 py-4 whitespace-nowrap" x-text="formatDate(question.updated_at)"></td>
 
                        

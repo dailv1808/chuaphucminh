@@ -55,14 +55,17 @@ document.addEventListener('alpine:init', function() {
       
 
 
-      
+
       
       // Thêm vào Alpine.data('qaData', function() {
+
+
+
       quickEditField: async function(question, field, value) {
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
         
-        // Nếu là trường content, cập nhật edited_content thay vì content
+        // Đặc biệt xử lý cho trường content
         const payload = {
           [field === 'content' ? 'edited_content' : field]: value,
           updated_by: user?.id || null
@@ -80,15 +83,21 @@ document.addEventListener('alpine:init', function() {
 
           if (!response.ok) throw new Error('Cập nhật thất bại');
           
+          // Cập nhật lại dữ liệu cục bộ ngay lập tức
+          if (field === 'content') {
+            question.edited_content = value;
+          } else {
+            question[field] = value;
+          }
+          
           this.showNotificationMessage('Cập nhật thành công', 'success');
-          this.fetchQuestions();
         } catch (error) {
           console.error('Error:', error);
           this.showNotificationMessage(error.message, 'error');
+          // Rollback giá trị nếu có lỗi
+          this.fetchQuestions();
         }
       },
-
-
 
 
 
