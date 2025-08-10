@@ -230,28 +230,23 @@
                 <!-- <td class="px-6 py-4" x-text="question.edited_content || question.short_content || question.content.substring(0, 50) + (question.content.length > 50 ? '...' : '')"></td> -->
 
                 <!-- Thay thế dòng hiện tại bằng -->
-                <!-- <td class="px-6 py-4">
-                  <input type="text" 
-                        x-model="question.edited_content || question.short_content || question.content" 
-                        @change.debounce.500ms="quickEditField(question, 'content', question.edited_content || question.short_content || question.content)"
-                        @click.stop
-                        class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-2">
-                </td> -->
-                
-
+             
 
                 <!-- <td class="px-6 py-4">
-                  <textarea x-model="question.edited_content || question.short_content || question.content" 
-                            @change.debounce.500ms="quickEditField(question, 'content', question.edited_content || question.short_content || question.content)"
-                            @click.stop
-                            rows="2"
-                            class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2 text-sm resize-y min-h-[60px]"></textarea>
-                </td> -->
-
-                <td class="px-6 py-4">
                   <textarea 
                     x-model="question.edited_content || question.short_content || question.content" 
                     @blur="quickEditField(question, 'content', question.edited_content || question.short_content || question.content)"
+                    @click.stop
+                    rows="2"
+                    class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2 text-sm resize-y min-h-[60px]"
+                  ></textarea>
+                </td> -->
+
+
+                <td class="px-6 py-4">
+                  <textarea 
+                    x-model="question.edited_content || question.short_content || question.content"
+                    @blur="quickEditField(question, 'edited_content', $event.target.value)"
                     @click.stop
                     rows="2"
                     class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2 text-sm resize-y min-h-[60px]"
