@@ -54,6 +54,81 @@ document.addEventListener('alpine:init', function() {
         updated_by: null
       },
 
+      // quickEditField: async function(question, field, value) {
+      //   const token = localStorage.getItem('access_token');
+      //   const user = JSON.parse(localStorage.getItem('user'));
+        
+      //   // Xác định trường cần cập nhật
+      //   let updateField = field;
+      //   let updateValue = value;
+        
+      //   // Đặc biệt xử lý cho trường content - lưu vào edited_content
+      //   if (field === 'content') {
+      //     updateField = 'edited_content';
+      //     updateValue = value;
+      //   }
+
+      //   const payload = {
+      //     [updateField]: updateValue,
+      //     updated_at: new Date().toISOString(),
+      //     updated_by: user?.id || null
+      //   };
+
+      //   try {
+      //     // Tạo bản sao của giá trị cũ để rollback nếu cần
+      //     const oldValue = field === 'content' 
+      //       ? question.edited_content || question.short_content || question.content
+      //       : question[field];
+
+      //     // Cập nhật giá trị ngay lập tức trên giao diện
+      //     if (field === 'content') {
+      //       question.edited_content = value;
+      //     } else {
+      //       question[field] = value;
+      //     }
+
+      //     const response = await fetch(`http://192.168.0.200:8000/api/questions/${question.id}/`, {
+      //       method: 'PATCH',
+      //       headers: { 
+      //         'Authorization': `Bearer ${token}`,
+      //         'Content-Type': 'application/json'
+      //       },
+      //       body: JSON.stringify(payload)
+      //     });
+
+      //     if (!response.ok) {
+      //       // Rollback giá trị nếu có lỗi
+      //       if (field === 'content') {
+      //         question.edited_content = oldValue;
+      //       } else {
+      //         question[field] = oldValue;
+      //       }
+      //       throw new Error('Cập nhật thất bại');
+      //     }
+          
+      //     // Cập nhật lại dữ liệu từ server
+      //     const updatedQuestion = await response.json();
+          
+      //     // Giữ lại trạng thái hiện tại của các trường không liên quan
+      //     const currentShowAnswerSection = question.showAnswerSection;
+      //     const currentNewAnswer = question.newAnswer;
+          
+      //     // Cập nhật toàn bộ dữ liệu từ server
+      //     Object.assign(question, updatedQuestion);
+          
+      //     // Khôi phục trạng thái các trường không liên quan
+      //     question.showAnswerSection = currentShowAnswerSection;
+      //     question.newAnswer = currentNewAnswer;
+          
+      //     this.showNotificationMessage('Cập nhật thành công', 'success');
+      //   } catch (error) {
+      //     console.error('Error:', error);
+      //     this.showNotificationMessage(error.message, 'error');
+      //   }
+      // },
+      
+
+
       quickEditField: async function(question, field, value) {
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
@@ -66,6 +141,10 @@ document.addEventListener('alpine:init', function() {
         if (field === 'content') {
           updateField = 'edited_content';
           updateValue = value;
+          // Cập nhật ngay lập tức trên giao diện
+          question.edited_content = value;
+        } else {
+          question[field] = value;
         }
 
         const payload = {
@@ -75,18 +154,6 @@ document.addEventListener('alpine:init', function() {
         };
 
         try {
-          // Tạo bản sao của giá trị cũ để rollback nếu cần
-          const oldValue = field === 'content' 
-            ? question.edited_content || question.short_content || question.content
-            : question[field];
-
-          // Cập nhật giá trị ngay lập tức trên giao diện
-          if (field === 'content') {
-            question.edited_content = value;
-          } else {
-            question[field] = value;
-          }
-
           const response = await fetch(`http://192.168.0.200:8000/api/questions/${question.id}/`, {
             method: 'PATCH',
             headers: { 
@@ -97,36 +164,30 @@ document.addEventListener('alpine:init', function() {
           });
 
           if (!response.ok) {
-            // Rollback giá trị nếu có lỗi
-            if (field === 'content') {
-              question.edited_content = oldValue;
-            } else {
-              question[field] = oldValue;
-            }
             throw new Error('Cập nhật thất bại');
           }
           
-          // Cập nhật lại dữ liệu từ server
+          // Cập nhật lại toàn bộ dữ liệu từ server
           const updatedQuestion = await response.json();
-          
-          // Giữ lại trạng thái hiện tại của các trường không liên quan
-          const currentShowAnswerSection = question.showAnswerSection;
-          const currentNewAnswer = question.newAnswer;
-          
-          // Cập nhật toàn bộ dữ liệu từ server
           Object.assign(question, updatedQuestion);
           
-          // Khôi phục trạng thái các trường không liên quan
-          question.showAnswerSection = currentShowAnswerSection;
-          question.newAnswer = currentNewAnswer;
+          // Nếu đang mở modal chi tiết, cập nhật luôn selectedQuestion
+          if (this.showDetailModal && this.selectedQuestion.id === question.id) {
+            this.selectedQuestion.edited_content = question.edited_content;
+          }
           
           this.showNotificationMessage('Cập nhật thành công', 'success');
         } catch (error) {
           console.error('Error:', error);
+          // Rollback giá trị nếu có lỗi
+          if (field === 'content') {
+            question.edited_content = oldValue;
+          } else {
+            question[field] = oldValue;
+          }
           this.showNotificationMessage(error.message, 'error');
         }
       },
-      
       
 
 
@@ -187,11 +248,24 @@ document.addEventListener('alpine:init', function() {
           });
       },
 
+
       showQuestionDetail: function(question) {
-        this.selectedQuestion = JSON.parse(JSON.stringify(question));
+        // Tạo bản sao sâu của question và đảm bảo edited_content được giữ nguyên
+        this.selectedQuestion = {
+          ...question,
+          edited_content: question.edited_content || question.short_content || question.content
+        };
         this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
         this.showDetailModal = true;
       },
+
+
+
+      // showQuestionDetail: function(question) {
+      //   this.selectedQuestion = JSON.parse(JSON.stringify(question));
+      //   this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
+      //   this.showDetailModal = true;
+      // },
 
       applyFilters: function() {
         this.currentPage = 1;

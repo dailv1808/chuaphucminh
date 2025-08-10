@@ -498,10 +498,18 @@
           
 
           <!-- Trong modal chi tiết, thêm phần hiển thị edited_content sau phần short_content -->
+          
           <div class="border-t pt-4">
             <label class="block text-sm font-medium text-gray-500 mb-1">Nội dung đã biên tập</label>
-            <div x-text="selectedQuestion.edited_content || 'N/A'" class="text-gray-900 whitespace-pre-line"></div>
+            <div x-text="selectedQuestion.edited_content || selectedQuestion.short_content || selectedQuestion.content || 'N/A'" 
+                class="text-gray-900 whitespace-pre-line"></div>
           </div>
+
+
+          <!-- <div class="border-t pt-4">
+            <label class="block text-sm font-medium text-gray-500 mb-1">Nội dung đã biên tập</label>
+            <div x-text="selectedQuestion.edited_content || 'N/A'" class="text-gray-900 whitespace-pre-line"></div>
+          </div> -->
 
 
           <div class="border-t pt-4">
