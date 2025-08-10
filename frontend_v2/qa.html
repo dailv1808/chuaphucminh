@@ -177,15 +177,14 @@
               <th scope="col" class="px-6 py-3">STT</th>
               <th scope="col" class="px-6 py-3">Ngày tạo</th>
               <th scope="col" class="px-6 py-3">Pháp Danh</th>
-              <th scope="col" class="px-6 py-3">Phân Loại</th>
-              <th scope="col" class="px-6 py-3">Câu hỏi</th>
+              <th scope="col" class="px-6 py-3 w-40">Phân Loại</th>
+              <th scope="col" class="px-6 py-3 min-w-[300px]">Câu hỏi</th>
               <th scope="col" class="px-6 py-3">Liên Lạc</th>
-              <th scope="col" class="px-6 py-3">Slide</th>
               <th scope="col" class="px-6 py-3">Trạng Thái</th>
               <th scope="col" class="px-6 py-3">Ngày sửa</th>
               <th scope="col" class="px-6 py-3">Người tạo</th>
               <th scope="col" class="px-6 py-3">Người biên tập</th>
-              
+              <th scope="col" class="px-6 py-3">Slide</th>
               <th scope="col" class="px-6 py-3">FAQ</th>
               <th scope="col" class="px-6 py-3 text-right">Thao tác</th>
             </tr>
@@ -206,17 +205,6 @@
                 <td class="px-6 py-4">
                   <div class="font-medium text-gray-900" x-text="question.name"></div>
                 </td>
-                <!-- <td class="px-6 py-4" x-text="question.group || 'N/A'"></td> -->
-                <!-- Thay thế dòng trên bằng -->
-
-                <!-- <td class="px-6 py-4">
-                  <input type="text" 
-                        x-model="question.group" 
-                        @change.debounce.500ms="quickEditField(question, 'group', question.group)"
-                        @click.stop
-                        class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-2">
-                </td> -->
-
 
                 <td class="px-6 py-4">
                   <input type="text" 
@@ -225,23 +213,6 @@
                         @click.stop
                         class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2 text-sm">
                 </td>
-
-                <!-- <td class="px-6 py-4" x-text="question.short_content || question.content.substring(0, 50) + (question.content.length > 50 ? '...' : '')"></td> -->
-                <!-- <td class="px-6 py-4" x-text="question.edited_content || question.short_content || question.content.substring(0, 50) + (question.content.length > 50 ? '...' : '')"></td> -->
-
-                <!-- Thay thế dòng hiện tại bằng -->
-             
-
-                <!-- <td class="px-6 py-4">
-                  <textarea 
-                    x-model="question.edited_content || question.short_content || question.content" 
-                    @blur="quickEditField(question, 'content', question.edited_content || question.short_content || question.content)"
-                    @click.stop
-                    rows="2"
-                    class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2 text-sm resize-y min-h-[60px]"
-                  ></textarea>
-                </td> -->
-
 
                 <td class="px-6 py-4">
                   <textarea 
@@ -253,27 +224,9 @@
                   ></textarea>
                 </td>
 
-
-
                 <td class="px-6 py-4" x-text="question.contact || 'N/A'"></td>
-                <!-- <td class="px-6 py-4 text-center">
-                  <i class="fas" :class="question.slideshow ? 'fa-check text-green-500' : 'fa-times text-gray-400'"></i>
-                </td> -->
-
-                <!-- Thay thế toàn bộ td hiện tại bằng -->
-                <td class="px-6 py-4 text-center">
-                  <input type="checkbox" 
-                        x-model="question.slideshow" 
-                        @change="quickEditField(question, 'slideshow', question.slideshow)"
-                        @click.stop
-                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                </td>
-
-                <!-- <td class="px-6 py-4">
-                  <span class="status-badge" :class="question.status">
-                    <span x-text="getStatusLabel(question.status)"></span>
-                  </span>
-                </td> -->
+    
+                
 
                 <!-- Thay thế dòng hiện tại -->
                 <td class="px-6 py-4">
@@ -289,20 +242,23 @@
 
 
 
-
-
                 <td class="px-6 py-4 whitespace-nowrap" x-text="formatDate(question.updated_at)"></td>
 
-                       
+  
                 <td class="px-6 py-4" x-text="question.created_by?.full_name || question.created_by?.username || 'Khách'"></td>
                 <td class="px-6 py-4" x-text="question.updated_by?.full_name || question.updated_by?.username || 'Khách'"></td>
 
 
-                <!-- <td class="px-6 py-4 text-center">
-                  <i class="fas" :class="question.is_faq ? 'fa-check text-green-500' : 'fa-times text-gray-400'"></i>
-                </td> -->
+                <!-- slideshow Thay thế toàn bộ td hiện tại bằng -->
+                <td class="px-6 py-4 text-center">
+                  <input type="checkbox" 
+                        x-model="question.slideshow" 
+                        @change="quickEditField(question, 'slideshow', question.slideshow)"
+                        @click.stop
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                </td>
 
-                <!-- Thay thế toàn bộ td hiện tại bằng -->
+                <!-- is_faq Thay thế toàn bộ td hiện tại bằng -->
                 <td class="px-6 py-4 text-center">
                   <input type="checkbox" 
                         x-model="question.is_faq" 

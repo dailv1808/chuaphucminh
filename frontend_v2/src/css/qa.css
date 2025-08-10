@@ -183,9 +183,15 @@ tr {
 }
 
 /* Main Content */
-.main-content {
+/* .main-content {
   max-height: 90vh;
   overflow-y: auto;
+} */
+ 
+.main-content {
+  max-height: calc(100vh - 5rem); /* Thay đổi từ 90vh */
+  overflow-y: auto;
+  padding-bottom: 2rem; /* Thêm padding dưới */
 }
 
 /* Table improvements */
