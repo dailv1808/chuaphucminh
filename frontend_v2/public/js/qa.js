@@ -38,6 +38,7 @@ document.addEventListener('alpine:init', function() {
         name: '',
         content: '',
         short_content: '',
+        edited_content: '',
         contact: '',
         answer: '',
         answered_at: null,
@@ -87,18 +88,15 @@ document.addEventListener('alpine:init', function() {
             if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
             return response.json();
           })
-
-
           .then(data => {
             this.questions = data.map(q => ({
               ...q,
               showAnswerSection: false,
               newAnswer: '',
               created_by: q.created_by || {username: 'Khách', full_name: 'Khách'},
-              updated_by: q.updated_by || q.created_by || {username: 'Khách', full_name: 'Khách'}
+              updated_by: q.updated_by || q.created_by || {username: 'Khách', full_name: 'Khách'},
+              edited_content: q.edited_content || null
             }));
-
-            
             this.applyFilters();
           })
           .catch(error => {
@@ -130,6 +128,7 @@ document.addEventListener('alpine:init', function() {
             q.name.toLowerCase().includes(query) || 
             q.content.toLowerCase().includes(query) ||
             (q.short_content && q.short_content.toLowerCase().includes(query)) ||
+            (q.edited_content && q.edited_content.toLowerCase().includes(query)) ||
             (q.answer && q.answer.toLowerCase().includes(query)) ||
             (q.group && q.group.toLowerCase().includes(query)) ||
             (q.tags && q.tags.toLowerCase().includes(query))
@@ -144,24 +143,18 @@ document.addEventListener('alpine:init', function() {
           results = results.filter(q => q.priority === this.priorityFilter);
         }
         
-
-
-
-        // Thêm filter slideshow
         if (this.slideshowFilter === 'yes') {
           results = results.filter(q => q.slideshow);
         } else if (this.slideshowFilter === 'no') {
           results = results.filter(q => !q.slideshow);
         }
         
-        // Thêm filter FAQ
         if (this.faqFilter === 'yes') {
           results = results.filter(q => q.is_faq);
         } else if (this.faqFilter === 'no') {
           results = results.filter(q => !q.is_faq);
         }
         
-        // Sắp xếp theo thời gian cập nhật
         if (this.sortBy === 'newest') {
           results.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
         } else if (this.sortBy === 'oldest') {
@@ -174,23 +167,6 @@ document.addEventListener('alpine:init', function() {
         
         this.filteredQuestions = results;
       },
-
-
-
-
-
-      //   if (this.sortBy === 'newest') {
-      //     results.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      //   } else {
-      //     results.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-      //   }
-        
-      //   this.filteredQuestions = results;
-      // },
-
-
-
-
 
       goToPage: function(page) {
         this.currentPage = page;
@@ -212,6 +188,7 @@ document.addEventListener('alpine:init', function() {
           name: '',
           content: '',
           short_content: '',
+          edited_content: '',
           contact: '',
           answer: '',
           answered_at: null,
@@ -245,6 +222,33 @@ document.addEventListener('alpine:init', function() {
         this.showQuestionModal = false;
       },
 
+      updateQuestionField: function(question, field) {
+        const token = localStorage.getItem('access_token');
+        const payload = {
+          [field]: question[field],
+          updated_at: new Date().toISOString()
+        };
+        
+        fetch(`http://192.168.0.200:8000/api/questions/${question.id}/`, {
+          method: 'PATCH',
+          headers: { 
+            'Authorization': `Bearer ${token}`, 
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Cập nhật thất bại');
+          this.showNotificationMessage('Cập nhật thành công', 'success');
+          question.updated_at = new Date().toISOString();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          this.showNotificationMessage(error.message, 'error');
+          this.fetchQuestions();
+        });
+      },
+
       saveQuestion: function() {
         if (!this.currentQuestion.name.trim() || !this.currentQuestion.content.trim()) {
           this.showNotificationMessage('Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
@@ -261,6 +265,7 @@ document.addEventListener('alpine:init', function() {
         
         const payload = { 
           ...this.currentQuestion,
+          edited_content: this.currentQuestion.edited_content || null,
           updated_by: user?.id || null
         };
         

@@ -19,14 +19,8 @@
   <div x-html="await (await fetch('./partials/sidebar.html')).text()"></div>
 
   <!-- Main Content -->
-  
   <div class="p-4 sm:ml-64 pt-20 main-content">
     <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-
-  <!-- <div class="p-4 sm:ml-64 pt-20">
-    <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-200"> -->
-
-
       <!-- Header Section -->
       <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
         <div>
@@ -49,8 +43,6 @@
           </button>
         </div>
       </div>
-
-
 
       <!-- Filter Section -->
       <div class="flex flex-wrap items-center gap-4 mb-6">
@@ -121,54 +113,6 @@
         </div>
       </div>
 
-
-
-
-      <!-- Filter Section
-      <div class="flex flex-wrap items-center gap-4 mb-6">
-        <div class="filter-item">
-          <span class="filter-label">Sắp xếp:</span>
-          <div class="flex gap-2">
-            <button @click="sortBy = 'newest'; applyFilters()" 
-                    class="filter-btn"
-                    :class="{'filter-btn-active': sortBy === 'newest'}">
-              Mới nhất
-            </button>
-            <button @click="sortBy = 'oldest'; applyFilters()" 
-                    class="filter-btn"
-                    :class="{'filter-btn-active': sortBy === 'oldest'}">
-              Cũ nhất
-            </button>
-          </div>
-        </div>
-        
-        <div class="filter-item">
-          <span class="filter-label">Trạng thái:</span>
-          <select x-model="statusFilter" @change="applyFilters" class="filter-select">
-            <option value="">Tất cả</option>
-            <option value="answered">Đã trả lời</option>
-            <option value="pending">Chưa trả lời</option>
-            <option value="archive">Lưu trữ</option>
-            <option value="reject">Từ chối</option>
-            <option value="review">Cần xem xét</option>
-          </select>
-        </div>
-        
-        <div class="filter-item">
-          <span class="filter-label">Độ ưu tiên:</span>
-          <select x-model="priorityFilter" @change="applyFilters" class="filter-select">
-            <option value="">Tất cả</option>
-            <option value="high">Cao</option>
-            <option value="medium">Trung bình</option>
-            <option value="low">Thấp</option>
-          </select>
-        </div>
-      </div>
- -->
-
-
-
-
       <!-- Questions List Table -->
       <div class="overflow-x-auto">
         <table class="w-full text-sm text-left text-gray-500">
@@ -203,11 +147,29 @@
                 <td class="px-6 py-4" x-text="(currentPage - 1) * perPage + index + 1"></td>
                 <td class="px-6 py-4 whitespace-nowrap" x-text="formatDate(question.created_at)"></td>
                 <td class="px-6 py-4">
-                  <div class="font-medium text-gray-900" x-text="question.name"></div>
+                  <input type="text" 
+                         x-model="question.name" 
+                         @change.debounce.500ms="updateQuestionField(question, 'name')"
+                         class="w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none">
                 </td>
-                <td class="px-6 py-4" x-text="question.group || 'N/A'"></td>
-                <td class="px-6 py-4" x-text="question.short_content || question.content.substring(0, 50) + (question.content.length > 50 ? '...' : '')"></td>
-                <td class="px-6 py-4" x-text="question.contact || 'N/A'"></td>
+                <td class="px-6 py-4">
+                  <input type="text" 
+                         x-model="question.group" 
+                         @change.debounce.500ms="updateQuestionField(question, 'group')"
+                         class="w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none">
+                </td>
+                <td class="px-6 py-4">
+                  <textarea x-model="question.edited_content || question.short_content"
+                            @change.debounce.500ms="updateQuestionField(question, question.edited_content ? 'edited_content' : 'short_content')"
+                            class="w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none resize-none"
+                            rows="1"></textarea>
+                </td>
+                <td class="px-6 py-4">
+                  <input type="text" 
+                         x-model="question.contact" 
+                         @change.debounce.500ms="updateQuestionField(question, 'contact')"
+                         class="w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none">
+                </td>
                 <td class="px-6 py-4 text-center">
                   <i class="fas" :class="question.slideshow ? 'fa-check text-green-500' : 'fa-times text-gray-400'"></i>
                 </td>
@@ -217,20 +179,8 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap" x-text="formatDate(question.updated_at)"></td>
-
-       
-<!-- 
-                <td class="px-6 py-4">
-                  <span x-text="question.created_by?.full_name || question.created_by?.username || question.created_by?.id || 'Chưa xác định'"></span>
-                </td>
-                <td class="px-6 py-4">
-                  <span x-text="question.updated_by?.full_name || question.updated_by?.username || question.updated_by?.id || 'Chưa xác định'"></span>
-                </td> -->
-                
                 <td class="px-6 py-4" x-text="question.created_by?.full_name || question.created_by?.username || 'Khách'"></td>
                 <td class="px-6 py-4" x-text="question.updated_by?.full_name || question.updated_by?.username || 'Khách'"></td>
-
-
                 <td class="px-6 py-4 text-center">
                   <i class="fas" :class="question.is_faq ? 'fa-check text-green-500' : 'fa-times text-gray-400'"></i>
                 </td>
@@ -287,12 +237,8 @@
   </div>
 
   <!-- Question Detail Modal -->
-  
   <div x-show="showDetailModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
     <div @click.outside="showDetailModal = false" class="modal-container">
-
-  <!-- <div x-show="showDetailModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-    <div @click.outside="showDetailModal = false" class="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"> -->
       <div class="p-6">
         <div class="flex justify-between items-center mb-6 sticky top-0 bg-white py-4 border-b">
           <h3 class="text-xl font-semibold text-gray-800">Chi tiết câu hỏi</h3>
@@ -330,17 +276,9 @@
 
               <div>
                 <label class="block text-sm font-medium text-gray-500 mb-1">Người tạo</label>
-
-
                 <div x-text="selectedQuestion.created_by?.full_name || selectedQuestion.created_by?.username || 'Khách'" 
                       class="text-gray-900">
                 </div>
-                <!-- <div x-text="selectedQuestion.created_by?.full_name || selectedQuestion.created_by?.username || selectedQuestion.created_by?.id || 'Chưa xác định'" 
-                      class="text-gray-900"></div>
-                </div> -->
-                
-
-
               </div>
             </div>
             
@@ -376,17 +314,9 @@
 
               <div>
                 <label class="block text-sm font-medium text-gray-500 mb-1">Người biên tập</label>
-
                 <div x-text="selectedQuestion.updated_by?.full_name || selectedQuestion.updated_by?.username || 'Khách'" 
                       class="text-gray-900">
                 </div>
-
-
-
-
-                <!-- <div x-text="selectedQuestion.updated_by?.full_name || selectedQuestion.updated_by?.username || selectedQuestion.updated_by?.id || 'Chưa xác định'" 
-                  class="text-gray-900"></div> -->
-                
               </div>
             </div>
           </div>
@@ -411,6 +341,11 @@
           <div class="border-t pt-4">
             <label class="block text-sm font-medium text-gray-500 mb-1">Nội dung rút gọn</label>
             <div x-text="selectedQuestion.short_content || 'N/A'" class="text-gray-900 whitespace-pre-line"></div>
+          </div>
+
+          <div class="border-t pt-4">
+            <label class="block text-sm font-medium text-gray-500 mb-1">Nội dung đã biên tập</label>
+            <div x-text="selectedQuestion.edited_content || 'N/A'" class="text-gray-900 whitespace-pre-line"></div>
           </div>
           
           <div class="border-t pt-4">
@@ -497,6 +432,11 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nội dung rút gọn</label>
             <input type="text" x-model="currentQuestion.short_content" class="w-full input-field" maxlength="300">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nội dung đã biên tập</label>
+            <textarea x-model="currentQuestion.edited_content" rows="4" class="w-full input-field"></textarea>
           </div>
           
           <div>
