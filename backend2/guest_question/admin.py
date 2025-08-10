@@ -3,9 +3,9 @@ from .models import GuestQuestion
 
 @admin.register(GuestQuestion)
 class GuestQuestionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'email', 'short_content', 'status', 'priority', 'tags', 'group', 'answered_at', 'created_at')
+    list_display = ('id', 'name', 'email', 'short_content', 'edited_content', 'status', 'priority', 'tags', 'group', 'answered_at', 'created_at')
     list_filter = ('status', 'priority', 'group', 'tags',)
-    search_fields = ('name', 'email', 'content', 'short_content',)
+    search_fields = ('name', 'email', 'content', 'short_content', 'edited_content')
     # autocomplete_fields = ['tags', 'group']
     readonly_fields = ['created_at', 'answered_at']
 
