@@ -206,7 +206,8 @@
                   <div class="font-medium text-gray-900" x-text="question.name"></div>
                 </td>
                 <td class="px-6 py-4" x-text="question.group || 'N/A'"></td>
-                <td class="px-6 py-4" x-text="question.short_content || question.content.substring(0, 50) + (question.content.length > 50 ? '...' : '')"></td>
+                <!-- <td class="px-6 py-4" x-text="question.short_content || question.content.substring(0, 50) + (question.content.length > 50 ? '...' : '')"></td> -->
+                <td class="px-6 py-4" x-text="question.edited_content || question.short_content || question.content.substring(0, 50) + (question.content.length > 50 ? '...' : '')"></td>
                 <td class="px-6 py-4" x-text="question.contact || 'N/A'"></td>
                 <td class="px-6 py-4 text-center">
                   <i class="fas" :class="question.slideshow ? 'fa-check text-green-500' : 'fa-times text-gray-400'"></i>
@@ -413,6 +414,14 @@
             <div x-text="selectedQuestion.short_content || 'N/A'" class="text-gray-900 whitespace-pre-line"></div>
           </div>
           
+
+          <!-- Trong modal chi tiết, thêm phần hiển thị edited_content sau phần short_content -->
+          <div class="border-t pt-4">
+            <label class="block text-sm font-medium text-gray-500 mb-1">Nội dung đã biên tập</label>
+            <div x-text="selectedQuestion.edited_content || 'N/A'" class="text-gray-900 whitespace-pre-line"></div>
+          </div>
+
+
           <div class="border-t pt-4">
             <label class="block text-sm font-medium text-gray-500 mb-1">Câu hỏi</label>
             <div x-text="selectedQuestion.content" class="text-gray-900 whitespace-pre-line"></div>
@@ -497,6 +506,12 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nội dung rút gọn</label>
             <input type="text" x-model="currentQuestion.short_content" class="w-full input-field" maxlength="300">
+          </div>
+
+          <!-- Thêm vào phần form chỉnh sửa, sau phần short_content -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nội dung đã biên tập</label>
+            <textarea x-model="currentQuestion.edited_content" rows="4" class="w-full input-field"></textarea>
           </div>
           
           <div>

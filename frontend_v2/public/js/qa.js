@@ -207,10 +207,14 @@ document.addEventListener('alpine:init', function() {
       openAddQuestionModal: function() {
         this.isEditing = false;
         const user = JSON.parse(localStorage.getItem('user'));
+
+
+        
         this.currentQuestion = {
           id: null,
           name: '',
           content: '',
+          edited_content: '',
           short_content: '',
           contact: '',
           answer: '',
@@ -278,6 +282,11 @@ document.addEventListener('alpine:init', function() {
         
         return payload;
       },
+
+
+
+
+
 
       createQuestion: function(payload) {
         const token = localStorage.getItem('access_token');
