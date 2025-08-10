@@ -54,15 +54,22 @@ document.addEventListener('alpine:init', function() {
         updated_by: null
       },
 
-
-      
       quickEditField: async function(question, field, value) {
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
         
-        // Đặc biệt xử lý cho trường content
+        // Xác định trường cần cập nhật
+        let updateField = field;
+        let updateValue = value;
+        
+        // Đặc biệt xử lý cho trường content - lưu vào edited_content
+        if (field === 'content') {
+          updateField = 'edited_content';
+          updateValue = value;
+        }
+
         const payload = {
-          [field === 'content' ? 'edited_content' : field]: value,
+          [updateField]: updateValue,
           updated_at: new Date().toISOString(),
           updated_by: user?.id || null
         };
@@ -119,7 +126,8 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage(error.message, 'error');
         }
       },
-
+      
+      
 
 
 
