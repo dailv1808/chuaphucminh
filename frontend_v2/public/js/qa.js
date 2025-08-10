@@ -54,87 +54,31 @@ document.addEventListener('alpine:init', function() {
         updated_by: null
       },
 
-      // quickEditField: async function(question, field, value) {
-      //   const token = localStorage.getItem('access_token');
-      //   const user = JSON.parse(localStorage.getItem('user'));
-        
-      //   // Xác định trường cần cập nhật
-      //   let updateField = field;
-      //   let updateValue = value;
-        
-      //   // Đặc biệt xử lý cho trường content - lưu vào edited_content
-      //   if (field === 'content') {
-      //     updateField = 'edited_content';
-      //     updateValue = value;
-      //     // Cập nhật ngay lập tức trên giao diện
-      //     question.edited_content = value;
-      //   } else {
-      //     question[field] = value;
-      //   }
-
-      //   const payload = {
-      //     [updateField]: updateValue,
-      //     updated_at: new Date().toISOString(),
-      //     updated_by: user?.id || null
-      //   };
-
-      //   try {
-      //     const response = await fetch(`http://192.168.0.200:8000/api/questions/${question.id}/`, {
-      //       method: 'PATCH',
-      //       headers: { 
-      //         'Authorization': `Bearer ${token}`,
-      //         'Content-Type': 'application/json'
-      //       },
-      //       body: JSON.stringify(payload)
-      //     });
-
-      //     if (!response.ok) {
-      //       throw new Error('Cập nhật thất bại');
-      //     }
-          
-      //     // Cập nhật lại toàn bộ dữ liệu từ server
-      //     const updatedQuestion = await response.json();
-      //     Object.assign(question, updatedQuestion);
-          
-      //     // Nếu đang mở modal chi tiết, cập nhật luôn selectedQuestion
-      //     if (this.showDetailModal && this.selectedQuestion.id === question.id) {
-      //       this.selectedQuestion.edited_content = question.edited_content;
-      //     }
-          
-      //     this.showNotificationMessage('Cập nhật thành công', 'success');
-      //   } catch (error) {
-      //     console.error('Error:', error);
-      //     // Rollback giá trị nếu có lỗi
-      //     if (field === 'content') {
-      //       question.edited_content = oldValue;
-      //     } else {
-      //       question[field] = oldValue;
-      //     }
-      //     this.showNotificationMessage(error.message, 'error');
-      //   }
-      // },
-      
-
-
       quickEditField: async function(question, field, value) {
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
         
-        // Lưu giá trị cũ để rollback nếu cần
-        const oldEditedContent = question.edited_content;
-        const oldContent = question.content;
+        // Xác định trường cần cập nhật
+        let updateField = field;
+        let updateValue = value;
+        
+        // Đặc biệt xử lý cho trường content - lưu vào edited_content
+        if (field === 'content') {
+          updateField = 'edited_content';
+          updateValue = value;
+          // Cập nhật ngay lập tức trên giao diện
+          question.edited_content = value;
+        } else {
+          question[field] = value;
+        }
+
+        const payload = {
+          [updateField]: updateValue,
+          updated_at: new Date().toISOString(),
+          updated_by: user?.id || null
+        };
 
         try {
-          // Tạo payload chính xác
-          const payload = {
-            edited_content: value, // Luôn cập nhật edited_content
-            updated_at: new Date().toISOString(),
-            updated_by: user?.id || null
-          };
-
-          // Cập nhật tạm thời trên giao diện
-          question.edited_content = value;
-
           const response = await fetch(`http://192.168.0.200:8000/api/questions/${question.id}/`, {
             method: 'PATCH',
             headers: { 
@@ -147,33 +91,89 @@ document.addEventListener('alpine:init', function() {
           if (!response.ok) {
             throw new Error('Cập nhật thất bại');
           }
-
-          // Cập nhật lại từ server
+          
+          // Cập nhật lại toàn bộ dữ liệu từ server
           const updatedQuestion = await response.json();
-          
-          // Giữ lại các trạng thái UI
-          const uiState = {
-            showAnswerSection: question.showAnswerSection,
-            newAnswer: question.newAnswer
-          };
-          
           Object.assign(question, updatedQuestion);
-          Object.assign(question, uiState);
-
-          // Đồng bộ với modal chi tiết nếu đang mở
-          if (this.showDetailModal && this.selectedQuestion?.id === question.id) {
-            this.selectedQuestion.edited_content = value;
+          
+          // Nếu đang mở modal chi tiết, cập nhật luôn selectedQuestion
+          if (this.showDetailModal && this.selectedQuestion.id === question.id) {
+            this.selectedQuestion.edited_content = question.edited_content;
           }
-
+          
           this.showNotificationMessage('Cập nhật thành công', 'success');
         } catch (error) {
           console.error('Error:', error);
-          // Rollback giá trị
-          question.edited_content = oldEditedContent;
-          question.content = oldContent;
+          // Rollback giá trị nếu có lỗi
+          if (field === 'content') {
+            question.edited_content = oldValue;
+          } else {
+            question[field] = oldValue;
+          }
           this.showNotificationMessage(error.message, 'error');
         }
       },
+      
+
+
+      // quickEditField: async function(question, field, value) {
+      //   const token = localStorage.getItem('access_token');
+      //   const user = JSON.parse(localStorage.getItem('user'));
+        
+      //   // Lưu giá trị cũ để rollback nếu cần
+      //   const oldEditedContent = question.edited_content;
+      //   const oldContent = question.content;
+
+      //   try {
+      //     // Tạo payload chính xác
+      //     const payload = {
+      //       edited_content: value, // Luôn cập nhật edited_content
+      //       updated_at: new Date().toISOString(),
+      //       updated_by: user?.id || null
+      //     };
+
+      //     // Cập nhật tạm thời trên giao diện
+      //     question.edited_content = value;
+
+      //     const response = await fetch(`http://192.168.0.200:8000/api/questions/${question.id}/`, {
+      //       method: 'PATCH',
+      //       headers: { 
+      //         'Authorization': `Bearer ${token}`,
+      //         'Content-Type': 'application/json'
+      //       },
+      //       body: JSON.stringify(payload)
+      //     });
+
+      //     if (!response.ok) {
+      //       throw new Error('Cập nhật thất bại');
+      //     }
+
+      //     // Cập nhật lại từ server
+      //     const updatedQuestion = await response.json();
+          
+      //     // Giữ lại các trạng thái UI
+      //     const uiState = {
+      //       showAnswerSection: question.showAnswerSection,
+      //       newAnswer: question.newAnswer
+      //     };
+          
+      //     Object.assign(question, updatedQuestion);
+      //     Object.assign(question, uiState);
+
+      //     // Đồng bộ với modal chi tiết nếu đang mở
+      //     if (this.showDetailModal && this.selectedQuestion?.id === question.id) {
+      //       this.selectedQuestion.edited_content = value;
+      //     }
+
+      //     this.showNotificationMessage('Cập nhật thành công', 'success');
+      //   } catch (error) {
+      //     console.error('Error:', error);
+      //     // Rollback giá trị
+      //     question.edited_content = oldEditedContent;
+      //     question.content = oldContent;
+      //     this.showNotificationMessage(error.message, 'error');
+      //   }
+      // },
 
 
 
