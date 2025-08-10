@@ -54,11 +54,13 @@ document.addEventListener('alpine:init', function() {
         updated_by: null
       },
 
+
+      
       quickEditField: async function(question, field, value) {
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
         
-        // Tạo payload với edited_content nếu là trường content
+        // Đặc biệt xử lý cho trường content
         const payload = {
           [field === 'content' ? 'edited_content' : field]: value,
           updated_at: new Date().toISOString(),
@@ -66,6 +68,11 @@ document.addEventListener('alpine:init', function() {
         };
 
         try {
+          // Tạo bản sao của giá trị cũ để rollback nếu cần
+          const oldValue = field === 'content' 
+            ? question.edited_content || question.short_content || question.content
+            : question[field];
+
           // Cập nhật giá trị ngay lập tức trên giao diện
           if (field === 'content') {
             question.edited_content = value;
@@ -82,20 +89,41 @@ document.addEventListener('alpine:init', function() {
             body: JSON.stringify(payload)
           });
 
-          if (!response.ok) throw new Error('Cập nhật thất bại');
+          if (!response.ok) {
+            // Rollback giá trị nếu có lỗi
+            if (field === 'content') {
+              question.edited_content = oldValue;
+            } else {
+              question[field] = oldValue;
+            }
+            throw new Error('Cập nhật thất bại');
+          }
           
-          // Cập nhật lại toàn bộ dữ liệu từ server
-          const updatedData = await response.json();
-          Object.assign(question, updatedData);
+          // Cập nhật lại dữ liệu từ server
+          const updatedQuestion = await response.json();
+          
+          // Giữ lại trạng thái hiện tại của các trường không liên quan
+          const currentShowAnswerSection = question.showAnswerSection;
+          const currentNewAnswer = question.newAnswer;
+          
+          // Cập nhật toàn bộ dữ liệu từ server
+          Object.assign(question, updatedQuestion);
+          
+          // Khôi phục trạng thái các trường không liên quan
+          question.showAnswerSection = currentShowAnswerSection;
+          question.newAnswer = currentNewAnswer;
           
           this.showNotificationMessage('Cập nhật thành công', 'success');
         } catch (error) {
           console.error('Error:', error);
           this.showNotificationMessage(error.message, 'error');
-          // Nếu có lỗi, làm mới lại dữ liệu từ server
-          this.fetchQuestions();
         }
       },
+
+
+
+
+     
 
       init: function() {
         if (!localStorage.getItem('access_token')) {

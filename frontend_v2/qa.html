@@ -180,12 +180,12 @@
               <th scope="col" class="px-6 py-3">Phân Loại</th>
               <th scope="col" class="px-6 py-3">Câu hỏi</th>
               <th scope="col" class="px-6 py-3">Liên Lạc</th>
-              
+              <th scope="col" class="px-6 py-3">Slide</th>
               <th scope="col" class="px-6 py-3">Trạng Thái</th>
               <th scope="col" class="px-6 py-3">Ngày sửa</th>
               <th scope="col" class="px-6 py-3">Người tạo</th>
               <th scope="col" class="px-6 py-3">Người biên tập</th>
-              <th scope="col" class="px-6 py-3">Slide</th>
+              
               <th scope="col" class="px-6 py-3">FAQ</th>
               <th scope="col" class="px-6 py-3 text-right">Thao tác</th>
             </tr>
@@ -240,15 +240,23 @@
                 
 
 
-                <td class="px-6 py-4">
+                <!-- <td class="px-6 py-4">
                   <textarea x-model="question.edited_content || question.short_content || question.content" 
                             @change.debounce.500ms="quickEditField(question, 'content', question.edited_content || question.short_content || question.content)"
                             @click.stop
                             rows="2"
                             class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2 text-sm resize-y min-h-[60px]"></textarea>
+                </td> -->
+
+                <td class="px-6 py-4">
+                  <textarea 
+                    x-model="question.edited_content || question.short_content || question.content" 
+                    @blur="quickEditField(question, 'content', question.edited_content || question.short_content || question.content)"
+                    @click.stop
+                    rows="2"
+                    class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2 text-sm resize-y min-h-[60px]"
+                  ></textarea>
                 </td>
-
-
 
 
 
