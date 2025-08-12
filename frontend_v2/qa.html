@@ -23,10 +23,6 @@
   <div class="p-4 sm:ml-64 pt-20 main-content">
     <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-200">
 
-  <!-- <div class="p-4 sm:ml-64 pt-20">
-    <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-200"> -->
-
-
       <!-- Header Section -->
       <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
         <div>
@@ -49,8 +45,6 @@
           </button>
         </div>
       </div>
-
-
 
       <!-- Filter Section -->
       <div class="flex flex-wrap items-center gap-4 mb-6">
@@ -121,54 +115,6 @@
         </div>
       </div>
 
-
-
-
-      <!-- Filter Section
-      <div class="flex flex-wrap items-center gap-4 mb-6">
-        <div class="filter-item">
-          <span class="filter-label">Sắp xếp:</span>
-          <div class="flex gap-2">
-            <button @click="sortBy = 'newest'; applyFilters()" 
-                    class="filter-btn"
-                    :class="{'filter-btn-active': sortBy === 'newest'}">
-              Mới nhất
-            </button>
-            <button @click="sortBy = 'oldest'; applyFilters()" 
-                    class="filter-btn"
-                    :class="{'filter-btn-active': sortBy === 'oldest'}">
-              Cũ nhất
-            </button>
-          </div>
-        </div>
-        
-        <div class="filter-item">
-          <span class="filter-label">Trạng thái:</span>
-          <select x-model="statusFilter" @change="applyFilters" class="filter-select">
-            <option value="">Tất cả</option>
-            <option value="answered">Đã trả lời</option>
-            <option value="pending">Chưa trả lời</option>
-            <option value="archive">Lưu trữ</option>
-            <option value="reject">Từ chối</option>
-            <option value="review">Cần xem xét</option>
-          </select>
-        </div>
-        
-        <div class="filter-item">
-          <span class="filter-label">Độ ưu tiên:</span>
-          <select x-model="priorityFilter" @change="applyFilters" class="filter-select">
-            <option value="">Tất cả</option>
-            <option value="high">Cao</option>
-            <option value="medium">Trung bình</option>
-            <option value="low">Thấp</option>
-          </select>
-        </div>
-      </div>
- -->
-
-
-
-
       <!-- Questions List Table -->
       <div class="overflow-x-auto">
         <table class="w-full text-sm text-left text-gray-500">
@@ -177,8 +123,7 @@
               <th scope="col" class="px-6 py-3">STT</th>
               <th scope="col" class="px-6 py-3">Ngày tạo</th>
               <th scope="col" class="px-6 py-3">Pháp Danh</th>
-              <th scope="col" class="px-6 py-3 w-40">Phân Loại</th>
-              <th scope="col" class="px-6 py-3 min-w-[300px]">Câu hỏi</th>
+              <th scope="col" class="px-6 py-3 min-w-[400px]">Câu hỏi</th>
               <th scope="col" class="px-6 py-3">Liên Lạc</th>
               <th scope="col" class="px-6 py-3">Trạng Thái</th>
               <th scope="col" class="px-6 py-3">Ngày sửa</th>
@@ -207,40 +152,17 @@
                 </td>
 
                 <td class="px-6 py-4">
-                  <input type="text" 
-                        x-model="question.group" 
-                        @change.debounce.500ms="quickEditField(question, 'group', question.group)"
-                        @click.stop
-                        class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2 text-sm">
-                </td>
-
-                <td class="px-6 py-4">
                   <textarea 
                     x-model="question.edited_content || question.short_content || question.content"
                     @blur="quickEditField(question, 'edited_content', $event.target.value)"
                     @click.stop
-                    rows="2"
-                    class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2 text-sm resize-y min-h-[60px]"
+                    rows="3"
+                    class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2 text-sm resize-y min-h-[80px]"
                   ></textarea>
                 </td>
 
                 <td class="px-6 py-4" x-text="question.contact || 'N/A'"></td>
     
-                
-
-                <!-- Thay thế dòng hiện tại -->
-                <!-- <td class="px-6 py-4">
-                  <select x-model="question.status" 
-                          @change="quickEditField(question, 'status', question.status)"
-                          @click.stop
-                          class="bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-2 w-full text-sm">
-                    <template x-for="status in statusOptions" :key="status.value">
-                      <option :value="status.value" x-text="status.label"></option>
-                    </template>
-                  </select>
-                </td> -->
-
-
                 <td class="px-6 py-4">
                   <select x-model="question.status" 
                           @change="quickEditField(question, 'status', question.status)"
@@ -254,16 +176,11 @@
                   </select>
                 </td>
 
-
-
                 <td class="px-6 py-4 whitespace-nowrap" x-text="formatDate(question.updated_at)"></td>
-
   
                 <td class="px-6 py-4" x-text="question.created_by?.full_name || question.created_by?.username || 'Khách'"></td>
                 <td class="px-6 py-4" x-text="question.updated_by?.full_name || question.updated_by?.username || 'Khách'"></td>
 
-
-                <!-- slideshow Thay thế toàn bộ td hiện tại bằng -->
                 <td class="px-6 py-4 text-center">
                   <input type="checkbox" 
                         x-model="question.slideshow" 
@@ -272,7 +189,6 @@
                         class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                 </td>
 
-                <!-- is_faq Thay thế toàn bộ td hiện tại bằng -->
                 <td class="px-6 py-4 text-center">
                   <input type="checkbox" 
                         x-model="question.is_faq" 
@@ -280,7 +196,6 @@
                         @click.stop
                         class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                 </td>
-
 
                 <td class="px-6 py-4 text-right">
                   <div class="flex justify-end gap-2">
@@ -338,9 +253,6 @@
   
   <div x-show="showDetailModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
     <div @click.outside="showDetailModal = false" class="modal-container">
-
-  <!-- <div x-show="showDetailModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-    <div @click.outside="showDetailModal = false" class="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"> -->
       <div class="p-6">
         <div class="flex justify-between items-center mb-6 sticky top-0 bg-white py-4 border-b">
           <h3 class="text-xl font-semibold text-gray-800">Chi tiết câu hỏi</h3>
@@ -378,17 +290,9 @@
 
               <div>
                 <label class="block text-sm font-medium text-gray-500 mb-1">Người tạo</label>
-
-
                 <div x-text="selectedQuestion.created_by?.full_name || selectedQuestion.created_by?.username || 'Khách'" 
                       class="text-gray-900">
                 </div>
-                <!-- <div x-text="selectedQuestion.created_by?.full_name || selectedQuestion.created_by?.username || selectedQuestion.created_by?.id || 'Chưa xác định'" 
-                      class="text-gray-900"></div>
-                </div> -->
-                
-
-
               </div>
             </div>
             
@@ -414,27 +318,23 @@
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-500 mb-1">Hiển thị slideshow</label>
-                  <div x-text="selectedQuestion.slideshow ? 'Có' : 'Không'" class="text-gray-900"></div>
+                  <div class="text-gray-900 font-medium" :class="{'text-green-600': selectedQuestion.slideshow, 'text-red-600': !selectedQuestion.slideshow}">
+                    <span x-text="selectedQuestion.slideshow ? 'Có' : 'Không'"></span>
+                  </div>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-500 mb-1">Câu hỏi thường gặp</label>
-                  <div x-text="selectedQuestion.is_faq ? 'Có' : 'Không'" class="text-gray-900"></div>
+                  <div class="text-gray-900 font-medium" :class="{'text-green-600': selectedQuestion.is_faq, 'text-red-600': !selectedQuestion.is_faq}">
+                    <span x-text="selectedQuestion.is_faq ? 'Có' : 'Không'"></span>
+                  </div>
                 </div>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-500 mb-1">Người biên tập</label>
-
                 <div x-text="selectedQuestion.updated_by?.full_name || selectedQuestion.updated_by?.username || 'Khách'" 
                       class="text-gray-900">
                 </div>
-
-
-
-
-                <!-- <div x-text="selectedQuestion.updated_by?.full_name || selectedQuestion.updated_by?.username || selectedQuestion.updated_by?.id || 'Chưa xác định'" 
-                  class="text-gray-900"></div> -->
-                
               </div>
             </div>
           </div>
@@ -461,21 +361,11 @@
             <div x-text="selectedQuestion.short_content || 'N/A'" class="text-gray-900 whitespace-pre-line"></div>
           </div>
           
-
-          <!-- Trong modal chi tiết, thêm phần hiển thị edited_content sau phần short_content -->
-          
           <div class="border-t pt-4">
             <label class="block text-sm font-medium text-gray-500 mb-1">Nội dung đã biên tập</label>
-            <div x-text="selectedQuestion.edited_content || selectedQuestion.short_content || selectedQuestion.content || 'N/A'" 
+            <div x-text="selectedQuestion.edited_content || selectedQuestion.content || 'N/A'" 
                 class="text-gray-900 whitespace-pre-line"></div>
           </div>
-
-
-          <!-- <div class="border-t pt-4">
-            <label class="block text-sm font-medium text-gray-500 mb-1">Nội dung đã biên tập</label>
-            <div x-text="selectedQuestion.edited_content || 'N/A'" class="text-gray-900 whitespace-pre-line"></div>
-          </div> -->
-
 
           <div class="border-t pt-4">
             <label class="block text-sm font-medium text-gray-500 mb-1">Câu hỏi</label>
@@ -563,10 +453,9 @@
             <input type="text" x-model="currentQuestion.short_content" class="w-full input-field" maxlength="300">
           </div>
 
-          <!-- Thêm vào phần form chỉnh sửa, sau phần short_content -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nội dung đã biên tập</label>
-            <textarea x-model="currentQuestion.edited_content" rows="4" class="w-full input-field"></textarea>
+            <textarea x-model="currentQuestion.edited_content || currentQuestion.content" rows="4" class="w-full input-field"></textarea>
           </div>
           
           <div>
