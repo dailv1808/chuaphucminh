@@ -169,6 +169,10 @@ document.addEventListener('alpine:init', function() {
           });
       },
 
+
+
+
+
       showQuestionDetail: function(question) {
         this.selectedQuestion = {
           ...question,
@@ -181,66 +185,56 @@ document.addEventListener('alpine:init', function() {
 
 
 
-      // Hàm tự động lưu khi người dùng nhập liệu (debounce 500ms)
-      handleEditContent: _.debounce(async function() {
-        if (!this.selectedQuestion) return;
+      // // Hàm tự động lưu khi người dùng nhập liệu (debounce 500ms)
+      // handleEditContent: _.debounce(async function() {
+      //   if (!this.selectedQuestion) return;
         
-        const token = localStorage.getItem('access_token');
-        const user = JSON.parse(localStorage.getItem('user'));
+      //   const token = localStorage.getItem('access_token');
+      //   const user = JSON.parse(localStorage.getItem('user'));
         
-        try {
-          const response = await fetch(`http://192.168.0.200:8000/api/questions/${this.selectedQuestion.id}/`, {
-            method: 'PATCH',
-            headers: { 
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              edited_content: this.selectedQuestion.edited_content,
-              updated_at: new Date().toISOString(),
-              updated_by: user?.id || null
-            })
-          });
+      //   try {
+      //     const response = await fetch(`http://192.168.0.200:8000/api/questions/${this.selectedQuestion.id}/`, {
+      //       method: 'PATCH',
+      //       headers: { 
+      //         'Authorization': `Bearer ${token}`,
+      //         'Content-Type': 'application/json'
+      //       },
+      //       body: JSON.stringify({
+      //         edited_content: this.selectedQuestion.edited_content,
+      //         updated_at: new Date().toISOString(),
+      //         updated_by: user?.id || null
+      //       })
+      //     });
 
-          if (!response.ok) throw new Error('Cập nhật thất bại');
+      //     if (!response.ok) throw new Error('Cập nhật thất bại');
           
-          // Cập nhật ngay trên giao diện không cần reload
-          const index = this.questions.findIndex(q => q.id === this.selectedQuestion.id);
-          if (index !== -1) {
-            this.questions[index].edited_content = this.selectedQuestion.edited_content;
-            this.questions[index].updated_at = new Date().toISOString();
-          }
+      //     // Cập nhật ngay trên giao diện không cần reload
+      //     const index = this.questions.findIndex(q => q.id === this.selectedQuestion.id);
+      //     if (index !== -1) {
+      //       this.questions[index].edited_content = this.selectedQuestion.edited_content;
+      //       this.questions[index].updated_at = new Date().toISOString();
+      //     }
           
-          // Hiển thị thông báo nhỏ không làm phiền người dùng
-          this.showTemporaryNotification('Đã tự động lưu thay đổi');
-        } catch (error) {
-          console.error('Error:', error);
-          this.showNotificationMessage('Lỗi khi lưu thay đổi: ' + error.message, 'error');
-        }
-      }, 500), // Debounce 500ms
+      //     // Hiển thị thông báo nhỏ không làm phiền người dùng
+      //     this.showTemporaryNotification('Đã tự động lưu thay đổi');
+      //   } catch (error) {
+      //     console.error('Error:', error);
+      //     this.showNotificationMessage('Lỗi khi lưu thay đổi: ' + error.message, 'error');
+      //   }
+      // }, 500), // Debounce 500ms
 
-      // Thông báo nhỏ không làm phiền
-      showTemporaryNotification: function(message) {
-        const tempNoti = document.createElement('div');
-        tempNoti.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg text-sm';
-        tempNoti.textContent = message;
-        document.body.appendChild(tempNoti);
+      // // Thông báo nhỏ không làm phiền
+      // showTemporaryNotification: function(message) {
+      //   const tempNoti = document.createElement('div');
+      //   tempNoti.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg text-sm';
+      //   tempNoti.textContent = message;
+      //   document.body.appendChild(tempNoti);
         
-        setTimeout(() => {
-          tempNoti.classList.add('opacity-0', 'transition-opacity', 'duration-300');
-          setTimeout(() => tempNoti.remove(), 300);
-        }, 2000);
-      },
-
-
-
-
-
-
-
-
-
-
+      //   setTimeout(() => {
+      //     tempNoti.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+      //     setTimeout(() => tempNoti.remove(), 300);
+      //   }, 2000);
+      // },
 
 
 
