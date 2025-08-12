@@ -169,15 +169,74 @@ document.addEventListener('alpine:init', function() {
           });
       },
 
+      // showQuestionDetail: function(question) {
+      //   // Tạo bản sao sâu và đảm bảo ưu tiên edited_content
+      //   this.selectedQuestion = JSON.parse(JSON.stringify({
+      //     ...question,
+      //     edited_content: question.edited_content || question.content // Default to content if empty
+      //   }));
+      //   this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
+      //   this.showDetailModal = true;
+      // },
+
       showQuestionDetail: function(question) {
-        // Tạo bản sao sâu và đảm bảo ưu tiên edited_content
-        this.selectedQuestion = JSON.parse(JSON.stringify({
+        // Tạo bản sao sâu và đảm bảo edited_content được giữ nguyên
+        this.selectedQuestion = {
           ...question,
-          edited_content: question.edited_content || question.content // Default to content if empty
-        }));
+          edited_content: question.edited_content || question.content || ''
+        };
         this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
         this.showDetailModal = true;
       },
+
+
+
+
+      // Thêm hàm xử lý cập nhật nội dung đã biên tập
+      updateEditedContent: async function() {
+        if (!this.selectedQuestion) return;
+        
+        const token = localStorage.getItem('access_token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        try {
+          const response = await fetch(`http://192.168.0.200:8000/api/questions/${this.selectedQuestion.id}/`, {
+            method: 'PATCH',
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              edited_content: this.selectedQuestion.edited_content,
+              updated_at: new Date().toISOString(),
+              updated_by: user?.id || null
+            })
+          });
+
+          if (!response.ok) throw new Error('Cập nhật thất bại');
+          
+          const updatedQuestion = await response.json();
+          // Cập nhật lại danh sách câu hỏi
+          const index = this.questions.findIndex(q => q.id === updatedQuestion.id);
+          if (index !== -1) {
+            this.questions[index].edited_content = updatedQuestion.edited_content;
+            this.questions[index].updated_at = updatedQuestion.updated_at;
+            this.questions[index].updated_by = updatedQuestion.updated_by;
+          }
+          
+          this.showNotificationMessage('Cập nhật nội dung thành công', 'success');
+        } catch (error) {
+          console.error('Error:', error);
+          this.showNotificationMessage(error.message, 'error');
+        }
+      }
+
+
+
+
+
+
+
 
       applyFilters: function() {
         this.currentPage = 1;

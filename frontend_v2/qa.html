@@ -361,11 +361,22 @@
             <div x-text="selectedQuestion.short_content || 'N/A'" class="text-gray-900 whitespace-pre-line"></div>
           </div>
           
+
+
           <div class="border-t pt-4">
+            <label class="block text-sm font-medium text-gray-500 mb-1">Nội dung đã biên tập</label>
+            <textarea 
+              x-model="selectedQuestion.edited_content" 
+              @blur="updateEditedContent()"
+              rows="4" 
+              class="w-full input-field"
+            ></textarea>
+          </div>
+          <!-- <div class="border-t pt-4">
             <label class="block text-sm font-medium text-gray-500 mb-1">Nội dung đã biên tập</label>
             <div x-text="selectedQuestion.edited_content || selectedQuestion.content || 'N/A'" 
                 class="text-gray-900 whitespace-pre-line"></div>
-          </div>
+          </div> -->
 
           <div class="border-t pt-4">
             <label class="block text-sm font-medium text-gray-500 mb-1">Câu hỏi</label>
