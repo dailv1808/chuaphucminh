@@ -229,7 +229,7 @@ document.addEventListener('alpine:init', function() {
           console.error('Error:', error);
           this.showNotificationMessage(error.message, 'error');
         }
-      }
+      },
 
 
 
