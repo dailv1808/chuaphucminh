@@ -21,7 +21,7 @@ document.addEventListener('alpine:init', () => {
       try {
         this.isLoading = true;
 
-        const response = await fetch('http://192.168.0.200/api/registration/', {
+        const response = await fetch('http://192.168.0.200:8000/api/registration/', {
           headers: {
             //'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -112,7 +112,7 @@ document.addEventListener('alpine:init', () => {
 
         const token = localStorage.getItem('access_token'); //Them moi
 
-        const response = await fetch(`http://192.168.0.200/api/registration/${id}/`, {
+        const response = await fetch(`http://192.168.0.200:8000/api/registration/${id}/`, {
           method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -142,7 +142,7 @@ document.addEventListener('alpine:init', () => {
       
       try {
         const token = localStorage.getItem('access_token'); // Them moi
-        const response = await fetch(`http://192.168.0.200/api/registration/${this.selectedRejectId}/`, {
+        const response = await fetch(`http://192.168.0.200:8000/api/registration/${this.selectedRejectId}/`, {
           method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${token}`, //themmoi

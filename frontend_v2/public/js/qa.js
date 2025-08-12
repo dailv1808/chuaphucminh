@@ -79,7 +79,7 @@ document.addEventListener('alpine:init', function() {
         };
 
         try {
-          const response = await fetch(`http://192.168.0.200/api/questions/${question.id}/`, {
+          const response = await fetch(`http://192.168.0.200:8000/api/questions/${question.id}/`, {
             method: 'PATCH',
             headers: { 
               'Authorization': `Bearer ${token}`,
@@ -135,7 +135,7 @@ document.addEventListener('alpine:init', function() {
       //     // Cập nhật tạm thời trên giao diện
       //     question.edited_content = value;
 
-      //     const response = await fetch(`http://192.168.0.200/api/questions/${question.id}/`, {
+      //     const response = await fetch(`http://192.168.0.200:8000/api/questions/${question.id}/`, {
       //       method: 'PATCH',
       //       headers: { 
       //         'Authorization': `Bearer ${token}`,
@@ -204,7 +204,7 @@ document.addEventListener('alpine:init', function() {
       fetchQuestions: function() {
         this.isLoading = true;
         const token = localStorage.getItem('access_token');
-        fetch('http://192.168.0.200/api/questions/', {
+        fetch('http://192.168.0.200:8000/api/questions/', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -409,7 +409,7 @@ document.addEventListener('alpine:init', function() {
 
       createQuestion: function(payload) {
         const token = localStorage.getItem('access_token');
-        fetch('http://192.168.0.200/api/questions/', {
+        fetch('http://192.168.0.200:8000/api/questions/', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -434,7 +434,7 @@ document.addEventListener('alpine:init', function() {
 
       updateQuestion: function(payload) {
         const token = localStorage.getItem('access_token');
-        fetch(`http://192.168.0.200/api/questions/${this.currentQuestion.id}/`, {
+        fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
           method: 'PUT',
           headers: { 
             'Authorization': `Bearer ${token}`, 
@@ -464,7 +464,7 @@ document.addEventListener('alpine:init', function() {
 
       deleteQuestion: function() {
         const token = localStorage.getItem('access_token');
-        fetch(`http://192.168.0.200/api/questions/${this.currentQuestion.id}/`, {
+        fetch(`http://192.168.0.200:8000/api/questions/${this.currentQuestion.id}/`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         })
