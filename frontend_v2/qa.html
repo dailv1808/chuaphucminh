@@ -6,9 +6,12 @@
   <title>Quản lý Hỏi đáp - CPM Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <link rel="stylesheet" href="./src/css/qa.css">
   <script src="/js/auth.js"></script>
+
 </head>
 
 <body class="bg-gray-50 font-sans text-gray-800" @keydown="handleKeyNavigation($event)">
@@ -361,22 +364,20 @@
             <div x-text="selectedQuestion.short_content || 'N/A'" class="text-gray-900 whitespace-pre-line"></div>
           </div>
           
-          <!-- <div class="border-t pt-4">
-            <label class="block text-sm font-medium text-gray-500 mb-1">Nội dung đã biên tập</label>
-            <div x-text="selectedQuestion.edited_content || selectedQuestion.content || 'N/A'" 
-                class="text-gray-900 whitespace-pre-line"></div>
-          </div> -->
+       
 
-          <!-- <div class="border-t pt-4">
+<!-- 
+          <div class="border-t pt-4">
             <label class="block text-sm font-medium text-gray-500 mb-1">Nội dung đã biên tập</label>
             <textarea 
               x-model="selectedQuestion.edited_content" 
-              @blur="updateEditedContent()"
-              rows="4" 
-              class="w-full input-field"
+              @input="handleEditContent"
+              rows="6" 
+              class="w-full input-field resize-y min-h-[150px]"
+              placeholder="Nhập nội dung đã biên tập..."
             ></textarea>
+            <p class="text-xs text-gray-500 mt-1">Thay đổi sẽ được tự động lưu</p>
           </div> -->
-
 
           <div class="border-t pt-4">
             <label class="block text-sm font-medium text-gray-500 mb-1">Nội dung đã biên tập</label>
