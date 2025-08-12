@@ -169,22 +169,12 @@ document.addEventListener('alpine:init', function() {
           });
       },
 
-      // showQuestionDetail: function(question) {
-      //   // Tạo bản sao sâu và đảm bảo ưu tiên edited_content
-      //   this.selectedQuestion = JSON.parse(JSON.stringify({
-      //     ...question,
-      //     edited_content: question.edited_content || question.content // Default to content if empty
-      //   }));
-      //   this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
-      //   this.showDetailModal = true;
-      // },
-
       showQuestionDetail: function(question) {
-        // Tạo bản sao sâu và đảm bảo edited_content được giữ nguyên
-        this.selectedQuestion = {
+        // Tạo bản sao sâu và đảm bảo ưu tiên edited_content
+        this.selectedQuestion = JSON.parse(JSON.stringify({
           ...question,
-          edited_content: question.edited_content || question.content || ''
-        };
+          edited_content: question.edited_content || question.content // Default to content if empty
+        }));
         this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
         this.showDetailModal = true;
       },
