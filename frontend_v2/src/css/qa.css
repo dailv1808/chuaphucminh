@@ -182,10 +182,16 @@ tr {
   opacity: 0;
 }
 
-.main-content {
-  max-height: calc(100vh - 5rem);
+/* Main Content */
+/* .main-content {
+  max-height: 90vh;
   overflow-y: auto;
-  padding-bottom: 2rem;
+} */
+
+.main-content {
+  max-height: calc(100vh - 5rem); /* Thay đổi từ 90vh */
+  overflow-y: auto;
+  padding-bottom: 2rem; /* Thêm padding dưới */
 }
 
 /* Table improvements */
@@ -207,6 +213,7 @@ th {
 .empty-state {
   @apply py-12;
 }
+
 
 /* Enhanced buttons */
 .btn-primary {
@@ -256,7 +263,8 @@ tr:hover {
   }
 }
 
-/* Table inputs */
+/* Thêm vào cuối file */
+/* Thay thế phần CSS cũ */
 table input[type="text"], 
 table input[type="text"]:focus,
 table select,
@@ -272,7 +280,7 @@ table input[type="checkbox"] {
   display: block;
 }
 
-/* Select box with arrow */
+/* Đảm bảo select box có mũi tên */
 table select {
   @apply pr-7;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
@@ -309,10 +317,59 @@ table select {
   @apply bg-blue-50 text-blue-800 border-blue-200;
 }
 
-/* Highlight for slideshow and FAQ status */
-.text-green-600 {
-  color: #16a34a;
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Thay thế hoặc bổ sung các quy tắc CSS sau */
+
+/* Xóa hoặc ghi đè quy tắc .main-content cũ */
+.main-content {
+  min-height: calc(100vh - 5rem);
+  overflow-y: visible; /* Thay đổi từ auto sang visible */
+  padding-bottom: 2rem;
 }
-.text-red-600 {
-  color: #dc2626;
+
+/* Đảm bảo table không bị tràn */
+table {
+  @apply w-full text-sm;
+  table-layout: auto;
+}
+
+/* Đảm bảo modal không ảnh hưởng đến layout chính */
+.modal-container {
+  @apply bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[85vh] overflow-y-auto;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Điều chỉnh footer pagination */
+.flex.justify-between.items-center.mt-6 {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 1rem 0;
+  border-top: 1px solid #e5e7eb;
+  z-index: 10;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .p-4.sm\:ml-64.pt-20 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .p-6.bg-white.rounded-xl {
+    padding: 1rem;
+  }
 }

@@ -113,6 +113,71 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage(error.message, 'error');
         }
       },
+      
+
+
+      // quickEditField: async function(question, field, value) {
+      //   const token = localStorage.getItem('access_token');
+      //   const user = JSON.parse(localStorage.getItem('user'));
+        
+      //   // Lưu giá trị cũ để rollback nếu cần
+      //   const oldEditedContent = question.edited_content;
+      //   const oldContent = question.content;
+
+      //   try {
+      //     // Tạo payload chính xác
+      //     const payload = {
+      //       edited_content: value, // Luôn cập nhật edited_content
+      //       updated_at: new Date().toISOString(),
+      //       updated_by: user?.id || null
+      //     };
+
+      //     // Cập nhật tạm thời trên giao diện
+      //     question.edited_content = value;
+
+      //     const response = await fetch(`http://192.168.0.200:8000/api/questions/${question.id}/`, {
+      //       method: 'PATCH',
+      //       headers: { 
+      //         'Authorization': `Bearer ${token}`,
+      //         'Content-Type': 'application/json'
+      //       },
+      //       body: JSON.stringify(payload)
+      //     });
+
+      //     if (!response.ok) {
+      //       throw new Error('Cập nhật thất bại');
+      //     }
+
+      //     // Cập nhật lại từ server
+      //     const updatedQuestion = await response.json();
+          
+      //     // Giữ lại các trạng thái UI
+      //     const uiState = {
+      //       showAnswerSection: question.showAnswerSection,
+      //       newAnswer: question.newAnswer
+      //     };
+          
+      //     Object.assign(question, updatedQuestion);
+      //     Object.assign(question, uiState);
+
+      //     // Đồng bộ với modal chi tiết nếu đang mở
+      //     if (this.showDetailModal && this.selectedQuestion?.id === question.id) {
+      //       this.selectedQuestion.edited_content = value;
+      //     }
+
+      //     this.showNotificationMessage('Cập nhật thành công', 'success');
+      //   } catch (error) {
+      //     console.error('Error:', error);
+      //     // Rollback giá trị
+      //     question.edited_content = oldEditedContent;
+      //     question.content = oldContent;
+      //     this.showNotificationMessage(error.message, 'error');
+      //   }
+      // },
+
+
+
+     
 
       init: function() {
         if (!localStorage.getItem('access_token')) {
@@ -151,7 +216,6 @@ document.addEventListener('alpine:init', function() {
           .then(data => {
             this.questions = data.map(q => ({
               ...q,
-              edited_content: q.edited_content || q.content, // Set edited_content to content if empty
               showAnswerSection: false,
               newAnswer: '',
               created_by: q.created_by || {username: 'Khách', full_name: 'Khách'},
@@ -169,15 +233,37 @@ document.addEventListener('alpine:init', function() {
           });
       },
 
+
+
       showQuestionDetail: function(question) {
         // Tạo bản sao sâu và đảm bảo ưu tiên edited_content
         this.selectedQuestion = JSON.parse(JSON.stringify({
           ...question,
-          edited_content: question.edited_content || question.content // Default to content if empty
+          edited_content: question.edited_content || question.short_content || question.content
         }));
         this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
         this.showDetailModal = true;
       },
+
+
+
+      // showQuestionDetail: function(question) {
+      //   // Tạo bản sao sâu của question và đảm bảo edited_content được giữ nguyên
+      //   this.selectedQuestion = {
+      //     ...question,
+      //     edited_content: question.edited_content || question.short_content || question.content
+      //   };
+      //   this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
+      //   this.showDetailModal = true;
+      // },
+
+
+
+      // showQuestionDetail: function(question) {
+      //   this.selectedQuestion = JSON.parse(JSON.stringify(question));
+      //   this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
+      //   this.showDetailModal = true;
+      // },
 
       applyFilters: function() {
         this.currentPage = 1;
@@ -193,7 +279,6 @@ document.addEventListener('alpine:init', function() {
             q.name.toLowerCase().includes(query) || 
             q.content.toLowerCase().includes(query) ||
             (q.short_content && q.short_content.toLowerCase().includes(query)) ||
-            (q.edited_content && q.edited_content.toLowerCase().includes(query)) ||
             (q.answer && q.answer.toLowerCase().includes(query)) ||
             (q.group && q.group.toLowerCase().includes(query)) ||
             (q.tags && q.tags.toLowerCase().includes(query))
@@ -253,7 +338,7 @@ document.addEventListener('alpine:init', function() {
           id: null,
           name: '',
           content: '',
-          edited_content: '', // Will be set to content when saving
+          edited_content: '',
           short_content: '',
           contact: '',
           answer: '',
@@ -278,10 +363,7 @@ document.addEventListener('alpine:init', function() {
 
       openEditQuestionModal: function(question) {
         this.isEditing = true;
-        this.currentQuestion = JSON.parse(JSON.stringify({
-          ...question,
-          edited_content: question.edited_content || question.content // Default to content if empty
-        }));
+        this.currentQuestion = JSON.parse(JSON.stringify(question));
         this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
         this.showQuestionModal = true;
         this.showDetailModal = false;
@@ -295,11 +377,6 @@ document.addEventListener('alpine:init', function() {
         if (!this.currentQuestion.name.trim() || !this.currentQuestion.content.trim()) {
           this.showNotificationMessage('Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
           return;
-        }
-
-        // Set edited_content to content if empty
-        if (!this.currentQuestion.edited_content) {
-          this.currentQuestion.edited_content = this.currentQuestion.content;
         }
 
         const payload = this.preparePayload();
