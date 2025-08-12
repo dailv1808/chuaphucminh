@@ -22,7 +22,7 @@ document.addEventListener('alpine:init', () => {
     async fetchRegistrations() {
       try {
         this.isLoading = true;
-        const response = await fetch('http://192.168.0.200:8000/api/registration/');
+        const response = await fetch('http://192.168.0.200/api/registration/');
         if (!response.ok) throw new Error('Lỗi kết nối mạng');
         
         const data = await response.json();
@@ -39,7 +39,7 @@ document.addEventListener('alpine:init', () => {
     async fetchAvailableKutis(gender) {
       try {
 	const token = localStorage.getItem('access_token');
-        const response = await fetch('http://192.168.0.200:8000/api/kuti/', {
+        const response = await fetch('http://192.168.0.200/api/kuti/', {
 	  headers: {
 	    'Authorization': `Bearer ${token}`, 
 	    'Content-Type': 'application/json' 
@@ -71,7 +71,7 @@ document.addEventListener('alpine:init', () => {
       }
 
       try {
-        const assignResponse = await fetch('http://192.168.0.200:8000/api/kutiassignment/assign/', {
+        const assignResponse = await fetch('http://192.168.0.200/api/kutiassignment/assign/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ document.addEventListener('alpine:init', () => {
 
         if (!assignResponse.ok) throw new Error('Gán Kuti thất bại');
         const token = localStorage.getItem('access_token');
-        const checkInResponse = await fetch(`http://192.168.0.200:8000/api/registration/${this.currentRegistrationId}/`, {
+        const checkInResponse = await fetch(`http://192.168.0.200/api/registration/${this.currentRegistrationId}/`, {
           method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -135,7 +135,7 @@ document.addEventListener('alpine:init', () => {
         this.isDownloading = true;
         this.showNotificationMessage('Đang tạo tờ khai tạm trú...', 'info');
         const token = localStorage.getItem('access_token'); 
-        const response = await fetch('http://192.168.0.200:8000/api/tamtru/', {
+        const response = await fetch('http://192.168.0.200/api/tamtru/', {
           method: 'POST',
           headers: {
      	    'Authorization': `Bearer ${token}`,

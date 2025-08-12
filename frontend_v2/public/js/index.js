@@ -27,7 +27,7 @@ document.addEventListener('alpine:init', () => {
         this.isLoading = true;
         
         // Fetch all registrations
-        const registrationsRes = await fetch('http://192.168.0.200:8000/api/registration/');
+        const registrationsRes = await fetch('http://192.168.0.200/api/registration/');
         if (registrationsRes.ok) {
           const registrationsData = await registrationsRes.json();
           
@@ -61,7 +61,7 @@ document.addEventListener('alpine:init', () => {
         
         // Fetch Kuti status
         const token = localStorage.getItem('access_token');
-        const kutiRes = await fetch('http://192.168.0.200:8000/api/kuti/', {
+        const kutiRes = await fetch('http://192.168.0.200/api/kuti/', {
           headers: {
                   'Authorization': `Bearer ${token}`,
                   'Content-Type': 'application/json'
@@ -74,7 +74,7 @@ document.addEventListener('alpine:init', () => {
         }
         
         // Fetch latest questions
-        const questionsRes = await fetch('http://192.168.0.200:8000/api/questions/');
+        const questionsRes = await fetch('http://192.168.0.200/api/questions/');
         if (questionsRes.ok) {
           const questionsData = await questionsRes.json();
           this.stats.newQuestions = questionsData.filter(q => q.status !== 'answered').length;

@@ -27,7 +27,7 @@ document.addEventListener('alpine:init', () => {
 
 	const token = localStorage.getItem('access_token');
 	
-       const response = await fetch('http://192.168.0.200:8000/api/kuti/', {
+       const response = await fetch('http://192.168.0.200/api/kuti/', {
 	  headers: {
 	    'Authorization': `Bearer ${token}`,
 	    'Content-Type': 'application/json'
@@ -80,8 +80,8 @@ document.addEventListener('alpine:init', () => {
 
       try {
         const url = this.isEditing 
-          ? `http://192.168.0.200:8000/api/kuti/${this.currentKuti.id}/`
-          : 'http://192.168.0.200:8000/api/kuti/';
+          ? `http://192.168.0.200/api/kuti/${this.currentKuti.id}/`
+          : 'http://192.168.0.200/api/kuti/';
         
         const method = this.isEditing ? 'PUT' : 'POST';
 
@@ -123,7 +123,7 @@ document.addEventListener('alpine:init', () => {
     async deleteKuti() {
       try {
         const token = localStorage.getItem('access_token');
-        const response = await fetch(`http://192.168.0.200:8000/api/kuti/${this.currentKuti.id}/`, {
+        const response = await fetch(`http://192.168.0.200/api/kuti/${this.currentKuti.id}/`, {
 	  headers: {
 	    'Authorization': `Bearer ${token}`,
           },
