@@ -426,11 +426,22 @@ document.addEventListener('alpine:init', function() {
         this.showQuestionModal = true;
       },
 
+      // openEditQuestionModal: function(question) {
+      //   this.isEditing = true;
+      //   this.currentQuestion = JSON.parse(JSON.stringify({
+      //     ...question,
+      //     edited_content: question.edited_content || question.content // Default to content if empty
+      //   }));
+      //   this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
+      //   this.showQuestionModal = true;
+      //   this.showDetailModal = false;
+      // },
+
       openEditQuestionModal: function(question) {
         this.isEditing = true;
         this.currentQuestion = JSON.parse(JSON.stringify({
           ...question,
-          edited_content: question.edited_content || question.content // Default to content if empty
+          edited_content: question.edited_content || question.content // Đảm bảo luôn có giá trị
         }));
         this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
         this.showQuestionModal = true;
@@ -456,12 +467,42 @@ document.addEventListener('alpine:init', function() {
         this.isEditing ? this.updateQuestion(payload) : this.createQuestion(payload);
       },
 
+      // preparePayload: function() {
+      //   const token = localStorage.getItem('access_token');
+      //   const user = JSON.parse(localStorage.getItem('user'));
+        
+      //   const payload = { 
+      //     ...this.currentQuestion,
+      //     updated_by: user?.id || null
+      //   };
+        
+      //   if (!this.isEditing) {
+      //     payload.created_by = user?.id || null;
+      //   }
+        
+      //   this.updateAnsweredAt();
+        
+      //   // Clean up payload before sending
+      //   delete payload.showAnswerSection;
+      //   delete payload.newAnswer;
+      //   delete payload.created_by_obj;
+      //   delete payload.updated_by_obj;
+        
+      //   return payload;
+      // },
+
       preparePayload: function() {
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
         
+        // Đảm bảo edited_content luôn có giá trị
+        if (!this.currentQuestion.edited_content) {
+          this.currentQuestion.edited_content = this.currentQuestion.content;
+        }
+        
         const payload = { 
           ...this.currentQuestion,
+          edited_content: this.currentQuestion.edited_content, // Đảm bảo gửi edited_content
           updated_by: user?.id || null
         };
         
