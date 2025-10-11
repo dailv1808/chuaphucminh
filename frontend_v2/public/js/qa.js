@@ -467,29 +467,7 @@ document.addEventListener('alpine:init', function() {
         this.isEditing ? this.updateQuestion(payload) : this.createQuestion(payload);
       },
 
-      // preparePayload: function() {
-      //   const token = localStorage.getItem('access_token');
-      //   const user = JSON.parse(localStorage.getItem('user'));
-        
-      //   const payload = { 
-      //     ...this.currentQuestion,
-      //     updated_by: user?.id || null
-      //   };
-        
-      //   if (!this.isEditing) {
-      //     payload.created_by = user?.id || null;
-      //   }
-        
-      //   this.updateAnsweredAt();
-        
-      //   // Clean up payload before sending
-      //   delete payload.showAnswerSection;
-      //   delete payload.newAnswer;
-      //   delete payload.created_by_obj;
-      //   delete payload.updated_by_obj;
-        
-      //   return payload;
-      // },
+
 
       preparePayload: function() {
         const token = localStorage.getItem('access_token');

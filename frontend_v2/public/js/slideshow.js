@@ -18,6 +18,105 @@ document.addEventListener('alpine:init', function() {
         this.fetchQuestions();
         this.loadYouTubeAPI();
       },
+
+
+      downloadPowerPoint: async function() {
+        if (this.slideshowQuestions.length === 0) {
+          this.showNotificationMessage('Không có câu hỏi nào để tạo PowerPoint', 'error');
+          return;
+        }
+
+        try {
+          this.showNotificationMessage('Đang tạo PowerPoint...', 'success');
+          
+          // Tạo nội dung PowerPoint
+          const pptx = new PptxGenJS();
+          
+          // Slide chào mừng
+          const welcomeSlide = pptx.addSlide();
+          welcomeSlide.background = { fill: '6a0000' };
+          welcomeSlide.addText('HỎI PHÁP\nTRÌNH PHÁP', {
+            x: 0.5,
+            y: 2,
+            w: '90%',
+            h: 3,
+            fontSize: 48,
+            bold: true,
+            color: 'FFFFFF',
+            align: 'left',
+            fontFace: 'Arial',
+            valign: 'middle',
+            isTextBox: true,
+            lineSpacing: 1.2
+          });
+
+          // Các slide câu hỏi
+          this.slideshowQuestions.forEach((question, index) => {
+            const slide = pptx.addSlide();
+            
+            // Tiêu đề slide
+            slide.addText(`Câu hỏi ${index + 1}`, {
+              x: 0.5,
+              y: 0.5,
+              w: '90%',
+              fontSize: 28,
+              bold: true,
+              color: '2E86AB'
+            });
+
+            // Thông tin người hỏi
+            slide.addText(`Hành giả: ${question.name || 'Ẩn danh'}`, {
+              x: 0.5,
+              y: 1.2,
+              w: '90%',
+              fontSize: 20,
+              bold: true,
+              color: '000000'
+            });
+
+            // Nội dung câu hỏi
+            const content = question.edited_content || question.content;
+            slide.addText(content, {
+              x: 0.5,
+              y: 2.0,
+              w: '90%',
+              h: 4,
+              fontSize: 16,
+              color: '333333',
+              align: 'left',
+              valign: 'top',
+              isTextBox: true,
+              lineSpacing: 1.3
+            });
+
+            // Footer với số trang
+            slide.addText(`Trang ${index + 2}`, {
+              x: 0.5,
+              y: 6.5,
+              w: '90%',
+              fontSize: 12,
+              color: '666666',
+              align: 'center'
+            });
+          });
+
+          // Tải file xuống
+          const fileName = `Hoi-Dap-Phap-Am-${new Date().toISOString().split('T')[0]}.pptx`;
+          await pptx.writeFile({ fileName: fileName });
+          
+          this.showNotificationMessage('Đã tạo PowerPoint thành công!', 'success');
+          
+        } catch (error) {
+          console.error('Error creating PowerPoint:', error);
+          this.showNotificationMessage('Lỗi khi tạo PowerPoint: ' + error.message, 'error');
+        }
+      },
+
+
+
+
+
+
       
       loadYouTubeAPI: function() {
         if (window.YT) {
