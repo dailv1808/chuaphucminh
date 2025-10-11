@@ -169,60 +169,7 @@ document.addEventListener('alpine:init', function() {
           });
       },
 
-      // Alternative: Export to CSV (không cần thư viện)
-      exportToCSV: function() {
-        try {
-          const headers = [
-            'STT', 'Ngày tạo', 'Pháp Danh', 'Câu hỏi', 'Nội dung đã biên tập',
-            'Nội dung rút gọn', 'Liên Lạc', 'Trạng Thái', 'Độ ưu tiên',
-            'Ngày sửa', 'Người tạo', 'Người biên tập', 'Slide', 'FAQ',
-            'Phân Loại', 'Tags', 'Câu trả lời', 'Ngày trả lời'
-          ];
-
-          const csvData = this.filteredQuestions.map((question, index) => [
-            index + 1,
-            this.formatDate(question.created_at),
-            `"${question.name}"`,
-            `"${question.content}"`,
-            `"${question.edited_content || question.content}"`,
-            `"${question.short_content || ''}"`,
-            `"${question.contact || 'N/A'}"`,
-            this.getStatusLabel(question.status),
-            this.priorityOptions.find(p => p.value === question.priority)?.label || question.priority,
-            this.formatDate(question.updated_at),
-            question.created_by?.full_name || question.created_by?.username || 'Khách',
-            question.updated_by?.full_name || question.updated_by?.username || 'Khách',
-            question.slideshow ? 'Có' : 'Không',
-            question.is_faq ? 'Có' : 'Không',
-            question.group || 'N/A',
-            question.tags || 'N/A',
-            `"${question.answer || ''}"`,
-            question.answered_at ? this.formatDate(question.answered_at) : 'N/A'
-          ]);
-
-          const csvContent = [headers, ...csvData]
-            .map(row => row.join(','))
-            .join('\n');
-
-          const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-          const link = document.createElement('a');
-          const date = new Date().toISOString().split('T')[0];
-          const url = URL.createObjectURL(blob);
-          
-          link.setAttribute('href', url);
-          link.setAttribute('download', `questions_${date}.csv`);
-          link.style.visibility = 'hidden';
-          
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          
-          this.showNotificationMessage('Xuất file CSV thành công', 'success');
-        } catch (error) {
-          console.error('Error exporting to CSV:', error);
-          this.showNotificationMessage('Lỗi khi xuất file CSV: ' + error.message, 'error');
-        }
-      },
+      
 
 
 
