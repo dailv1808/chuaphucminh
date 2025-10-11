@@ -29,6 +29,10 @@ document.addEventListener('alpine:init', function() {
         return content ? content.replace(/\n/g, '\n') : '';
       },
 
+      
+
+
+
       downloadPowerPoint: async function() {
         if (this.slideshowQuestions.length === 0) {
           this.showNotificationMessage('Không có câu hỏi nào để tạo PowerPoint', 'error');
@@ -41,14 +45,32 @@ document.addEventListener('alpine:init', function() {
           // Tạo nội dung PowerPoint
           const pptx = new PptxGenJS();
           
-          // Slide chào mừng
+          // Slide chào mừng - CẬP NHẬT: Tách thành 2 dòng riêng biệt
           const welcomeSlide = pptx.addSlide();
           welcomeSlide.background = { fill: '6a0000' };
-          welcomeSlide.addText('HỎI PHÁP\nTRÌNH PHÁP', {
+          
+          // Dòng 1: HỎI PHÁP
+          welcomeSlide.addText('HỎI PHÁP', {
             x: 0.5,
             y: 2,
             w: '90%',
-            h: 3,
+            h: 1.5,
+            fontSize: 48,
+            bold: true,
+            color: 'FFFFFF',
+            align: 'left',
+            fontFace: 'Arial',
+            valign: 'middle',
+            isTextBox: true,
+            lineSpacing: 1.2
+          });
+          
+          // Dòng 2: TRÌNH PHÁP
+          welcomeSlide.addText('TRÌNH PHÁP', {
+            x: 0.5,
+            y: 3.5,
+            w: '90%',
+            h: 1.5,
             fontSize: 48,
             bold: true,
             color: 'FFFFFF',
@@ -59,16 +81,16 @@ document.addEventListener('alpine:init', function() {
             lineSpacing: 1.2
           });
 
-          // Các slide câu hỏi
+          // Các slide câu hỏi - CẬP NHẬT: Điều chỉnh vị trí và chiều cao
           this.slideshowQuestions.forEach((question, index) => {
             const slide = pptx.addSlide();
             
             // Tiêu đề slide
             slide.addText(`Câu hỏi ${index + 1}`, {
               x: 0.5,
-              y: 0.5,
+              y: 0.3,
               w: '90%',
-              fontSize: 28,
+              fontSize: 24,
               bold: true,
               color: '2E86AB'
             });
@@ -76,35 +98,37 @@ document.addEventListener('alpine:init', function() {
             // Thông tin người hỏi
             slide.addText(`Hành giả: ${question.name || 'Ẩn danh'}`, {
               x: 0.5,
-              y: 1.2,
+              y: 1.0,
               w: '90%',
-              fontSize: 20,
+              fontSize: 18,
               bold: true,
               color: '000000'
             });
 
-            // Nội dung câu hỏi - sử dụng hàm getQuestionContent để lấy nội dung
+            // Nội dung câu hỏi - CẬP NHẬT: Tăng chiều cao và điều chỉnh vị trí
             const content = this.getQuestionContent(question);
-            // Trong phần tạo slide câu hỏi, thay đổi options cho text content:
             slide.addText(content, {
               x: 0.5,
-              y: 2.0,
+              y: 1.8,
               w: '90%',
-              h: 4,
+              h: 4.5, // Tăng chiều cao
               fontSize: 16,
               color: '333333',
               align: 'left',
               valign: 'top',
               isTextBox: true,
-              lineSpacing: 1.3,
-              preserveFormatting: true, // Giữ nguyên định dạng xuống dòng
-              breakLine: true // Cho phép xuống dòng
+              lineSpacing: 1.5, // Tăng khoảng cách dòng
+              lineSpacingMultiple: 1.5,
+              autoFit: true,
+              shrinkText: true,
+              preserveFormatting: true,
+              breakLine: true
             });
 
             // Footer với số trang
             slide.addText(`Trang ${index + 2}`, {
               x: 0.5,
-              y: 6.5,
+              y: 6.8,
               w: '90%',
               fontSize: 12,
               color: '666666',
@@ -123,6 +147,11 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage('Lỗi khi tạo PowerPoint: ' + error.message, 'error');
         }
       },
+
+
+
+
+
 
       loadYouTubeAPI: function() {
         if (window.YT) {
