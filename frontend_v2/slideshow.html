@@ -92,10 +92,14 @@
             this.dragOverQuestion = null;
           }
         }">
+
+
+
           <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
               <tr>
                 <th scope="col" class="px-6 py-3">STT</th>
+                <th scope="col" class="px-6 py-3">Pháp danh</th>
                 <th scope="col" class="px-6 py-3">Nội dung</th>
                 <th scope="col" class="px-6 py-3 text-right">Thao tác</th>
               </tr>
@@ -113,8 +117,8 @@
                     @drop="handleDrop()"
                     @dragend="handleDragEnd()">
                   <td class="px-6 py-4" x-text="index + 1"></td>
+                  <td class="px-6 py-4 font-medium text-gray-900" x-text="question.name || 'Ẩn danh'"></td>
                   <td class="px-6 py-4" style="white-space: pre-line; word-wrap: break-word; word-break: break-word;" x-text="question.edited_content"></td>
-              
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-2">
                       <button @click.stop="markAsAnswered(question)" class="action-btn bg-green-50 text-green-600 hover:bg-green-100">
@@ -129,6 +133,16 @@
               </template>
             </tbody>
           </table>
+          
+
+
+
+
+
+
+
+
+
           
           <div x-show="slideshowQuestions.length === 0" class="empty-state">
             <i class="far fa-folder-open text-4xl text-gray-400"></i>
