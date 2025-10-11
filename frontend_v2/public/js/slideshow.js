@@ -21,9 +21,12 @@ document.addEventListener('alpine:init', function() {
 
       // Hàm lấy nội dung câu hỏi - ưu tiên edited_content, nếu trống thì lấy content
       getQuestionContent: function(question) {
-        return question.edited_content && question.edited_content.trim() !== '' 
+        const content = question.edited_content && question.edited_content.trim() !== '' 
           ? question.edited_content 
           : question.content;
+        
+        // Giữ nguyên các phần xuống dòng
+        return content ? content.replace(/\n/g, '\n') : '';
       },
 
       downloadPowerPoint: async function() {
@@ -82,6 +85,7 @@ document.addEventListener('alpine:init', function() {
 
             // Nội dung câu hỏi - sử dụng hàm getQuestionContent để lấy nội dung
             const content = this.getQuestionContent(question);
+            // Trong phần tạo slide câu hỏi, thay đổi options cho text content:
             slide.addText(content, {
               x: 0.5,
               y: 2.0,
@@ -93,7 +97,8 @@ document.addEventListener('alpine:init', function() {
               valign: 'top',
               isTextBox: true,
               lineSpacing: 1.3,
-              preserveFormatting: true // Giữ nguyên định dạng xuống dòng
+              preserveFormatting: true, // Giữ nguyên định dạng xuống dòng
+              breakLine: true // Cho phép xuống dòng
             });
 
             // Footer với số trang
