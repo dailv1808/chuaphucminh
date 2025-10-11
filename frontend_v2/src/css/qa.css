@@ -373,3 +373,20 @@ table {
     padding: 1rem;
   }
 }
+
+
+/* Thêm vào phần button styles */
+.btn-success {
+  @apply px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center shadow-sm hover:shadow-md;
+}
+
+/* Có thể thêm responsive nếu cần */
+@media (max-width: 768px) {
+  .flex.items-center.gap-3 {
+    @apply flex-wrap;
+  }
+  
+  .btn-success, .btn-primary {
+    @apply flex-1 min-w-[120px] justify-center;
+  }
+}
