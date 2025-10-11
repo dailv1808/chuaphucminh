@@ -169,10 +169,11 @@
           <template x-if="currentSlideIndex > 0 && currentQuestion">
             <div class="question-content">
               <div class="question-author">
-                Câu hỏi của hành giả: <span x-text="currentQuestion.name"></span>
+                Câu hỏi của hành giả: <span x-text="currentQuestion.name || 'Ẩn danh'"></span>
               </div>
-              
-              <div class="whitespace-pre-line" x-text="currentQuestion.edited_content"></div>
+              <div class="whitespace-pre-line overflow-auto break-words max-h-full" 
+                  style="white-space: pre-line; word-wrap: break-word; word-break: break-word;"
+                  x-text="currentQuestion.edited_content"></div>
             </div>
           </template>
         </div>
