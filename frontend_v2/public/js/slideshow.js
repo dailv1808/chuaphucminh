@@ -162,7 +162,12 @@ document.addEventListener('alpine:init', function() {
             // Lọc câu hỏi trình chiếu và sắp xếp theo thứ tự cũ nhất trước
             this.slideshowQuestions = data
               .filter(q => q.status === "pending" && q.slideshow === true)
-              .sort((a, b) => new Date(a.created_at) - new Date(b.created_at)); // Sắp xếp cũ nhất trước
+              .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+              .map(q => ({
+                ...q,
+                // THÊM DÒNG NÀY: Đảm bảo edited_content không bị null/undefined
+                edited_content: q.edited_content || q.content
+              }));
           })
           .catch(error => {
             console.error('Error:', error);
@@ -173,6 +178,10 @@ document.addEventListener('alpine:init', function() {
           });
       },
       
+
+
+
+
       markAsAnswered: async function(question) {
         if (!this.youtubeLink) {
           this.showNotificationMessage('Vui lòng nhập link YouTube livestream', 'error');
