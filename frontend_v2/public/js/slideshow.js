@@ -13,15 +13,30 @@ document.addEventListener('alpine:init', function() {
       youtubeLink: '',
       youtubePlayer: null,
       isYouTubeAPILoaded: false,
+      answeredQuestions: new Set(), // Theo dõi câu hỏi đã được đánh dấu
       
       init: function() {
         this.fetchQuestions();
         this.loadYouTubeAPI();
+        this.loadCachedYouTubeLink();
       },
 
       // Hàm lấy nội dung câu hỏi - ưu tiên edited_content, nếu trống thì lấy content
    
+      // THÊM METHOD MỚI - Cache YouTube link
+      loadCachedYouTubeLink: function() {
+        const cachedLink = localStorage.getItem('cached_youtube_link');
+        if (cachedLink) {
+          this.youtubeLink = cachedLink;
+        }
+      },
 
+      // THÊM METHOD MỚI - Save YouTube link to cache
+      saveYouTubeLinkToCache: function() {
+        if (this.youtubeLink && this.youtubeLink.trim() !== '') {
+          localStorage.setItem('cached_youtube_link', this.youtubeLink);
+        }
+      },
 
       getQuestionContent: function(question) {
         const content = question.edited_content && question.edited_content.trim() !== '' 
@@ -271,6 +286,8 @@ document.addEventListener('alpine:init', function() {
             question.id, 
             `Tham khảo video tại: ${timestampLink}`
           );
+
+          this.answeredQuestions.add(question.id);
           
           this.showNotificationMessage(
             `Đã đánh dấu câu hỏi là đã trả lời tại ${this.formatTime(currentTime)}`,
@@ -283,6 +300,13 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage('Lỗi khi đánh dấu câu hỏi: ' + error.message, 'error');
         }
       },
+
+      // THÊM METHOD MỚI - Kiểm tra câu hỏi đã được đánh dấu chưa
+      isQuestionAnswered: function(question) {
+        return this.answeredQuestions.has(question.id) || question.status === 'answered';
+      },
+
+
       
       removeFromSlideshow: async function(question) {
         try {
@@ -428,6 +452,9 @@ document.addEventListener('alpine:init', function() {
             this.currentQuestion.id, 
             `Tham khảo video tại: ${timestampLink}`
           );
+          
+          // THÊM DÒNG NÀY - Đánh dấu câu hỏi đã trả lời
+          this.answeredQuestions.add(this.currentQuestion.id);
           
           this.showNotificationMessage(
             `Đã lưu thời điểm ${this.formatTime(currentTime)} vào câu trả lời`, 

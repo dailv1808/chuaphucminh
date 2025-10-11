@@ -44,9 +44,12 @@
 
       <!-- YouTube Link and Start Button -->
       <div class="flex flex-col gap-4 bg-gray-50 p-4 rounded-lg mb-6">
+
+        <!-- Tìm phần YouTube input và thêm @change -->
         <div class="flex-1">
           <label class="block text-sm font-medium text-gray-700 mb-1">Link YouTube Livestream</label>
           <input type="text" x-model="youtubeLink" placeholder="https://www.youtube.com/watch?v=..." 
+                @change="saveYouTubeLinkToCache()"
                 class="w-full input-field">
         </div>
         
@@ -122,9 +125,21 @@
                   <td class="px-6 py-4" style="white-space: pre-line; word-wrap: break-word; word-break: break-word;" x-text="question.edited_content"></td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-2">
+
                       <button @click.stop="markAsAnswered(question)" class="action-btn bg-green-50 text-green-600 hover:bg-green-100">
                         <i class="fas fa-check-circle mr-1"></i> Đánh dấu đã trả lời
                       </button>
+
+                      <button @click.stop="markAsAnswered(question)" 
+                              class="action-btn"
+                              :class="isQuestionAnswered(question) ? 
+                                      'bg-amber-50 text-amber-600 hover:bg-amber-100' : 
+                                      'bg-green-50 text-green-600 hover:bg-green-100'">
+                        <i class="fas fa-check-circle mr-1"></i> 
+                        <span x-text="isQuestionAnswered(question) ? 'Đã đánh dấu trả lời' : 'Đánh dấu đã trả lời'"></span>
+                      </button>
+
+
                       <button @click.stop="removeFromSlideshow(question)" class="action-btn delete-btn">
                         <i class="fas fa-times mr-1"></i> Xóa khỏi trình chiếu
                       </button>
@@ -190,9 +205,21 @@
           <button @click="prevSlide()" class="btn-secondary">
             <i class="fas fa-chevron-left mr-1"></i> Trước (P)
           </button>
-          <button @click="saveCurrentTimestamp()" class="btn-primary">
+
+
+          <!-- <button @click="saveCurrentTimestamp()" class="btn-primary">
             <i class="fas fa-check-circle mr-1"></i> Đánh dấu đã trả lời (R)
+          </button> -->
+
+          <button @click="saveCurrentTimestamp()" 
+                  class="btn-primary"
+                  :class="{ 'bg-amber-600 hover:bg-amber-700': isQuestionAnswered(currentQuestion) }"
+                  x-show="currentSlideIndex > 0">
+            <i class="fas fa-check-circle mr-1"></i> 
+            <span x-text="isQuestionAnswered(currentQuestion) ? 'Đã đánh dấu trả lời (R)' : 'Đánh dấu đã trả lời (R)'"></span>
           </button>
+
+
           <button @click="nextSlide()" class="btn-primary">
             Tiếp (N) <i class="fas fa-chevron-right ml-1"></i>
           </button>

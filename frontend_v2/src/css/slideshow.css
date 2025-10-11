@@ -23,3 +23,24 @@ td[style*="white-space: pre-line"] {
     word-break: break-word !important;
     max-width: 500px; /* Giới hạn chiều rộng tối đa */
 }
+
+/* Thêm vào cuối file slideshow.css */
+.bg-amber-50 {
+  background-color: #fffbeb;
+}
+
+.bg-amber-100 {
+  background-color: #fef3c7;
+}
+
+.text-amber-600 {
+  color: #d97706;
+}
+
+.bg-amber-600 {
+  background-color: #d97706;
+}
+
+.hover\:bg-amber-700:hover {
+  background-color: #b45309;
+}
