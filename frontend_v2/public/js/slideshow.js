@@ -62,7 +62,7 @@ document.addEventListener('alpine:init', function() {
             fontFace: 'Arial',
             valign: 'middle',
             isTextBox: true,
-            lineSpacing: 1.2
+            lineSpacing: 1.0
           });
           
           // Dòng 2: TRÌNH PHÁP
@@ -78,7 +78,7 @@ document.addEventListener('alpine:init', function() {
             fontFace: 'Arial',
             valign: 'middle',
             isTextBox: true,
-            lineSpacing: 1.2
+            lineSpacing: 1.0
           });
 
           // Các slide câu hỏi - CẬP NHẬT: Điều chỉnh vị trí và chiều cao
