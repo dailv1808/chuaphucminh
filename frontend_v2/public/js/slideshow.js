@@ -1,346 +1,555 @@
-function slideshowData() {
+document.addEventListener('alpine:init', function() {
+  Alpine.data('slideshowData', function() {
     return {
-        // State
-        slideshowQuestions: [],
-        currentSlideIndex: 0,
-        isSlideshowActive: false,
-        youtubeLink: '',
-        showNotification: false,
-        notificationMessage: '',
-        notificationType: 'success',
-        isLoading: true,
-        youtubePlayer: null,
+      questions: [],
+      slideshowQuestions: [],
+      isLoading: true,
+      isSlideshowActive: false,
+      currentSlideIndex: 0,
+      showNotification: false,
+      notificationMessage: '',
+      notificationType: 'success',
+      keyboardHandler: null,
+      youtubeLink: '',
+      youtubePlayer: null,
+      isYouTubeAPILoaded: false,
+      
+      init: function() {
+        this.fetchQuestions();
+        this.loadYouTubeAPI();
+      },
 
-        // Initialize
-        async init() {
-            await this.loadSlideshowQuestions();
-            this.setupKeyboardListeners();
-            
-            // Load YouTube API
-            this.loadYouTubeAPI();
-        },
 
-        // Load YouTube API
-        loadYouTubeAPI() {
-            if (!window.YT) {
-                const tag = document.createElement('script');
-                tag.src = "https://www.youtube.com/iframe_api";
-                const firstScriptTag = document.getElementsByTagName('script')[0];
-                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-            }
-
-            window.onYouTubeIframeAPIReady = () => {
-                this.initializeYouTubePlayer();
-            };
-
-            // If YouTube API is already loaded
-            if (window.YT && window.YT.Player) {
-                this.initializeYouTubePlayer();
-            }
-        },
-
-        // Initialize YouTube Player
-        initializeYouTubePlayer() {
-            const playerElement = document.getElementById('youtube-player');
-            if (playerElement && !this.youtubePlayer) {
-                this.youtubePlayer = new YT.Player('youtube-player', {
-                    height: '0',
-                    width: '0',
-                    videoId: this.extractVideoId(this.youtubeLink),
-                    playerVars: {
-                        'playsinline': 1,
-                        'enablejsapi': 1,
-                        'origin': window.location.origin
-                    },
-                    events: {
-                        'onReady': this.onPlayerReady.bind(this),
-                        'onStateChange': this.onPlayerStateChange.bind(this)
-                    }
-                });
-            }
-        },
-
-        // Extract video ID from YouTube URL
-        extractVideoId(url) {
-            if (!url) return '';
-            
-            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-            const match = url.match(regex);
-            return match ? match[1] : '';
-        },
-
-        onPlayerReady(event) {
-            console.log('YouTube Player ready');
-        },
-
-        onPlayerStateChange(event) {
-            // Handle player state changes if needed
-        },
-
-        // Load slideshow questions from localStorage
-        async loadSlideshowQuestions() {
-            try {
-                this.isLoading = true;
-                
-                // Get slideshow question IDs from localStorage
-                const slideshowIds = JSON.parse(localStorage.getItem('slideshowQuestions') || '[]');
-                
-                if (slideshowIds.length === 0) {
-                    this.slideshowQuestions = [];
-                    this.isLoading = false;
-                    return;
-                }
-
-                // Get all questions from localStorage
-                const allQuestions = JSON.parse(localStorage.getItem('questions') || '[]');
-                
-                // Filter questions that are in slideshow and sort by oldest first (theo thứ tự cũ nhất trước)
-                const slideshowQuestions = allQuestions
-                    .filter(q => slideshowIds.includes(q.id) && !q.answered)
-                    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // Sắp xếp theo thời gian tạo (cũ nhất trước)
-
-                this.slideshowQuestions = slideshowQuestions;
-            } catch (error) {
-                console.error('Error loading slideshow questions:', error);
-                this.showNotification('Có lỗi xảy ra khi tải câu hỏi trình chiếu', 'error');
-            } finally {
-                this.isLoading = false;
-            }
-        },
-
-        // Get question content - ưu tiên lấy giá trị đã biên tập, nếu trống thì lấy giá trị gốc
-        getQuestionContent(question) {
-            return question.editedContent && question.editedContent.trim() !== '' 
-                ? question.editedContent 
-                : question.content;
-        },
-
-        // Start slideshow
-        startSlideshow() {
-            if (this.slideshowQuestions.length === 0) {
-                this.showNotification('Không có câu hỏi nào để trình chiếu', 'error');
-                return;
-            }
-
-            if (!this.youtubeLink) {
-                this.showNotification('Vui lòng nhập link YouTube livestream', 'error');
-                return;
-            }
-
-            this.currentSlideIndex = 0;
-            this.isSlideshowActive = true;
-
-            // Initialize or update YouTube player with new video
-            const videoId = this.extractVideoId(this.youtubeLink);
-            if (videoId) {
-                if (this.youtubePlayer) {
-                    this.youtubePlayer.loadVideoById(videoId);
-                } else {
-                    this.initializeYouTubePlayer();
-                }
-            }
-
-            this.showNotification('Bắt đầu trình chiếu', 'success');
-        },
-
-        // Stop slideshow
-        stopSlideshow() {
-            this.isSlideshowActive = false;
-            this.currentSlideIndex = 0;
-            
-            if (this.youtubePlayer) {
-                this.youtubePlayer.stopVideo();
-            }
-            
-            this.showNotification('Đã dừng trình chiếu', 'success');
-        },
-
-        // Next slide
-        nextSlide() {
-            if (this.currentSlideIndex < this.slideshowQuestions.length) {
-                this.currentSlideIndex++;
-            }
-        },
-
-        // Previous slide
-        prevSlide() {
-            if (this.currentSlideIndex > 0) {
-                this.currentSlideIndex--;
-            }
-        },
-
-        // Get current question
-        get currentQuestion() {
-            if (this.currentSlideIndex === 0) return null;
-            return this.slideshowQuestions[this.currentSlideIndex - 1];
-        },
-
-        // Mark question as answered
-        async markAsAnswered(question) {
-            try {
-                // Update in main questions list
-                const allQuestions = JSON.parse(localStorage.getItem('questions') || '[]');
-                const questionIndex = allQuestions.findIndex(q => q.id === question.id);
-                
-                if (questionIndex !== -1) {
-                    allQuestions[questionIndex].answered = true;
-                    allQuestions[questionIndex].answeredAt = new Date().toISOString();
-                    localStorage.setItem('questions', JSON.stringify(allQuestions));
-                }
-
-                // Remove from slideshow
-                await this.removeFromSlideshow(question);
-                
-                this.showNotification('Đã đánh dấu câu hỏi là đã trả lời', 'success');
-            } catch (error) {
-                console.error('Error marking question as answered:', error);
-                this.showNotification('Có lỗi xảy ra khi đánh dấu câu hỏi', 'error');
-            }
-        },
-
-        // Save current timestamp (for answered questions)
-        saveCurrentTimestamp() {
-            if (this.currentQuestion) {
-                this.markAsAnswered(this.currentQuestion);
-                
-                // Auto move to next slide after marking as answered
-                if (this.currentSlideIndex < this.slideshowQuestions.length) {
-                    this.nextSlide();
-                }
-            }
-        },
-
-        // Remove question from slideshow
-        async removeFromSlideshow(question) {
-            try {
-                // Remove from slideshow IDs in localStorage
-                const slideshowIds = JSON.parse(localStorage.getItem('slideshowQuestions') || '[]');
-                const updatedIds = slideshowIds.filter(id => id !== question.id);
-                localStorage.setItem('slideshowQuestions', JSON.stringify(updatedIds));
-
-                // Remove from current slideshow list
-                this.slideshowQuestions = this.slideshowQuestions.filter(q => q.id !== question.id);
-
-                this.showNotification('Đã xóa câu hỏi khỏi trình chiếu', 'success');
-            } catch (error) {
-                console.error('Error removing question from slideshow:', error);
-                this.showNotification('Có lỗi xảy ra khi xóa câu hỏi', 'error');
-            }
-        },
-
-        // Setup keyboard listeners
-        setupKeyboardListeners() {
-            document.addEventListener('keydown', (event) => {
-                if (!this.isSlideshowActive) return;
-
-                switch (event.key.toLowerCase()) {
-                    case 'n': // Next
-                        event.preventDefault();
-                        this.nextSlide();
-                        break;
-                    case 'p': // Previous
-                        event.preventDefault();
-                        this.prevSlide();
-                        break;
-                    case 'r': // Mark as answered
-                        event.preventDefault();
-                        this.saveCurrentTimestamp();
-                        break;
-                    case 's': // Stop
-                        event.preventDefault();
-                        this.stopSlideshow();
-                        break;
-                }
-            });
-        },
-
-        // Show notification
-        showNotification(message, type = 'success') {
-            this.notificationMessage = message;
-            this.notificationType = type;
-            this.showNotification = true;
-
-            setTimeout(() => {
-                this.showNotification = false;
-            }, 3000);
-        },
-
-        // Download PowerPoint
-        async downloadPowerPoint() {
-            try {
-                if (this.slideshowQuestions.length === 0) {
-                    this.showNotification('Không có câu hỏi nào để tạo PowerPoint', 'error');
-                    return;
-                }
-
-                const pptx = new PptxGenJS();
-
-                // Slide chào mừng
-                const welcomeSlide = pptx.addSlide();
-                welcomeSlide.background = { fill: 'FFFFFF' };
-                
-                welcomeSlide.addText('HỎI PHÁP\nTRÌNH PHÁP', {
-                    x: 0.5,
-                    y: 2,
-                    w: '90%',
-                    h: 2,
-                    fontSize: 44,
-                    bold: true,
-                    color: '0070C0',
-                    align: 'center',
-                    fontFace: 'Arial'
-                });
-
-                // Thêm các slide câu hỏi
-                this.slideshowQuestions.forEach((question, index) => {
-                    const slide = pptx.addSlide();
-                    slide.background = { fill: 'FFFFFF' };
-
-                    // Tiêu đề slide
-                    slide.addText(`Câu hỏi ${index + 1}`, {
-                        x: 0.5,
-                        y: 0.5,
-                        w: '90%',
-                        fontSize: 20,
-                        bold: true,
-                        color: '0070C0',
-                        fontFace: 'Arial'
-                    });
-
-                    // Thông tin người gửi
-                    slide.addText(`Câu hỏi của hành giả: ${question.name}`, {
-                        x: 0.5,
-                        y: 1.2,
-                        w: '90%',
-                        fontSize: 16,
-                        color: '444444',
-                        fontFace: 'Arial'
-                    });
-
-                    // Nội dung câu hỏi (giữ nguyên định dạng xuống dòng)
-                    const questionContent = this.getQuestionContent(question);
-                    slide.addText(questionContent, {
-                        x: 0.5,
-                        y: 2,
-                        w: '90%',
-                        h: 4,
-                        fontSize: 18,
-                        color: '000000',
-                        fontFace: 'Arial',
-                        align: 'left',
-                        valign: 'top'
-                    });
-                });
-
-                // Tải file
-                const fileName = `Trinh_Chieu_Hoi_Dap_${new Date().toISOString().split('T')[0]}.pptx`;
-                await pptx.writeFile({ fileName });
-                
-                this.showNotification('Đã tải file PowerPoint thành công', 'success');
-            } catch (error) {
-                console.error('Error generating PowerPoint:', error);
-                this.showNotification('Có lỗi xảy ra khi tạo PowerPoint', 'error');
-            }
+      downloadPowerPoint: async function() {
+        if (this.slideshowQuestions.length === 0) {
+          this.showNotificationMessage('Không có câu hỏi nào để tạo PowerPoint', 'error');
+          return;
         }
+
+        try {
+          this.showNotificationMessage('Đang tạo PowerPoint...', 'success');
+          
+          // Tạo nội dung PowerPoint
+          const pptx = new PptxGenJS();
+          
+          // Slide chào mừng
+          const welcomeSlide = pptx.addSlide();
+          welcomeSlide.background = { fill: '6a0000' };
+          welcomeSlide.addText('HỎI PHÁP\nTRÌNH PHÁP', {
+            x: 0.5,
+            y: 2,
+            w: '90%',
+            h: 3,
+            fontSize: 48,
+            bold: true,
+            color: 'FFFFFF',
+            align: 'left',
+            fontFace: 'Arial',
+            valign: 'middle',
+            isTextBox: true,
+            lineSpacing: 1.2
+          });
+
+          // Các slide câu hỏi
+          this.slideshowQuestions.forEach((question, index) => {
+            const slide = pptx.addSlide();
+            
+            // Tiêu đề slide
+            slide.addText(`Câu hỏi ${index + 1}`, {
+              x: 0.5,
+              y: 0.5,
+              w: '90%',
+              fontSize: 28,
+              bold: true,
+              color: '2E86AB'
+            });
+
+            // Thông tin người hỏi
+            slide.addText(`Hành giả: ${question.name || 'Ẩn danh'}`, {
+              x: 0.5,
+              y: 1.2,
+              w: '90%',
+              fontSize: 20,
+              bold: true,
+              color: '000000'
+            });
+
+            // Nội dung câu hỏi
+            const content = question.edited_content || question.content;
+            slide.addText(content, {
+              x: 0.5,
+              y: 2.0,
+              w: '90%',
+              h: 4,
+              fontSize: 16,
+              color: '333333',
+              align: 'left',
+              valign: 'top',
+              isTextBox: true,
+              lineSpacing: 1.3
+            });
+
+            // Footer với số trang
+            slide.addText(`Trang ${index + 2}`, {
+              x: 0.5,
+              y: 6.5,
+              w: '90%',
+              fontSize: 12,
+              color: '666666',
+              align: 'center'
+            });
+          });
+
+          // Tải file xuống
+          const fileName = `Hoi-Dap-Phap-Am-${new Date().toISOString().split('T')[0]}.pptx`;
+          await pptx.writeFile({ fileName: fileName });
+          
+          this.showNotificationMessage('Đã tạo PowerPoint thành công!', 'success');
+          
+        } catch (error) {
+          console.error('Error creating PowerPoint:', error);
+          this.showNotificationMessage('Lỗi khi tạo PowerPoint: ' + error.message, 'error');
+        }
+      },
+
+
+
+
+
+
+      
+      loadYouTubeAPI: function() {
+        if (window.YT) {
+          this.isYouTubeAPILoaded = true;
+          return;
+        }
+        
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        
+        window.onYouTubeIframeAPIReady = () => {
+          this.isYouTubeAPILoaded = true;
+          console.log('YouTube API ready');
+        };
+      },
+      
+      get currentQuestion() {
+        return this.slideshowQuestions[this.currentSlideIndex - 1];
+      },
+      
+      // fetchQuestions: function() {
+      //   this.isLoading = true;
+      //   fetch('https://api.chuaphucminh.xyz/api/questions/')
+      //     .then(response => {
+      //       if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
+      //       return response.json();
+      //     })
+      //     .then(data => {
+      //       this.questions = data;
+      //       this.slideshowQuestions = data.filter(q => 
+      //         q.status === "pending" && q.slideshow === true
+      //       );
+      //     })
+      //     .catch(error => {
+      //       console.error('Error:', error);
+      //       this.showNotificationMessage(error.message, 'error');
+      //     })
+      //     .finally(() => {
+      //       this.isLoading = false;
+      //     });
+      // },
+
+
+      fetchQuestions: function() {
+        this.isLoading = true;
+        fetch('https://api.chuaphucminh.xyz/api/questions/')
+          .then(response => {
+            if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
+            return response.json();
+          })
+          .then(data => {
+            this.questions = data.map(q => ({
+              ...q,
+              // Đảm bảo có edited_content nếu không có thì dùng content
+              displayContent: q.edited_content || q.content
+            }));
+            this.slideshowQuestions = data.filter(q => 
+              q.status === "pending" && q.slideshow === true
+            );
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            this.showNotificationMessage(error.message, 'error');
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
+      },
+      
+
+      markAsAnswered: async function(question) {
+        if (!this.youtubeLink) {
+          this.showNotificationMessage('Vui lòng nhập link YouTube livestream', 'error');
+          return;
+        }
+
+        try {
+          // Đảm bảo YouTube player đã sẵn sàng
+          if (!this.youtubePlayer) {
+            await this.initializeYouTubePlayer();
+          }
+
+          // Lấy thời gian hiện tại từ video
+          const currentTime = await this.getCurrentTime();
+          const videoId = this.extractYouTubeId(this.youtubeLink);
+          
+          if (!videoId) {
+            this.showNotificationMessage('Link YouTube không hợp lệ', 'error');
+            return;
+          }
+
+          const cleanUrl = this.youtubeLink.split('&')[0];
+          const timestampLink = `${cleanUrl}&t=${Math.floor(currentTime)}s`;
+          
+          await this.updateQuestionAnswer(
+            question.id, 
+            `Tham khảo video tại: ${timestampLink}`
+          );
+          
+          this.showNotificationMessage(
+            `Đã đánh dấu câu hỏi là đã trả lời tại ${this.formatTime(currentTime)}`,
+            'success'
+          );
+          
+          this.fetchQuestions();
+        } catch (error) {
+          console.error('Error:', error);
+          this.showNotificationMessage('Lỗi khi đánh dấu câu hỏi: ' + error.message, 'error');
+        }
+      },
+      
+
+      // markAsAnswered: async function(question) {
+      //   if (!this.youtubeLink) {
+      //     this.showNotificationMessage('Vui lòng nhập link YouTube livestream', 'error');
+      //     return;
+      //   }
+
+      //   try {
+      //     let timestamp = 0;
+      //     if (this.youtubePlayer) {
+      //       timestamp = await this.getCurrentTime();
+      //     }
+
+      //     const videoId = this.extractYouTubeId(this.youtubeLink);
+      //     if (!videoId) {
+      //       this.showNotificationMessage('Link YouTube không hợp lệ', 'error');
+      //       return;
+      //     }
+
+      //     const cleanUrl = this.youtubeLink.split('&')[0];
+      //     const timestampLink = `${cleanUrl}&t=${Math.floor(timestamp)}s`;
+          
+      //     await this.updateQuestionAnswer(
+      //       question.id, 
+      //       `Tham khảo video tại: ${timestampLink}`
+      //     );
+          
+      //     this.showNotificationMessage(
+      //       `Đã đánh dấu câu hỏi là đã trả lời tại ${this.formatTime(timestamp)}`,
+      //       'success'
+      //     );
+          
+      //     this.fetchQuestions();
+      //   } catch (error) {
+      //     console.error('Error:', error);
+      //     this.showNotificationMessage('Lỗi khi đánh dấu câu hỏi: ' + error.message, 'error');
+      //   }
+      // },
+      
+      removeFromSlideshow: async function(question) {
+        try {
+          const token = localStorage.getItem('access_token');
+          const response = await fetch(`https://api.chuaphucminh.xyz/api/questions/${question.id}/`, {
+            method: 'PATCH',
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+              slideshow: false
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Cập nhật câu hỏi thất bại');
+          }
+
+          this.showNotificationMessage('Đã xóa câu hỏi khỏi trình chiếu', 'success');
+          this.fetchQuestions();
+        } catch (error) {
+          console.error('Error:', error);
+          this.showNotificationMessage('Lỗi khi xóa câu hỏi: ' + error.message, 'error');
+        }
+      },
+      
+      startSlideshow: function() {
+        if (this.slideshowQuestions.length === 0) {
+          this.showNotificationMessage('Không có câu hỏi nào để trình chiếu', 'error');
+          return;
+        }
+        
+        if (!this.youtubeLink) {
+          this.showNotificationMessage('Vui lòng nhập link YouTube livestream', 'error');
+          return;
+        }
+        
+        this.currentSlideIndex = 0;
+        this.isSlideshowActive = true;
+        this.initializeYouTubePlayer();
+        
+        this.keyboardHandler = (e) => {
+          const key = e.key.toLowerCase();
+          
+          if (!this.isSlideshowActive) return;
+          
+          switch (key) {
+            case 'n':
+            case 'arrowright':
+              e.preventDefault();
+              this.nextSlide();
+              break;
+            case 'p':
+            case 'arrowleft':
+              e.preventDefault();
+              this.prevSlide();
+              break;
+            case 's':
+            case 'escape':
+              e.preventDefault();
+              this.stopSlideshow();
+              break;
+            case 'r':
+              e.preventDefault();
+              this.saveCurrentTimestamp();
+              break;
+          }
+        };
+        
+        document.addEventListener('keydown', this.keyboardHandler);
+      },
+      
+      initializeYouTubePlayer: function() {
+        if (!this.isYouTubeAPILoaded) {
+          this.showNotificationMessage('YouTube API chưa sẵn sàng', 'error');
+          return;
+        }
+
+        const videoId = this.extractYouTubeId(this.youtubeLink);
+        if (!videoId) {
+          this.showNotificationMessage('Link YouTube không hợp lệ', 'error');
+          return;
+        }
+
+        if (this.youtubePlayer) {
+          this.youtubePlayer.destroy();
+        }
+
+        this.youtubePlayer = new YT.Player('youtube-player', {
+          videoId: videoId,
+          playerVars: {
+            autoplay: 1,
+            mute: 1,
+            controls: 0,
+            disablekb: 1,
+            enablejsapi: 1,
+            fs: 0,
+            modestbranding: 1,
+            rel: 0
+          },
+          events: {
+            'onReady': (event) => {
+              event.target.playVideo();
+              console.log('YouTube Player ready');
+            },
+            'onStateChange': (event) => {
+              console.log('Player state:', event.data);
+            },
+            'onError': (error) => {
+              console.error('Player error:', error);
+            }
+          }
+        });
+      },
+      
+      stopSlideshow: function() {
+        this.isSlideshowActive = false;
+        
+        if (this.keyboardHandler) {
+          document.removeEventListener('keydown', this.keyboardHandler);
+          this.keyboardHandler = null;
+        }
+        
+        if (this.youtubePlayer) {
+          this.youtubePlayer.destroy();
+          this.youtubePlayer = null;
+        }
+      },
+      
+      saveCurrentTimestamp: async function() {
+        if (!this.youtubePlayer) {
+          this.showNotificationMessage('YouTube Player chưa sẵn sàng', 'error');
+          return;
+        }
+
+        try {
+          const currentTime = await this.getCurrentTime();
+          const cleanUrl = this.youtubeLink.split('&')[0];
+          const timestampLink = `${cleanUrl}&t=${Math.floor(currentTime)}s`;
+          
+          await this.updateQuestionAnswer(
+            this.currentQuestion.id, 
+            `Tham khảo video tại: ${timestampLink}`
+          );
+          
+          this.showNotificationMessage(
+            `Đã lưu thời điểm ${this.formatTime(currentTime)} vào câu trả lời`, 
+            'success'
+          );
+        } catch (error) {
+          console.error('Error:', error);
+          this.showNotificationMessage('Lỗi khi lấy thời gian video: ' + error.message, 'error');
+        }
+      },
+
+      // Cập nhật hàm getCurrentTime để xử lý tốt hơn
+      getCurrentTime: function() {
+        return new Promise((resolve, reject) => {
+          if (!this.youtubePlayer) {
+            reject(new Error('YouTube Player chưa khởi tạo'));
+            return;
+          }
+
+          // Thử lấy thời gian nhiều lần nếu cần
+          const tryGetTime = (attempts = 0) => {
+            try {
+              const time = this.youtubePlayer.getCurrentTime();
+              
+              if (time > 0 || attempts >= 3) {
+                resolve(time);
+              } else {
+                setTimeout(() => tryGetTime(attempts + 1), 500);
+              }
+            } catch (error) {
+              if (attempts >= 3) {
+                reject(error);
+              } else {
+                setTimeout(() => tryGetTime(attempts + 1), 500);
+              }
+            }
+          };
+
+          tryGetTime();
+        });
+      },
+            
+      // getCurrentTime: function() {
+      //   return new Promise((resolve, reject) => {
+      //     try {
+      //       if (this.youtubePlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
+      //         this.youtubePlayer.playVideo();
+      //       }
+            
+      //       setTimeout(() => {
+      //         const time = this.youtubePlayer.getCurrentTime();
+      //         console.log('Current video time:', time);
+      //         if (time > 0) {
+      //           resolve(time);
+      //         } else {
+      //           reject(new Error('Không thể lấy thời gian hiện tại'));
+      //         }
+      //       }, 500);
+      //     } catch (error) {
+      //       reject(error);
+      //     }
+      //   });
+      // },
+      
+      extractYouTubeId: function(url) {
+        const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        
+        if (match && match[2].length === 11) {
+          return match[2];
+        }
+        
+        const shortRegExp = /youtu\.be\/([^#&?]*)/;
+        const shortMatch = url.match(shortRegExp);
+        
+        return shortMatch ? shortMatch[1] : null;
+      },
+      
+      updateQuestionAnswer: async function(questionId, answer) {
+        const token = localStorage.getItem('access_token');
+        
+        try {
+          const response = await fetch(`https://api.chuaphucminh.xyz/api/questions/${questionId}/`, {
+            method: 'PATCH',
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+              answer: answer,
+              status: 'answered',
+              answered_at: new Date().toISOString()
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Cập nhật câu trả lời thất bại');
+          }
+
+          const updatedQuestion = await response.json();
+          this.slideshowQuestions = this.slideshowQuestions.map(q => 
+            q.id === questionId ? updatedQuestion : q
+          );
+        } catch (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
+      },
+      
+      formatTime: function(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      },
+      
+      nextSlide: function() {
+        if (this.currentSlideIndex < this.slideshowQuestions.length) {
+          this.currentSlideIndex++;
+        } else {
+          this.currentSlideIndex = 0;
+        }
+      },
+      
+      prevSlide: function() {
+        if (this.currentSlideIndex > 0) {
+          this.currentSlideIndex--;
+        } else {
+          this.currentSlideIndex = this.slideshowQuestions.length;
+        }
+      },
+      
+      showNotificationMessage: function(message, type) {
+        this.notificationMessage = message;
+        this.notificationType = type;
+        this.showNotification = true;
+        setTimeout(() => this.showNotification = false, 3000);
+      }
     };
-}
+  });
+});
