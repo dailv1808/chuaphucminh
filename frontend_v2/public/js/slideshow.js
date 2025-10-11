@@ -144,7 +144,7 @@ document.addEventListener('alpine:init', function() {
                 slide.addText(line, {
                   x: 0.9,
                   y: currentY,
-                  w: '90%',
+                  w: '95%',
                   h: lineHeight,
                   fontSize: 14,
                   color: '333333',
