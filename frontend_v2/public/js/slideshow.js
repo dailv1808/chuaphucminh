@@ -218,10 +218,10 @@ document.addEventListener('alpine:init', function() {
             fontSize: 44,
             bold: true,
             color: 'FFFFFF',
-            align: 'center',
+            align: 'left',
             fontFace: 'Arial',
-            valign: 'middle',
-            lineSpacing: 24 // Tăng khoảng cách giữa 2 dòng
+            valign: 'left',
+            lineSpacing: 36 // Tăng khoảng cách giữa 2 dòng
           });
 
           // Các slide câu hỏi
