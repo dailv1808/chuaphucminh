@@ -20,16 +20,174 @@ document.addEventListener('alpine:init', function() {
       },
 
       // Hàm lấy nội dung câu hỏi - ưu tiên edited_content, nếu trống thì lấy content
+   
+
+
       getQuestionContent: function(question) {
         const content = question.edited_content && question.edited_content.trim() !== '' 
           ? question.edited_content 
           : question.content;
         
-        // Giữ nguyên các phần xuống dòng
-        return content ? content.replace(/\n/g, '\n') : '';
+        // Xử lý nội dung để đảm bảo định dạng đúng
+        if (!content) return '';
+        
+        // Thay thế nhiều khoảng trắng liên tiếp bằng một khoảng trắng
+        let processedContent = content.replace(/\s+/g, ' ');
+        
+        // Đảm bảo xuống dòng đúng cách
+        processedContent = processedContent.replace(/\n/g, '\n');
+        
+        // Thêm khoảng trống giữa các đoạn nếu cần
+        processedContent = processedContent.replace(/\n/g, '\n\n');
+        
+        // Giới hạn độ dài mỗi dòng (tùy chọn)
+        processedContent = this.wrapText(processedContent, 80);
+        
+        return processedContent;
       },
 
+      // Hàm hỗ trợ wrap text
+      wrapText: function(text, maxLength) {
+        const words = text.split(' ');
+        let lines = [];
+        let currentLine = '';
+
+        words.forEach(word => {
+          if ((currentLine + word).length <= maxLength) {
+            currentLine += (currentLine === '' ? '' : ' ') + word;
+          } else {
+            if (currentLine !== '') {
+              lines.push(currentLine);
+            }
+            currentLine = word;
+          }
+        });
+
+        if (currentLine !== '') {
+          lines.push(currentLine);
+        }
+
+        return lines.join('\n');
+      }
+
       
+
+
+
+      // downloadPowerPoint: async function() {
+      //   if (this.slideshowQuestions.length === 0) {
+      //     this.showNotificationMessage('Không có câu hỏi nào để tạo PowerPoint', 'error');
+      //     return;
+      //   }
+
+      //   try {
+      //     this.showNotificationMessage('Đang tạo PowerPoint...', 'success');
+          
+      //     // Tạo nội dung PowerPoint
+      //     const pptx = new PptxGenJS();
+          
+      //     // Slide chào mừng - CẬP NHẬT: Tách thành 2 dòng riêng biệt
+      //     const welcomeSlide = pptx.addSlide();
+      //     welcomeSlide.background = { fill: '6a0000' };
+          
+      //     // Dòng 1: HỎI PHÁP
+      //     welcomeSlide.addText('HỎI PHÁP', {
+      //       x: 0.5,
+      //       y: 2,
+      //       w: '90%',
+      //       h: 1.5,
+      //       fontSize: 48,
+      //       bold: true,
+      //       color: 'FFFFFF',
+      //       align: 'left',
+      //       fontFace: 'Arial',
+      //       valign: 'middle',
+      //       isTextBox: true,
+      //       lineSpacing: 1.0
+      //     });
+          
+      //     // Dòng 2: TRÌNH PHÁP
+      //     welcomeSlide.addText('TRÌNH PHÁP', {
+      //       x: 0.5,
+      //       y: 3.5,
+      //       w: '90%',
+      //       h: 1.5,
+      //       fontSize: 48,
+      //       bold: true,
+      //       color: 'FFFFFF',
+      //       align: 'left',
+      //       fontFace: 'Arial',
+      //       valign: 'middle',
+      //       isTextBox: true,
+      //       lineSpacing: 1.0
+      //     });
+
+      //     // Các slide câu hỏi - CẬP NHẬT: Điều chỉnh vị trí và chiều cao
+      //     this.slideshowQuestions.forEach((question, index) => {
+      //       const slide = pptx.addSlide();
+            
+      //       // Tiêu đề slide
+      //       slide.addText(`Câu hỏi ${index + 1}`, {
+      //         x: 0.5,
+      //         y: 0.3,
+      //         w: '90%',
+      //         fontSize: 24,
+      //         bold: true,
+      //         color: '2E86AB'
+      //       });
+
+      //       // Thông tin người hỏi
+      //       slide.addText(`Hành giả: ${question.name || 'Ẩn danh'}`, {
+      //         x: 0.5,
+      //         y: 1.0,
+      //         w: '90%',
+      //         fontSize: 18,
+      //         bold: true,
+      //         color: '000000'
+      //       });
+
+      //       // Nội dung câu hỏi - CẬP NHẬT: Tăng chiều cao và điều chỉnh vị trí
+      //       const content = this.getQuestionContent(question);
+      //       slide.addText(content, {
+      //         x: 0.5,
+      //         y: 1.8,
+      //         w: '90%',
+      //         h: 4.5, // Tăng chiều cao
+      //         fontSize: 16,
+      //         color: '333333',
+      //         align: 'left',
+      //         valign: 'top',
+      //         isTextBox: true,
+      //         lineSpacing: 1.5, // Tăng khoảng cách dòng
+      //         lineSpacingMultiple: 1.5,
+      //         autoFit: true,
+      //         shrinkText: true,
+      //         preserveFormatting: true,
+      //         breakLine: true
+      //       });
+
+      //       // Footer với số trang
+      //       slide.addText(`Trang ${index + 2}`, {
+      //         x: 0.5,
+      //         y: 6.8,
+      //         w: '90%',
+      //         fontSize: 12,
+      //         color: '666666',
+      //         align: 'center'
+      //       });
+      //     });
+
+      //     // Tải file xuống
+      //     const fileName = `Slide-Hoi-Dap-Phat-Phap-${new Date().toISOString().split('T')[0]}.pptx`;
+      //     await pptx.writeFile({ fileName: fileName });
+          
+      //     this.showNotificationMessage('Đã tạo PowerPoint thành công!', 'success');
+          
+      //   } catch (error) {
+      //     console.error('Error creating PowerPoint:', error);
+      //     this.showNotificationMessage('Lỗi khi tạo PowerPoint: ' + error.message, 'error');
+      //   }
+      // },
 
 
 
@@ -45,24 +203,22 @@ document.addEventListener('alpine:init', function() {
           // Tạo nội dung PowerPoint
           const pptx = new PptxGenJS();
           
-          // Slide chào mừng - CẬP NHẬT: Tách thành 2 dòng riêng biệt
+          // Slide chào mừng
           const welcomeSlide = pptx.addSlide();
           welcomeSlide.background = { fill: '6a0000' };
           
           // Dòng 1: HỎI PHÁP
           welcomeSlide.addText('HỎI PHÁP', {
             x: 0.5,
-            y: 2,
+            y: 2.0,
             w: '90%',
             h: 1.5,
             fontSize: 48,
             bold: true,
             color: 'FFFFFF',
-            align: 'left',
+            align: 'center',
             fontFace: 'Arial',
-            valign: 'middle',
-            isTextBox: true,
-            lineSpacing: 1.0
+            valign: 'middle'
           });
           
           // Dòng 2: TRÌNH PHÁP
@@ -74,14 +230,12 @@ document.addEventListener('alpine:init', function() {
             fontSize: 48,
             bold: true,
             color: 'FFFFFF',
-            align: 'left',
+            align: 'center',
             fontFace: 'Arial',
-            valign: 'middle',
-            isTextBox: true,
-            lineSpacing: 1.0
+            valign: 'middle'
           });
 
-          // Các slide câu hỏi - CẬP NHẬT: Điều chỉnh vị trí và chiều cao
+          // Các slide câu hỏi
           this.slideshowQuestions.forEach((question, index) => {
             const slide = pptx.addSlide();
             
@@ -90,7 +244,7 @@ document.addEventListener('alpine:init', function() {
               x: 0.5,
               y: 0.3,
               w: '90%',
-              fontSize: 24,
+              fontSize: 20,
               bold: true,
               color: '2E86AB'
             });
@@ -98,31 +252,36 @@ document.addEventListener('alpine:init', function() {
             // Thông tin người hỏi
             slide.addText(`Hành giả: ${question.name || 'Ẩn danh'}`, {
               x: 0.5,
-              y: 1.0,
+              y: 0.8,
               w: '90%',
-              fontSize: 18,
+              fontSize: 16,
               bold: true,
               color: '000000'
             });
 
-            // Nội dung câu hỏi - CẬP NHẬT: Tăng chiều cao và điều chỉnh vị trí
+            // Nội dung câu hỏi - CẬP NHẬT QUAN TRỌNG
             const content = this.getQuestionContent(question);
-            slide.addText(content, {
+            
+            // Xử lý nội dung để đảm bảo xuống dòng đúng
+            const processedContent = content.replace(/\n/g, '\n\n'); // Thêm khoảng trống giữa các đoạn
+            
+            slide.addText(processedContent, {
               x: 0.5,
-              y: 1.8,
+              y: 1.5,
               w: '90%',
-              h: 4.5, // Tăng chiều cao
-              fontSize: 16,
+              h: 5.0, // Tăng chiều cao đáng kể
+              fontSize: 14, // Giảm font size để có nhiều không gian hơn
               color: '333333',
               align: 'left',
               valign: 'top',
               isTextBox: true,
-              lineSpacing: 1.5, // Tăng khoảng cách dòng
-              lineSpacingMultiple: 1.5,
-              autoFit: true,
-              shrinkText: true,
+              lineSpacing: 1.8, // Tăng khoảng cách dòng
+              paragraphSpacing: 8, // Thêm khoảng cách giữa các đoạn
+              autoFit: false, // Tắt autoFit để kiểm soát tốt hơn
+              shrinkText: false, // Tắt shrinkText
               preserveFormatting: true,
-              breakLine: true
+              breakLine: true,
+              margin: 0.1 // Thêm margin bên trong
             });
 
             // Footer với số trang
@@ -130,14 +289,14 @@ document.addEventListener('alpine:init', function() {
               x: 0.5,
               y: 6.8,
               w: '90%',
-              fontSize: 12,
+              fontSize: 10,
               color: '666666',
               align: 'center'
             });
           });
 
           // Tải file xuống
-          const fileName = `Slide-Hoi-Dap-Phat-Phap-${new Date().toISOString().split('T')[0]}.pptx`;
+          const fileName = `Hoi-Dap-Phap-Am-${new Date().toISOString().split('T')[0]}.pptx`;
           await pptx.writeFile({ fileName: fileName });
           
           this.showNotificationMessage('Đã tạo PowerPoint thành công!', 'success');
