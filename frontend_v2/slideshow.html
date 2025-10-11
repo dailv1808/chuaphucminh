@@ -6,6 +6,7 @@
   <title>Trình Chiếu Hỏi Đáp - CPM Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Garamond:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Thêm thư viện PowerPoint -->
@@ -136,13 +137,6 @@
           
 
 
-
-
-
-
-
-
-
           
           <div x-show="slideshowQuestions.length === 0" class="empty-state">
             <i class="far fa-folder-open text-4xl text-gray-400"></i>
@@ -167,14 +161,19 @@
           </template>
           
           <template x-if="currentSlideIndex > 0 && currentQuestion">
-            <div class="question-content">
-              <div class="question-author">
+
+            <div class="question-content" style="padding-left: 6rem; padding-right: 6rem;">
+              <div class="question-author" style="font-size: 2.5rem; font-family: 'Garamond', serif;">
                 Câu hỏi của hành giả: <span x-text="currentQuestion.name || 'Ẩn danh'"></span>
               </div>
               <div class="whitespace-pre-line overflow-auto break-words max-h-full" 
-                  style="white-space: pre-line; word-wrap: break-word; word-break: break-word;"
+                  style="white-space: pre-line; word-wrap: break-word; word-break: break-word; 
+                        font-size: 2rem; font-family: 'Garamond', serif; line-height: 1.6;"
                   x-text="currentQuestion.edited_content"></div>
             </div>
+
+
+
           </template>
         </div>
       </div>
