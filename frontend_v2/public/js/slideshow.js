@@ -19,12 +19,6 @@ document.addEventListener('alpine:init', function() {
         this.loadYouTubeAPI();
       },
 
-      // Hàm lấy nội dung câu hỏi - ưu tiên edited_content, nếu trống thì lấy content
-      getQuestionContent: function(question) {
-        return question.edited_content && question.edited_content.trim() !== '' 
-          ? question.edited_content 
-          : question.content;
-      },
 
       downloadPowerPoint: async function() {
         if (this.slideshowQuestions.length === 0) {
@@ -80,8 +74,8 @@ document.addEventListener('alpine:init', function() {
               color: '000000'
             });
 
-            // Nội dung câu hỏi - sử dụng hàm getQuestionContent để lấy nội dung
-            const content = this.getQuestionContent(question);
+            // Nội dung câu hỏi
+            const content = question.edited_content || question.content;
             slide.addText(content, {
               x: 0.5,
               y: 2.0,
@@ -92,8 +86,7 @@ document.addEventListener('alpine:init', function() {
               align: 'left',
               valign: 'top',
               isTextBox: true,
-              lineSpacing: 1.3,
-              preserveFormatting: true // Giữ nguyên định dạng xuống dòng
+              lineSpacing: 1.3
             });
 
             // Footer với số trang
@@ -119,6 +112,12 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
+
+
+
+
+
+      
       loadYouTubeAPI: function() {
         if (window.YT) {
           this.isYouTubeAPILoaded = true;
@@ -140,6 +139,29 @@ document.addEventListener('alpine:init', function() {
         return this.slideshowQuestions[this.currentSlideIndex - 1];
       },
       
+      // fetchQuestions: function() {
+      //   this.isLoading = true;
+      //   fetch('https://api.chuaphucminh.xyz/api/questions/')
+      //     .then(response => {
+      //       if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
+      //       return response.json();
+      //     })
+      //     .then(data => {
+      //       this.questions = data;
+      //       this.slideshowQuestions = data.filter(q => 
+      //         q.status === "pending" && q.slideshow === true
+      //       );
+      //     })
+      //     .catch(error => {
+      //       console.error('Error:', error);
+      //       this.showNotificationMessage(error.message, 'error');
+      //     })
+      //     .finally(() => {
+      //       this.isLoading = false;
+      //     });
+      // },
+
+
       fetchQuestions: function() {
         this.isLoading = true;
         fetch('https://api.chuaphucminh.xyz/api/questions/')
@@ -153,11 +175,9 @@ document.addEventListener('alpine:init', function() {
               // Đảm bảo có edited_content nếu không có thì dùng content
               displayContent: q.edited_content || q.content
             }));
-            
-            // Lọc câu hỏi trình chiếu và sắp xếp theo thứ tự cũ nhất trước
-            this.slideshowQuestions = data
-              .filter(q => q.status === "pending" && q.slideshow === true)
-              .sort((a, b) => new Date(a.created_at) - new Date(b.created_at)); // Sắp xếp cũ nhất trước
+            this.slideshowQuestions = data.filter(q => 
+              q.status === "pending" && q.slideshow === true
+            );
           })
           .catch(error => {
             console.error('Error:', error);
@@ -168,6 +188,7 @@ document.addEventListener('alpine:init', function() {
           });
       },
       
+
       markAsAnswered: async function(question) {
         if (!this.youtubeLink) {
           this.showNotificationMessage('Vui lòng nhập link YouTube livestream', 'error');
@@ -208,6 +229,45 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage('Lỗi khi đánh dấu câu hỏi: ' + error.message, 'error');
         }
       },
+      
+
+      // markAsAnswered: async function(question) {
+      //   if (!this.youtubeLink) {
+      //     this.showNotificationMessage('Vui lòng nhập link YouTube livestream', 'error');
+      //     return;
+      //   }
+
+      //   try {
+      //     let timestamp = 0;
+      //     if (this.youtubePlayer) {
+      //       timestamp = await this.getCurrentTime();
+      //     }
+
+      //     const videoId = this.extractYouTubeId(this.youtubeLink);
+      //     if (!videoId) {
+      //       this.showNotificationMessage('Link YouTube không hợp lệ', 'error');
+      //       return;
+      //     }
+
+      //     const cleanUrl = this.youtubeLink.split('&')[0];
+      //     const timestampLink = `${cleanUrl}&t=${Math.floor(timestamp)}s`;
+          
+      //     await this.updateQuestionAnswer(
+      //       question.id, 
+      //       `Tham khảo video tại: ${timestampLink}`
+      //     );
+          
+      //     this.showNotificationMessage(
+      //       `Đã đánh dấu câu hỏi là đã trả lời tại ${this.formatTime(timestamp)}`,
+      //       'success'
+      //     );
+          
+      //     this.fetchQuestions();
+      //   } catch (error) {
+      //     console.error('Error:', error);
+      //     this.showNotificationMessage('Lỗi khi đánh dấu câu hỏi: ' + error.message, 'error');
+      //   }
+      // },
       
       removeFromSlideshow: async function(question) {
         try {
@@ -364,6 +424,7 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
+      // Cập nhật hàm getCurrentTime để xử lý tốt hơn
       getCurrentTime: function() {
         return new Promise((resolve, reject) => {
           if (!this.youtubePlayer) {
@@ -393,6 +454,28 @@ document.addEventListener('alpine:init', function() {
           tryGetTime();
         });
       },
+            
+      // getCurrentTime: function() {
+      //   return new Promise((resolve, reject) => {
+      //     try {
+      //       if (this.youtubePlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
+      //         this.youtubePlayer.playVideo();
+      //       }
+            
+      //       setTimeout(() => {
+      //         const time = this.youtubePlayer.getCurrentTime();
+      //         console.log('Current video time:', time);
+      //         if (time > 0) {
+      //           resolve(time);
+      //         } else {
+      //           reject(new Error('Không thể lấy thời gian hiện tại'));
+      //         }
+      //       }, 500);
+      //     } catch (error) {
+      //       reject(error);
+      //     }
+      //   });
+      // },
       
       extractYouTubeId: function(url) {
         const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|v=)([^#&?]*).*/;
