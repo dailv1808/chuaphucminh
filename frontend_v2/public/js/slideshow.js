@@ -221,7 +221,7 @@ document.addEventListener('alpine:init', function() {
             align: 'left',
             fontFace: 'Arial',
             valign: 'left',
-            lineSpacing: 36 // Tăng khoảng cách giữa 2 dòng
+            lineSpacing: 46 // Tăng khoảng cách giữa 2 dòng
           });
 
           // Các slide câu hỏi
