@@ -15,6 +15,10 @@
   @apply px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors;
 }
 
+.btn-success {
+  @apply px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center shadow-sm hover:shadow-md;
+}
+
 .input-field {
   @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm;
 }
@@ -183,15 +187,10 @@ tr {
 }
 
 /* Main Content */
-/* .main-content {
-  max-height: 90vh;
-  overflow-y: auto;
-} */
-
 .main-content {
-  max-height: calc(100vh - 5rem); /* Thay đổi từ 90vh */
+  max-height: calc(100vh - 5rem);
   overflow-y: auto;
-  padding-bottom: 2rem; /* Thêm padding dưới */
+  padding-bottom: 2rem;
 }
 
 /* Table improvements */
@@ -213,7 +212,6 @@ th {
 .empty-state {
   @apply py-12;
 }
-
 
 /* Enhanced buttons */
 .btn-primary {
@@ -317,13 +315,12 @@ table select {
   @apply bg-blue-50 text-blue-800 border-blue-200;
 }
 
-
 /* Thay thế hoặc bổ sung các quy tắc CSS sau */
 
 /* Xóa hoặc ghi đè quy tắc .main-content cũ */
 .main-content {
   min-height: calc(100vh - 5rem);
-  overflow-y: visible; /* Thay đổi từ auto sang visible */
+  overflow-y: visible;
   padding-bottom: 2rem;
 }
 
@@ -362,22 +359,110 @@ table {
   }
 }
 
-/* Thêm vào phần button styles */
+/* ===== EXCEL EXPORT BUTTON STYLES ===== */
 .btn-success {
   @apply px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center shadow-sm hover:shadow-md;
 }
 
-/* Responsive cho mobile */
+.btn-success:focus {
+  @apply outline-none ring-2 ring-green-500 ring-opacity-50;
+}
+
+.btn-success:active {
+  @apply bg-green-800 transform scale-95;
+}
+
+.btn-success i {
+  @apply text-green-100;
+}
+
+/* Loading state for export button */
+.btn-success.loading {
+  @apply opacity-70 cursor-not-allowed;
+}
+
+.btn-success.loading i {
+  @apply animate-spin;
+}
+
+/* Success feedback animation */
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.btn-success.success {
+  animation: successPulse 0.5s ease-in-out;
+}
+
+/* Print styles for exported data */
+@media print {
+  .btn-success {
+    @apply hidden;
+  }
+}
+
+/* Ensure proper spacing in button group */
+.flex.items-center.gap-3 > * {
+  @apply flex-shrink-0;
+}
+
+/* Responsive styles for export button */
 @media (max-width: 768px) {
   .flex.items-center.gap-3 {
     @apply flex-wrap justify-end;
   }
   
-  .btn-success, .btn-primary {
-    @apply text-sm px-3 py-2;
+  .btn-success {
+    @apply text-sm px-3 py-2 flex-1 min-w-[120px] justify-center;
   }
   
   .relative.w-full.md\\:w-64 {
-    @apply min-w-full;
+    @apply min-w-full order-first;
+  }
+}
+
+/* Mobile optimization for action buttons */
+@media (max-width: 640px) {
+  .flex.items-center.gap-3 {
+    @apply gap-2;
+  }
+  
+  .btn-success span {
+    @apply hidden;
+  }
+  
+  .btn-success i {
+    @apply mr-0;
+  }
+  
+  .btn-success {
+    @apply w-10 h-10 p-0 justify-center;
+  }
+}
+
+/* Dark mode support (if needed) */
+@media (prefers-color-scheme: dark) {
+  .btn-success {
+    @apply bg-green-700 hover:bg-green-600;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn-success {
+    @apply border-2 border-white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .btn-success {
+    @apply transition-none;
+  }
+  
+  .btn-success:active {
+    @apply transform-none;
   }
 }
