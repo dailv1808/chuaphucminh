@@ -137,7 +137,7 @@ document.addEventListener('alpine:init', function() {
           });
 
           // Tải file xuống
-          const fileName = `Hoi-Dap-Phap-Am-${new Date().toISOString().split('T')[0]}.pptx`;
+          const fileName = `Slide-Hoi-Dap-Phat-Phap-${new Date().toISOString().split('T')[0]}.pptx`;
           await pptx.writeFile({ fileName: fileName });
           
           this.showNotificationMessage('Đã tạo PowerPoint thành công!', 'success');
