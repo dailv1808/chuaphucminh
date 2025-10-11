@@ -362,3 +362,62 @@ table {
   }
 }
 
+
+
+
+
+
+
+
+
+/* Thêm vào cuối file qa.css */
+
+/* Nút Xuất Excel */
+.btn-success {
+  @apply px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center shadow-sm hover:shadow-md;
+}
+
+.btn-success:hover {
+  @apply bg-green-700 transform scale-105;
+}
+
+.btn-success:active {
+  @apply transform scale-95;
+}
+
+/* Hoặc nếu muốn sử dụng màu xanh dương thay vì xanh lá */
+.btn-export {
+  @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center shadow-sm hover:shadow-md;
+}
+
+.btn-export:hover {
+  @apply bg-blue-700 transform scale-105;
+}
+
+.btn-export:active {
+  @apply transform scale-95;
+}
+
+/* Icon animation */
+.btn-success i, .btn-export i {
+  @apply transition-transform duration-200;
+}
+
+.btn-success:hover i, .btn-export:hover i {
+  @apply transform scale-110;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .btn-success, .btn-export {
+    @apply px-3 py-1.5 text-sm;
+  }
+  
+  .btn-success span, .btn-export span {
+    @apply hidden sm:inline;
+  }
+  
+  .btn-success i, .btn-export i {
+    @apply mr-0 sm:mr-2;
+  }
+}
