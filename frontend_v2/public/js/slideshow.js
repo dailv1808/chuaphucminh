@@ -46,6 +46,10 @@ document.addEventListener('alpine:init', function() {
         return processedContent;
       },
 
+
+
+      
+
       // Hàm hỗ trợ wrap text
       wrapText: function(text, maxLength) {
         const words = text.split(' ');
@@ -72,8 +76,6 @@ document.addEventListener('alpine:init', function() {
 
       
 
-
-
       // downloadPowerPoint: async function() {
       //   if (this.slideshowQuestions.length === 0) {
       //     this.showNotificationMessage('Không có câu hỏi nào để tạo PowerPoint', 'error');
@@ -86,24 +88,22 @@ document.addEventListener('alpine:init', function() {
       //     // Tạo nội dung PowerPoint
       //     const pptx = new PptxGenJS();
           
-      //     // Slide chào mừng - CẬP NHẬT: Tách thành 2 dòng riêng biệt
+      //     // Slide chào mừng
       //     const welcomeSlide = pptx.addSlide();
       //     welcomeSlide.background = { fill: '6a0000' };
           
       //     // Dòng 1: HỎI PHÁP
       //     welcomeSlide.addText('HỎI PHÁP', {
       //       x: 0.5,
-      //       y: 2,
+      //       y: 2.0,
       //       w: '90%',
       //       h: 1.5,
       //       fontSize: 48,
       //       bold: true,
       //       color: 'FFFFFF',
-      //       align: 'left',
+      //       align: 'center',
       //       fontFace: 'Arial',
-      //       valign: 'middle',
-      //       isTextBox: true,
-      //       lineSpacing: 1.0
+      //       valign: 'middle'
       //     });
           
       //     // Dòng 2: TRÌNH PHÁP
@@ -115,14 +115,12 @@ document.addEventListener('alpine:init', function() {
       //       fontSize: 48,
       //       bold: true,
       //       color: 'FFFFFF',
-      //       align: 'left',
+      //       align: 'center',
       //       fontFace: 'Arial',
-      //       valign: 'middle',
-      //       isTextBox: true,
-      //       lineSpacing: 1.0
+      //       valign: 'middle'
       //     });
 
-      //     // Các slide câu hỏi - CẬP NHẬT: Điều chỉnh vị trí và chiều cao
+      //     // Các slide câu hỏi
       //     this.slideshowQuestions.forEach((question, index) => {
       //       const slide = pptx.addSlide();
             
@@ -131,7 +129,7 @@ document.addEventListener('alpine:init', function() {
       //         x: 0.5,
       //         y: 0.3,
       //         w: '90%',
-      //         fontSize: 24,
+      //         fontSize: 20,
       //         bold: true,
       //         color: '2E86AB'
       //       });
@@ -139,31 +137,36 @@ document.addEventListener('alpine:init', function() {
       //       // Thông tin người hỏi
       //       slide.addText(`Hành giả: ${question.name || 'Ẩn danh'}`, {
       //         x: 0.5,
-      //         y: 1.0,
+      //         y: 0.8,
       //         w: '90%',
-      //         fontSize: 18,
+      //         fontSize: 16,
       //         bold: true,
       //         color: '000000'
       //       });
 
-      //       // Nội dung câu hỏi - CẬP NHẬT: Tăng chiều cao và điều chỉnh vị trí
+      //       // Nội dung câu hỏi - CẬP NHẬT QUAN TRỌNG
       //       const content = this.getQuestionContent(question);
-      //       slide.addText(content, {
+            
+      //       // Xử lý nội dung để đảm bảo xuống dòng đúng
+      //       const processedContent = content.replace(/\n/g, '\n\n'); // Thêm khoảng trống giữa các đoạn
+            
+      //       slide.addText(processedContent, {
       //         x: 0.5,
-      //         y: 1.8,
+      //         y: 1.5,
       //         w: '90%',
-      //         h: 4.5, // Tăng chiều cao
-      //         fontSize: 16,
+      //         h: 5.0, // Tăng chiều cao đáng kể
+      //         fontSize: 14, // Giảm font size để có nhiều không gian hơn
       //         color: '333333',
       //         align: 'left',
       //         valign: 'top',
       //         isTextBox: true,
-      //         lineSpacing: 1.5, // Tăng khoảng cách dòng
-      //         lineSpacingMultiple: 1.5,
-      //         autoFit: true,
-      //         shrinkText: true,
+      //         lineSpacing: 1.8, // Tăng khoảng cách dòng
+      //         paragraphSpacing: 8, // Thêm khoảng cách giữa các đoạn
+      //         autoFit: false, // Tắt autoFit để kiểm soát tốt hơn
+      //         shrinkText: false, // Tắt shrinkText
       //         preserveFormatting: true,
-      //         breakLine: true
+      //         breakLine: true,
+      //         margin: 0.1 // Thêm margin bên trong
       //       });
 
       //       // Footer với số trang
@@ -171,14 +174,14 @@ document.addEventListener('alpine:init', function() {
       //         x: 0.5,
       //         y: 6.8,
       //         w: '90%',
-      //         fontSize: 12,
+      //         fontSize: 10,
       //         color: '666666',
       //         align: 'center'
       //       });
       //     });
 
       //     // Tải file xuống
-      //     const fileName = `Slide-Hoi-Dap-Phat-Phap-${new Date().toISOString().split('T')[0]}.pptx`;
+      //     const fileName = `Hoi-Dap-Phap-Am-${new Date().toISOString().split('T')[0]}.pptx`;
       //     await pptx.writeFile({ fileName: fileName });
           
       //     this.showNotificationMessage('Đã tạo PowerPoint thành công!', 'success');
@@ -207,32 +210,18 @@ document.addEventListener('alpine:init', function() {
           const welcomeSlide = pptx.addSlide();
           welcomeSlide.background = { fill: '6a0000' };
           
-          // Dòng 1: HỎI PHÁP
-          welcomeSlide.addText('HỎI PHÁP', {
+          welcomeSlide.addText('HỎI PHÁP\nTRÌNH PHÁP', {
             x: 0.5,
-            y: 2.0,
+            y: 2.5,
             w: '90%',
-            h: 1.5,
-            fontSize: 48,
+            h: 2,
+            fontSize: 44,
             bold: true,
             color: 'FFFFFF',
             align: 'center',
             fontFace: 'Arial',
-            valign: 'middle'
-          });
-          
-          // Dòng 2: TRÌNH PHÁP
-          welcomeSlide.addText('TRÌNH PHÁP', {
-            x: 0.5,
-            y: 3.5,
-            w: '90%',
-            h: 1.5,
-            fontSize: 48,
-            bold: true,
-            color: 'FFFFFF',
-            align: 'center',
-            fontFace: 'Arial',
-            valign: 'middle'
+            valign: 'middle',
+            lineSpacing: 24 // Tăng khoảng cách giữa 2 dòng
           });
 
           // Các slide câu hỏi
@@ -259,29 +248,31 @@ document.addEventListener('alpine:init', function() {
               color: '000000'
             });
 
-            // Nội dung câu hỏi - CẬP NHẬT QUAN TRỌNG
+            // Nội dung câu hỏi - PHƯƠNG PHÁP MỚI: Tách thành từng dòng
             const content = this.getQuestionContent(question);
             
-            // Xử lý nội dung để đảm bảo xuống dòng đúng
-            const processedContent = content.replace(/\n/g, '\n\n'); // Thêm khoảng trống giữa các đoạn
+            // Tách nội dung thành các dòng
+            const lines = content.split('\n').filter(line => line.trim() !== '');
             
-            slide.addText(processedContent, {
-              x: 0.5,
-              y: 1.5,
-              w: '90%',
-              h: 5.0, // Tăng chiều cao đáng kể
-              fontSize: 14, // Giảm font size để có nhiều không gian hơn
-              color: '333333',
-              align: 'left',
-              valign: 'top',
-              isTextBox: true,
-              lineSpacing: 1.8, // Tăng khoảng cách dòng
-              paragraphSpacing: 8, // Thêm khoảng cách giữa các đoạn
-              autoFit: false, // Tắt autoFit để kiểm soát tốt hơn
-              shrinkText: false, // Tắt shrinkText
-              preserveFormatting: true,
-              breakLine: true,
-              margin: 0.1 // Thêm margin bên trong
+            let currentY = 1.5;
+            const lineHeight = 0.4; // Chiều cao mỗi dòng
+            
+            lines.forEach((line, lineIndex) => {
+              if (currentY + lineHeight <= 6.5) { // Giới hạn chiều cao slide
+                slide.addText(line, {
+                  x: 0.5,
+                  y: currentY,
+                  w: '90%',
+                  h: lineHeight,
+                  fontSize: 14,
+                  color: '333333',
+                  align: 'left',
+                  valign: 'top',
+                  lineSpacing: 6,
+                  bullet: false
+                });
+                currentY += lineHeight;
+              }
             });
 
             // Footer với số trang
