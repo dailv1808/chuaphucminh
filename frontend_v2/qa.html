@@ -27,6 +27,7 @@
     <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-200">
 
       <!-- Header Section -->
+      <!-- Trong phần Header Section -->
       <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
         <div>
           <h1 class="text-2xl font-bold text-gray-800">Quản lý Hỏi đáp</h1>
@@ -39,9 +40,16 @@
               <i class="fas fa-search text-gray-400"></i>
             </div>
             <input type="text" x-model="searchQuery" @input.debounce.300ms="applyFilters"
-                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" 
-                   placeholder="Tìm kiếm...">
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" 
+                  placeholder="Tìm kiếm...">
           </div>
+          
+          <!-- Nút Xuất Excel -->
+          <button @click="exportToExcel()" class="btn-success">
+            <i class="fas fa-file-excel mr-2"></i>
+            <span>Xuất Excel</span>
+          </button>
+          
           <button @click="openAddQuestionModal()" class="btn-primary">
             <i class="fas fa-plus mr-2"></i>
             <span>Thêm mới</span>

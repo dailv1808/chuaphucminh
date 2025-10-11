@@ -136,6 +136,124 @@ document.addEventListener('alpine:init', function() {
         return option ? option.label : status;
       },
 
+
+
+
+
+      // Thêm vào trong Alpine.data('qaData', function() { ... })
+
+      exportToExcel: function() {
+        try {
+          // Tạo dữ liệu cho Excel (định dạng HTML table)
+          const tableHeaders = [
+            'STT', 'Ngày tạo', 'Pháp Danh', 'Câu hỏi', 'Nội dung đã biên tập',
+            'Nội dung rút gọn', 'Liên Lạc', 'Trạng Thái', 'Độ ưu tiên',
+            'Ngày sửa', 'Người tạo', 'Người biên tập', 'Slide', 'FAQ',
+            'Phân Loại', 'Tags', 'Câu trả lời', 'Ngày trả lời'
+          ];
+
+          const tableData = this.filteredQuestions.map((question, index) => [
+            (index + 1).toString(),
+            this.formatDate(question.created_at),
+            this.escapeExcelValue(question.name),
+            this.escapeExcelValue(question.content),
+            this.escapeExcelValue(question.edited_content || question.content),
+            this.escapeExcelValue(question.short_content || ''),
+            this.escapeExcelValue(question.contact || 'N/A'),
+            this.getStatusLabel(question.status),
+            this.priorityOptions.find(p => p.value === question.priority)?.label || question.priority,
+            this.formatDate(question.updated_at),
+            question.created_by?.full_name || question.created_by?.username || 'Khách',
+            question.updated_by?.full_name || question.updated_by?.username || 'Khách',
+            question.slideshow ? 'Có' : 'Không',
+            question.is_faq ? 'Có' : 'Không',
+            question.group || 'N/A',
+            question.tags || 'N/A',
+            this.escapeExcelValue(question.answer || ''),
+            question.answered_at ? this.formatDate(question.answered_at) : 'N/A'
+          ]);
+
+          // Tạo nội dung CSV
+          const csvContent = this.generateCSVContent(tableHeaders, tableData);
+          
+          // Tạo và tải file
+          this.downloadFile(csvContent, 'questions.csv', 'text/csv;charset=utf-8;');
+          
+          this.showNotificationMessage('Xuất file Excel thành công!', 'success');
+          
+        } catch (error) {
+          console.error('Error exporting to Excel:', error);
+          this.showNotificationMessage('Lỗi khi xuất file: ' + error.message, 'error');
+        }
+      },
+
+      // Hàm hỗ trợ: Escape giá trị cho CSV
+      escapeExcelValue: function(value) {
+        if (value === null || value === undefined) return '';
+        
+        const stringValue = String(value);
+        // Nếu giá trị chứa dấu phẩy, xuống dòng, hoặc dấu ngoặc kép, thì bọc trong ngoặc kép
+        if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"') || stringValue.includes('\r')) {
+          return '"' + stringValue.replace(/"/g, '""') + '"';
+        }
+        return stringValue;
+      },
+
+      // Hàm tạo nội dung CSV
+      generateCSVContent: function(headers, data) {
+        const headerRow = headers.map(header => this.escapeExcelValue(header)).join(',');
+        const dataRows = data.map(row => row.join(','));
+        
+        // Thêm BOM để hiển thị tiếng Việt đúng trong Excel
+        return '\uFEFF' + [headerRow, ...dataRows].join('\n');
+      },
+
+      // Hàm tải file
+      downloadFile: function(content, filename, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Giải phóng bộ nhớ
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+      },
+
+      // Thêm hàm format date chi tiết hơn cho export
+      formatDateForExport: function(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       fetchQuestions: function() {
         this.isLoading = true;
         const token = localStorage.getItem('access_token');

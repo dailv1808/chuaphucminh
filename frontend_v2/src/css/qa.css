@@ -318,18 +318,6 @@ table select {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 /* Thay thế hoặc bổ sung các quy tắc CSS sau */
 
 /* Xóa hoặc ghi đè quy tắc .main-content cũ */
@@ -374,19 +362,22 @@ table {
   }
 }
 
-
 /* Thêm vào phần button styles */
 .btn-success {
   @apply px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center shadow-sm hover:shadow-md;
 }
 
-/* Có thể thêm responsive nếu cần */
+/* Responsive cho mobile */
 @media (max-width: 768px) {
   .flex.items-center.gap-3 {
-    @apply flex-wrap;
+    @apply flex-wrap justify-end;
   }
   
   .btn-success, .btn-primary {
-    @apply flex-1 min-w-[120px] justify-center;
+    @apply text-sm px-3 py-2;
+  }
+  
+  .relative.w-full.md\\:w-64 {
+    @apply min-w-full;
   }
 }
