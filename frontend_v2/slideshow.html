@@ -173,17 +173,17 @@
 
           <template x-if="currentSlideIndex > 0 && currentQuestion">
             <div class="question-content" style="padding-left: 8rem; padding-right: 8rem;">
-              <div class="question-author" style="font-size: 2.5rem; font-family: 'Times New Roman', Times, serif;">
-                <span class="font-bold">Câu hỏi (Hành giả: <span x-text="currentQuestion.name || 'Ẩn danh'"></span>):</span> 
-                <span class="font-normal">Dạ con thưa Sư, xin Sư cho con hỏi:</span>
+              <div style="font-size: 2.5rem; font-family: 'Times New Roman', Times, serif;">
+                <strong>Câu hỏi (Hành giả: <span x-text="currentQuestion.name || 'Ẩn danh'"></span>):</strong> 
+                Dạ con thưa Sư, xin Sư cho con hỏi:
               </div>
               <div class="whitespace-pre-line overflow-auto break-words max-h-full" 
                   style="white-space: pre-line; word-wrap: break-word; word-break: break-word; 
                         font-size: 2.5rem; font-family: 'Times New Roman', Times, serif; line-height: 1.7;"
                   x-text="currentQuestion.edited_content"></div>
-              <div class="question-author" style="white-space: pre-line; word-wrap: break-word; word-break: break-word; 
+              <div style="white-space: pre-line; word-wrap: break-word; word-break: break-word; 
                         font-size: 2.5rem; font-family: 'Times New Roman', Times, serif; line-height: 1.7;">
-                <span class="font-normal">Con thành kính tri ân Sư ạ!</span>
+                Con thành kính tri ân Sư ạ!
               </div>                  
             </div>
           </template>
