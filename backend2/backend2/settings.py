@@ -138,7 +138,7 @@ DATABASES = {
         'NAME': 'chuadb',
         'USER': 'dailv',
         'PASSWORD': 'dailv',
-        'HOST': '192.168.0.100',  # hoặc địa chỉ IP nếu PostgreSQL nằm trên server khác
+        'HOST': '192.168.0.200',  # hoặc địa chỉ IP nếu PostgreSQL nằm trên server khác
         'PORT': '5432',
     }
 }

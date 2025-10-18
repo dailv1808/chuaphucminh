@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="vi" x-data="slideshowData()">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trình Chiếu Hỏi Đáp - CPM Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Garamond:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Thêm thư viện PowerPoint -->
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <script src="/js/auth.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/slideshow-BvZmz3DE.css">
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800">
+  <!-- Header -->
+  <div x-html="await (await fetch('./partials/header.html')).text()"></div>
+  
+  <!-- Sidebar -->
+  <div x-html="await (await fetch('./partials/sidebar.html')).text()"></div>
+
+  <!-- Main Content -->
+  <div class="p-4 sm:ml-64 pt-20">
+    <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-200">
+      <!-- Header Section -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Trình Chiếu Hỏi Đáp 1</h1>
+          <p class="text-gray-500 text-sm mt-1" x-text="`Tổng cộng ${slideshowQuestions.length} câu hỏi`"></p>
+        </div>
+        <div class="flex gap-2">
+          <!-- Thêm nút tải PowerPoint -->
+          <button @click="downloadPowerPoint()" 
+                  class="flex items-center rounded-lg bg-purple-600 px-4 py-2 text-white transition-colors duration-150 hover:bg-purple-700 disabled:opacity-50"
+                  :disabled="slideshowQuestions.length === 0">
+            <i class="fas fa-file-powerpoint mr-2"></i>
+            Tải PowerPoint
+          </button>
+        </div>
+      </div>
+
+      <!-- YouTube Link and Start Button -->
+      <div class="flex flex-col gap-4 bg-gray-50 p-4 rounded-lg mb-6">
+
+        <!-- Tìm phần YouTube input và thêm @change -->
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Link YouTube Livestream</label>
+          <input type="text" x-model="youtubeLink" placeholder="https://www.youtube.com/watch?v=..." 
+                @change="saveYouTubeLinkToCache()"
+                class="w-full input-field">
+        </div>
+        
+        <button @click="startSlideshow()" class="btn-primary" 
+                :disabled="slideshowQuestions.length === 0 || !youtubeLink">
+          <i class="fas fa-play mr-2"></i>
+          <span>Bắt đầu trình chiếu</span>
+        </button>
+      </div>
+
+      <!-- Questions List -->
+      <div class="overflow-x-auto">
+        <div x-data="{
+          draggedQuestion: null,
+          dragOverQuestion: null,
+          
+          handleDragStart(question) {
+            this.draggedQuestion = question;
+          },
+          
+          handleDragOver(question, event) {
+            event.preventDefault();
+            if (question.id !== this.draggedQuestion.id) {
+              this.dragOverQuestion = question;
+            }
+          },
+          
+          handleDrop() {
+            if (this.draggedQuestion && this.dragOverQuestion) {
+              const draggedIndex = slideshowQuestions.findIndex(q => q.id === this.draggedQuestion.id);
+              const dropIndex = slideshowQuestions.findIndex(q => q.id === this.dragOverQuestion.id);
+              
+              if (draggedIndex > -1 && dropIndex > -1) {
+                const [removed] = slideshowQuestions.splice(draggedIndex, 1);
+                slideshowQuestions.splice(dropIndex, 0, removed);
+              }
+            }
+            this.draggedQuestion = null;
+            this.dragOverQuestion = null;
+          },
+          
+          handleDragEnd() {
+            this.draggedQuestion = null;
+            this.dragOverQuestion = null;
+          }
+        }">
+
+
+
+          <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3">STT</th>
+                <th scope="col" class="px-6 py-3">Pháp danh</th>
+                <th scope="col" class="px-6 py-3">Nội dung</th>
+                <th scope="col" class="px-6 py-3 text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="(question, index) in slideshowQuestions" :key="question.id">
+                <tr class="border-b hover:bg-gray-50 transition-colors duration-200"
+                    :class="{
+                      'bg-blue-50': draggedQuestion?.id === question.id,
+                      'bg-green-50': dragOverQuestion?.id === question.id
+                    }"
+                    draggable="true"
+                    @dragstart="handleDragStart(question)"
+                    @dragover="handleDragOver(question, $event)"
+                    @drop="handleDrop()"
+                    @dragend="handleDragEnd()">
+                  <td class="px-6 py-4" x-text="index + 1"></td>
+                  <td class="px-6 py-4 font-medium text-gray-900" x-text="question.name || 'Ẩn danh'"></td>
+                  <td class="px-6 py-4" style="white-space: pre-line; word-wrap: break-word; word-break: break-word;" x-text="question.edited_content"></td>
+                  
+
+                  
+                  <!-- <td class="px-6 py-4 text-right">
+                    <div class="flex justify-end gap-2">
+
+                      <button @click.stop="markAsAnswered(question)" class="action-btn bg-green-50 text-green-600 hover:bg-green-100">
+                        <i class="fas fa-check-circle mr-1"></i> Đánh dấu đã trả lời
+                      </button>
+
+                      <button @click.stop="markAsAnswered(question)" 
+                              class="action-btn"
+                              :class="isQuestionAnswered(question) ? 
+                                      'bg-amber-50 text-amber-600 hover:bg-amber-100' : 
+                                      'bg-green-50 text-green-600 hover:bg-green-100'">
+                        <i class="fas fa-check-circle mr-1"></i> 
+                        <span x-text="isQuestionAnswered(question) ? 'Đã đánh dấu trả lời' : 'Đánh dấu đã trả lời'"></span>
+                      </button>
+
+
+                      <button @click.stop="removeFromSlideshow(question)" class="action-btn delete-btn">
+                        <i class="fas fa-times mr-1"></i> Xóa khỏi trình chiếu
+                      </button>
+                    </div>
+                  </td> -->
+
+
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex justify-end gap-2">
+                      <button @click.stop="markAsAnswered(question)" 
+                              class="action-btn"
+                              :class="isQuestionAnswered(question) ? 
+                                      'bg-amber-50 text-amber-600 hover:bg-amber-100' : 
+                                      'bg-green-50 text-green-600 hover:bg-green-100'">
+                        <i class="fas fa-check-circle mr-1"></i> 
+                        <span x-text="isQuestionAnswered(question) ? 'Đã đánh dấu trả lời' : 'Đánh dấu đã trả lời'"></span>
+                      </button>
+                      <button @click.stop="removeFromSlideshow(question)" class="action-btn delete-btn">
+                        <i class="fas fa-times mr-1"></i> Xóa khỏi trình chiếu
+                      </button>
+                    </div>
+                  </td>
+
+
+
+
+                </tr>
+              </template>
+            </tbody>
+          </table>
+          
+
+
+          
+          <div x-show="slideshowQuestions.length === 0" class="empty-state">
+            <i class="far fa-folder-open text-4xl text-gray-400"></i>
+            <p x-show="isLoading">Đang tải dữ liệu...</p>
+            <p x-show="!isLoading && slideshowQuestions.length === 0">Không có câu hỏi nào trong trình chiếu</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slideshow Fullscreen Modal -->
+  <div x-show="isSlideshowActive" x-transition class="fixed inset-0 z-50 bg-white">
+    <div class="h-full w-full flex flex-col">
+      <!-- Slideshow Content -->
+      <div class="flex-1 p-8 overflow-auto">
+        <div class="max-w-4xl w-full h-full">
+      
+
+          <template x-if="currentSlideIndex === 0">
+            <div class="welcome-slide">
+              <h1 style="font-family: 'Times New Roman', Times, serif;">HỎI ĐÁP<br>TRÌNH PHÁP</h1>
+            </div>
+          </template>
+          
+          <template x-if="currentSlideIndex > 0 && currentQuestion">
+
+     
+            <div class="question-content" style="padding-left: 8rem; padding-right: 8rem;">
+              <div class="question-author" style="font-size: 3rem; font-family: 'Times New Roman', Times, serif;">
+                Câu hỏi của hành giả: <span x-text="currentQuestion.name || 'Ẩn danh'"></span>
+              </div>
+              <div class="whitespace-pre-line overflow-auto break-words max-h-full" 
+                  style="white-space: pre-line; word-wrap: break-word; word-break: break-word; 
+                        font-size: 2.5rem; font-family: 'Times New Roman', Times, serif; line-height: 1.7;"
+                  x-text="currentQuestion.edited_content"></div>
+            </div>
+
+
+
+          </template>
+        </div>
+      </div>
+
+      <!-- Slideshow Controls -->
+      <div class="flex justify-between items-center p-4 bg-gray-100">
+        <div class="text-gray-700">
+          Câu hỏi <span x-text="currentSlideIndex"></span>/<span x-text="slideshowQuestions.length"></span>
+        </div>
+        <div class="flex gap-4">
+          <button @click="prevSlide()" class="btn-secondary">
+            <i class="fas fa-chevron-left mr-1"></i> Trước (P)
+          </button>
+
+
+          <!-- <button @click="saveCurrentTimestamp()" class="btn-primary">
+            <i class="fas fa-check-circle mr-1"></i> Đánh dấu đã trả lời (R)
+          </button> -->
+
+          <button @click="saveCurrentTimestamp()" 
+                  class="btn-primary"
+                  :class="{ 'bg-amber-600 hover:bg-amber-700': isQuestionAnswered(currentQuestion) }"
+                  x-show="currentSlideIndex > 0">
+            <i class="fas fa-check-circle mr-1"></i> 
+            <span x-text="isQuestionAnswered(currentQuestion) ? 'Đã đánh dấu trả lời (R)' : 'Đánh dấu đã trả lời (R)'"></span>
+          </button>
+
+
+          <button @click="nextSlide()" class="btn-primary">
+            Tiếp (N) <i class="fas fa-chevron-right ml-1"></i>
+          </button>
+          <button @click="stopSlideshow()" class="btn-danger">
+            <i class="fas fa-stop mr-1"></i> Dừng (S)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div x-show="showNotification" x-transition class="fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg"
+       :class="{
+         'bg-green-100 text-green-800 border border-green-200': notificationType === 'success',
+         'bg-red-100 text-red-800 border border-red-200': notificationType === 'error'
+       }">
+    <div class="flex items-center">
+      <i class="fas mr-3" :class="notificationType === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
+      <span x-text="notificationMessage"></span>
+      <button @click="showNotification = false" class="ml-4 text-gray-500 hover:text-gray-700">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <div id="youtube-player" style="display: none;"></div>
+
+  <script src="/js/slideshow.js"></script>
+</body>
+</html>
