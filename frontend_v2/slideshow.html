@@ -123,32 +123,6 @@
                   <td class="px-6 py-4" x-text="index + 1"></td>
                   <td class="px-6 py-4 font-medium text-gray-900" x-text="question.name || 'Ẩn danh'"></td>
                   <td class="px-6 py-4" style="white-space: pre-line; word-wrap: break-word; word-break: break-word;" x-text="question.edited_content"></td>
-                  
-
-                  
-                  <!-- <td class="px-6 py-4 text-right">
-                    <div class="flex justify-end gap-2">
-
-                      <button @click.stop="markAsAnswered(question)" class="action-btn bg-green-50 text-green-600 hover:bg-green-100">
-                        <i class="fas fa-check-circle mr-1"></i> Đánh dấu đã trả lời
-                      </button>
-
-                      <button @click.stop="markAsAnswered(question)" 
-                              class="action-btn"
-                              :class="isQuestionAnswered(question) ? 
-                                      'bg-amber-50 text-amber-600 hover:bg-amber-100' : 
-                                      'bg-green-50 text-green-600 hover:bg-green-100'">
-                        <i class="fas fa-check-circle mr-1"></i> 
-                        <span x-text="isQuestionAnswered(question) ? 'Đã đánh dấu trả lời' : 'Đánh dấu đã trả lời'"></span>
-                      </button>
-
-
-                      <button @click.stop="removeFromSlideshow(question)" class="action-btn delete-btn">
-                        <i class="fas fa-times mr-1"></i> Xóa khỏi trình chiếu
-                      </button>
-                    </div>
-                  </td> -->
-
 
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-2">
@@ -166,17 +140,11 @@
                     </div>
                   </td>
 
-
-
-
                 </tr>
               </template>
             </tbody>
           </table>
-          
-
-
-          
+                    
           <div x-show="slideshowQuestions.length === 0" class="empty-state">
             <i class="far fa-folder-open text-4xl text-gray-400"></i>
             <p x-show="isLoading">Đang tải dữ liệu...</p>
@@ -206,15 +174,16 @@
      
             <div class="question-content" style="padding-left: 8rem; padding-right: 8rem;">
               <div class="question-author" style="font-size: 3rem; font-family: 'Times New Roman', Times, serif;">
-                Câu hỏi của hành giả: <span x-text="currentQuestion.name || 'Ẩn danh'"></span>
+                Câu hỏi (Hành giả: <span x-text="currentQuestion.name || 'Ẩn danh'"></span>): Dạ con thưa Sư, xin Sư cho con hỏi:
               </div>
               <div class="whitespace-pre-line overflow-auto break-words max-h-full" 
                   style="white-space: pre-line; word-wrap: break-word; word-break: break-word; 
                         font-size: 2.5rem; font-family: 'Times New Roman', Times, serif; line-height: 1.7;"
                   x-text="currentQuestion.edited_content"></div>
+              <div class="question-author" style="font-size: 3rem; font-family: 'Times New Roman', Times, serif;">
+                Con thành kính tri ân Sư ạ!
+              </div>                  
             </div>
-
-
 
           </template>
         </div>
