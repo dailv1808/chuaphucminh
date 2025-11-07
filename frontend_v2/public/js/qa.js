@@ -114,42 +114,6 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
-      // THÊM HÀM NÀY VÀO (sau hàm quickEditField)
-      autoSaveCurrentQuestion: async function() {
-        if (!this.currentQuestion.id) return;
-        
-        const token = localStorage.getItem('access_token');
-        const user = JSON.parse(localStorage.getItem('user'));
-        
-        try {
-          const payload = this.preparePayload();
-          const response = await fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
-            method: 'PUT',
-            headers: { 
-              'Authorization': `Bearer ${token}`, 
-              'Content-Type': 'application/json' 
-            },
-            body: JSON.stringify(payload)
-          });
-
-          if (!response.ok) throw new Error('Tự động lưu thất bại');
-          
-          // Cập nhật lại danh sách câu hỏi
-          const updatedQuestion = await response.json();
-          const index = this.questions.findIndex(q => q.id === updatedQuestion.id);
-          if (index !== -1) {
-            this.questions[index] = { ...this.questions[index], ...updatedQuestion };
-          }
-          
-          this.showTemporaryNotification('Đã tự động lưu thay đổi');
-          return true;
-        } catch (error) {
-          console.error('Error auto-saving:', error);
-          this.showNotificationMessage('Lỗi khi tự động lưu: ' + error.message, 'error');
-          return false;
-        }
-      },
-
       init: function() {
         if (!localStorage.getItem('access_token')) {
           window.location.href = '/login.html?next=' + encodeURIComponent(window.location.pathname);
@@ -488,60 +452,6 @@ document.addEventListener('alpine:init', function() {
         this.sortAndFilterQuestions();
       },
 
-
-
-
-
-      // sortAndFilterQuestions: function() {
-      //   let results = [...this.questions];
-        
-      //   if (this.searchQuery) {
-      //     const query = this.searchQuery.toLowerCase();
-      //     results = results.filter(q => 
-      //       q.name.toLowerCase().includes(query) || 
-      //       q.content.toLowerCase().includes(query) ||
-      //       (q.short_content && q.short_content.toLowerCase().includes(query)) ||
-      //       (q.edited_content && q.edited_content.toLowerCase().includes(query)) ||
-      //       (q.answer && q.answer.toLowerCase().includes(query)) ||
-      //       (q.group && q.group.toLowerCase().includes(query)) ||
-      //       (q.tags && q.tags.toLowerCase().includes(query))
-      //     );
-      //   }
-        
-      //   if (this.statusFilter) {
-      //     results = results.filter(q => q.status === this.statusFilter);
-      //   }
-        
-      //   if (this.priorityFilter) {
-      //     results = results.filter(q => q.priority === this.priorityFilter);
-      //   }
-        
-      //   if (this.slideshowFilter === 'yes') {
-      //     results = results.filter(q => q.slideshow);
-      //   } else if (this.slideshowFilter === 'no') {
-      //     results = results.filter(q => !q.slideshow);
-      //   }
-        
-      //   if (this.faqFilter === 'yes') {
-      //     results = results.filter(q => q.is_faq);
-      //   } else if (this.faqFilter === 'no') {
-      //     results = results.filter(q => !q.is_faq);
-      //   }
-        
-      //   if (this.sortBy === 'newest') {
-      //     results.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
-      //   } else if (this.sortBy === 'oldest') {
-      //     results.sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
-      //   } else if (this.sortBy === 'newest_created') {
-      //     results.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      //   } else {
-      //     results.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-      //   }
-        
-      //   this.filteredQuestions = results;
-      // },
-
-
       sortAndFilterQuestions: function() {
         let results = [...this.questions];
         
@@ -589,17 +499,7 @@ document.addEventListener('alpine:init', function() {
         }
         
         this.filteredQuestions = results;
-        
-        // Đảm bảo currentPage không vượt quá tổng số trang
-        if (this.currentPage > this.totalPages && this.totalPages > 0) {
-          this.currentPage = this.totalPages;
-        }
       },
-
-
-
-
-
 
       goToPage: function(page) {
         this.currentPage = page;
@@ -742,34 +642,6 @@ document.addEventListener('alpine:init', function() {
         });
       },
 
-      // updateQuestion: function(payload) {
-      //   const token = localStorage.getItem('access_token');
-      //   fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
-      //     method: 'PUT',
-      //     headers: { 
-      //       'Authorization': `Bearer ${token}`, 
-      //       'Content-Type': 'application/json' 
-      //     },
-      //     body: JSON.stringify(payload)
-      //   })
-      //   .then(response => {
-      //     if (!response.ok) throw new Error('Cập nhật thất bại');
-      //     return response.json();
-      //   })
-      //   .then(() => {
-      //     this.showNotificationMessage('Cập nhật câu hỏi thành công', 'success');
-      //     this.showQuestionModal = false;
-      //     this.fetchQuestions();
-      //   })
-      //   .catch(error => {
-      //     console.error('Error:', error);
-      //     this.showNotificationMessage(error.message, 'error');
-      //   });
-      // },
-
-
-
-      // CẬP NHẬT HÀM updateQuestion (thay thế hàm hiện tại)
       updateQuestion: function(payload) {
         const token = localStorage.getItem('access_token');
         fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
@@ -787,56 +659,13 @@ document.addEventListener('alpine:init', function() {
         .then(() => {
           this.showNotificationMessage('Cập nhật câu hỏi thành công', 'success');
           this.showQuestionModal = false;
-          // Thay vì gọi fetchQuestions() sẽ reset trang, gọi:
-          this.fetchQuestionsWithoutPageReset();
+          this.fetchQuestions();
         })
         .catch(error => {
           console.error('Error:', error);
           this.showNotificationMessage(error.message, 'error');
         });
       },
-
-      fetchQuestionsWithoutPageReset: function() {
-        this.isLoading = true;
-        const token = localStorage.getItem('access_token');
-        fetch('https://api.chuaphucminh.xyz/api/questions/', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-          .then(response => {
-            if (!response.ok) throw new Error('Lỗi khi tải danh sách câu hỏi');
-            return response.json();
-          })
-          .then(data => {
-            this.questions = data.map(q => ({
-              ...q,
-              edited_content: q.edited_content || q.content,
-              showAnswerSection: false,
-              newAnswer: '',
-              created_by: q.created_by || {username: 'Khách', full_name: 'Khách'},
-              updated_by: q.updated_by || q.created_by || {username: 'Khách', full_name: 'Khách'}
-            }));
-            
-            // Cập nhật filteredQuestions mà không reset currentPage
-            this.updateFilteredQuestions();
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            this.showNotificationMessage(error.message, 'error');
-          })
-          .finally(() => {
-            this.isLoading = false;
-          });
-      },
-
-      // THÊM HÀM updateFilteredQuestions
-      updateFilteredQuestions: function() {
-        this.sortAndFilterQuestions();
-        // KHÔNG reset currentPage ở đây
-      },
-
-
 
       confirmDelete: function(question) {
         this.currentQuestion = { ...question };
@@ -891,31 +720,10 @@ document.addEventListener('alpine:init', function() {
       },
 
 
-      // navigateQuestion: async function(direction) {
-      //   // Nếu đang ở modal chỉnh sửa và có thay đổi, tự động lưu trước
-      //   if (this.showQuestionModal && this.isEditing) {
-      //     await this.autoSaveCurrentQuestion();
-      //   }
-        
-      //   const newIndex = this.currentQuestionIndex + direction;
-      //   if (newIndex >= 0 && newIndex < this.filteredQuestions.length) {
-      //     const question = this.filteredQuestions[newIndex];
-      //     if (this.showDetailModal) {
-      //       this.showQuestionDetail(question);
-      //     } else if (this.showQuestionModal) {
-      //       this.openEditQuestionModal(question);
-      //     }
-      //   }
-      // },
-
       navigateQuestion: async function(direction) {
-        // Nếu đang ở modal chỉnh sửa, tự động lưu trước khi chuyển
+        // Nếu đang ở modal chỉnh sửa và có thay đổi, tự động lưu trước
         if (this.showQuestionModal && this.isEditing) {
-          const saved = await this.autoSaveCurrentQuestion();
-          if (!saved) {
-            // Nếu lưu thất bại, không chuyển câu hỏi
-            return;
-          }
+          await this.autoSaveCurrentQuestion();
         }
         
         const newIndex = this.currentQuestionIndex + direction;
@@ -972,7 +780,23 @@ document.addEventListener('alpine:init', function() {
         // KHÔNG reset currentPage ở đây
       },
 
-
+      // // Thay thế hàm navigateQuestion hiện tại
+      // navigateQuestion: async function(direction) {
+      //   // Nếu đang ở modal chỉnh sửa và có thay đổi, tự động lưu trước
+      //   if (this.showQuestionModal && this.isEditing && this.hasChanges()) {
+      //     await this.autoSaveCurrentQuestion();
+      //   }
+        
+      //   const newIndex = this.currentQuestionIndex + direction;
+      //   if (newIndex >= 0 && newIndex < this.filteredQuestions.length) {
+      //     const question = this.filteredQuestions[newIndex];
+      //     if (this.showDetailModal) {
+      //       this.showQuestionDetail(question);
+      //     } else if (this.showQuestionModal) {
+      //       this.openEditQuestionModal(question);
+      //     }
+      //   }
+      // },
 
       // Thêm hàm kiểm tra thay đổi
       hasChanges: function() {
