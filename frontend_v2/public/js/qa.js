@@ -63,13 +63,12 @@ document.addEventListener('alpine:init', function() {
         const user = JSON.parse(localStorage.getItem('user'));
         
         try {
-          // Tạo bản sao của câu hỏi
+          // Tạo bản sao của câu hỏi, giữ nguyên mọi tham số
           const duplicatedQuestion = {
             ...question,
             name: `${question.name} (Bản sao)`,
-            updated_at: new Date().toISOString(), 
-            created_by: user?.id || null,
-            updated_by: user?.id || null
+            updated_at: new Date().toISOString(), // Chỉ cập nhật thời gian sửa
+            updated_by: user?.id || null  // Cập nhật người sửa là người hiện tại
           };
 
           // Xóa các trường không cần thiết
