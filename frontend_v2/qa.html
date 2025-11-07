@@ -228,6 +228,13 @@
 
                 <td class="px-6 py-4 text-right">
                   <div class="flex justify-end gap-2">
+
+                    <!-- Thêm nút duplicate trước nút edit -->
+                    <button @click.stop="duplicateQuestion(question)" 
+                            class="action-btn bg-green-50 text-green-600 hover:bg-green-100"
+                            title="Nhân đôi câu hỏi">
+                      <i class="fas fa-copy"></i>
+                    </button>
                     <button @click.stop="openEditQuestionModal(question)" class="action-btn edit-btn">
                       <i class="fas fa-edit"></i>
                     </button>

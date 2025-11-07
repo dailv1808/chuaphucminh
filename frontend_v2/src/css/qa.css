@@ -421,3 +421,12 @@ table {
     @apply mr-0 sm:mr-2;
   }
 }
+
+/* Thêm vào cuối file */
+.bg-green-50 {
+  background-color: #f0fdf4;
+}
+
+.hover\:bg-green-100:hover {
+  background-color: #dcfce7;
+}
