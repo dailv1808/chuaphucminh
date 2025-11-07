@@ -722,28 +722,35 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
-      // HÀM TỰ ĐỘNG LƯU VÀ CHUYỂN CÂU HỎI
+
+
+
+
+      // THAY THẾ HÀM autoSaveAndNavigate
       autoSaveAndNavigate: async function(direction) {
         console.log('Auto saving and navigating...');
         
+        // Tạo bản sao của currentQuestion để tránh tham chiếu
+        const questionToSave = { ...this.currentQuestion };
+        
         // Kiểm tra dữ liệu bắt buộc
-        if (!this.currentQuestion.name?.trim() || !this.currentQuestion.content?.trim()) {
+        if (!questionToSave.name?.trim() || !questionToSave.content?.trim()) {
           this.showNotificationMessage('Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
           return;
         }
 
         // Đảm bảo edited_content có giá trị
-        if (!this.currentQuestion.edited_content?.trim()) {
-          this.currentQuestion.edited_content = this.currentQuestion.content;
+        if (!questionToSave.edited_content?.trim()) {
+          questionToSave.edited_content = questionToSave.content;
         }
 
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
         
         try {
-          // Chuẩn bị payload - sử dụng cùng logic với saveQuestion
+          // Chuẩn bị payload
           const payload = { 
-            ...this.currentQuestion,
+            ...questionToSave,
             updated_by: user?.id || null,
             updated_at: new Date().toISOString()
           };
@@ -765,8 +772,8 @@ document.addEventListener('alpine:init', function() {
 
           console.log('Saving payload:', payload);
 
-          const response = await fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
-            method: 'PUT',
+          const response = await fetch(`https://api.chuaphucminh.xyz/api/questions/${questionToSave.id}/`, {
+            method: 'PATCH', // THAY ĐỔI: Sử dụng PATCH thay vì PUT
             headers: { 
               'Authorization': `Bearer ${token}`, 
               'Content-Type': 'application/json' 
@@ -782,7 +789,7 @@ document.addEventListener('alpine:init', function() {
           const updatedQuestion = await response.json();
           console.log('Save successful:', updatedQuestion);
           
-          // CẬP NHẬT DỮ LIỆU NGAY LẬP TỨC TRONG questions ARRAY
+          // CẬP NHẬT DỮ LIỆU NGAY LẬP TỨC
           const index = this.questions.findIndex(q => q.id === updatedQuestion.id);
           if (index !== -1) {
             this.questions[index] = { ...this.questions[index], ...updatedQuestion };
