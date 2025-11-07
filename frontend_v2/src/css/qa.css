@@ -430,3 +430,8 @@ table {
 .hover\:bg-green-100:hover {
   background-color: #dcfce7;
 }
+
+/* Thêm vào cuối file */
+input[type="checkbox"] {
+  @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
+}

@@ -21,6 +21,9 @@ document.addEventListener('alpine:init', function() {
       perPage: 10,
       selectedQuestion: null,
       currentQuestionIndex: 0,
+      // Biến cho chức năng chọn nhiều
+      selectedQuestions: [],
+      selectAll: false,
       statusOptions: [
         { value: 'answered', label: 'Đã trả lời' },
         { value: 'pending', label: 'Chưa trả lời' },
@@ -52,6 +55,65 @@ document.addEventListener('alpine:init', function() {
         updated_at: new Date().toISOString(),
         created_by: null,
         updated_by: null
+      },
+
+      // Hàm chọn/bỏ chọn tất cả
+      toggleSelectAll: function() {
+        if (this.selectAll) {
+          this.selectedQuestions = [...this.paginatedQuestions.map(q => q.id)];
+        } else {
+          this.selectedQuestions = [];
+        }
+      },
+
+      // Hàm chọn/bỏ chọn một câu hỏi
+      toggleSelectQuestion: function(questionId) {
+        const index = this.selectedQuestions.indexOf(questionId);
+        if (index > -1) {
+          this.selectedQuestions.splice(index, 1);
+        } else {
+          this.selectedQuestions.push(questionId);
+        }
+      },
+
+      // Hàm kiểm tra xem câu hỏi có được chọn không
+      isSelected: function(questionId) {
+        return this.selectedQuestions.includes(questionId);
+      },
+
+      // Hàm xóa nhiều câu hỏi
+      deleteMultipleQuestions: async function() {
+        if (this.selectedQuestions.length === 0) {
+          this.showNotificationMessage('Vui lòng chọn ít nhất một câu hỏi để xóa', 'error');
+          return;
+        }
+
+        if (!confirm(`Bạn có chắc chắn muốn xóa ${this.selectedQuestions.length} câu hỏi đã chọn?`)) {
+          return;
+        }
+
+        const token = localStorage.getItem('access_token');
+        
+        try {
+          // Xóa từng câu hỏi
+          for (const questionId of this.selectedQuestions) {
+            const response = await fetch(`https://api.chuaphucminh.xyz/api/questions/${questionId}/`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error(`Xóa câu hỏi ${questionId} thất bại`);
+          }
+          
+          this.showNotificationMessage(`Đã xóa thành công ${this.selectedQuestions.length} câu hỏi`, 'success');
+          this.selectedQuestions = []; // Reset danh sách chọn
+          this.selectAll = false;
+          this.fetchQuestions(); // Tải lại danh sách
+          
+        } catch (error) {
+          console.error('Error:', error);
+          this.showNotificationMessage(error.message, 'error');
+        }
       },
 
 
