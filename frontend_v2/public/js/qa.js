@@ -114,6 +114,77 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
+      // Thêm vào trong Alpine.data('qaData', function() { ... }), sau hàm quickEditField
+
+      // Hàm tự động lưu cho modal chỉnh sửa
+      autoSaveEditModal: _.debounce(async function() {
+        if (!this.isEditing || !this.currentQuestion.id) return;
+        
+        console.log('Auto saving edit modal...');
+        
+        // Kiểm tra dữ liệu bắt buộc
+        if (!this.currentQuestion.name?.trim() || !this.currentQuestion.content?.trim()) {
+          return; // Không hiển thị lỗi, chỉ không lưu
+        }
+
+        const token = localStorage.getItem('access_token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        try {
+          // Chuẩn bị payload
+          const payload = { 
+            ...this.currentQuestion,
+            updated_by: user?.id || null,
+            updated_at: new Date().toISOString()
+          };
+
+          // Cập nhật answered_at nếu có câu trả lời
+          if (payload.answer && !payload.answered_at) {
+            payload.answered_at = new Date().toISOString();
+            payload.status = 'answered';
+          } else if (!payload.answer && payload.answered_at) {
+            payload.answered_at = null;
+            payload.status = 'pending';
+          }
+
+          // Clean up payload
+          delete payload.showAnswerSection;
+          delete payload.newAnswer;
+          delete payload.created_by_obj;
+          delete payload.updated_by_obj;
+
+          const response = await fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
+            method: 'PUT',
+            headers: { 
+              'Authorization': `Bearer ${token}`, 
+              'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error('Tự động lưu thất bại');
+          }
+          
+          const updatedQuestion = await response.json();
+          
+          // Cập nhật dữ liệu trong questions array
+          const index = this.questions.findIndex(q => q.id === updatedQuestion.id);
+          if (index !== -1) {
+            this.questions[index] = { ...this.questions[index], ...updatedQuestion };
+          }
+          
+          // Cập nhật filteredQuestions
+          this.applyFilters();
+          
+          this.showTemporaryNotification('Đã tự động lưu thay đổi');
+          
+        } catch (error) {
+          console.error('Error auto-saving edit modal:', error);
+          // Không hiển thị thông báo lỗi để không làm phiền người dùng
+        }
+      }, 1000), // Debounce 1 giây
+
       init: function() {
         if (!localStorage.getItem('access_token')) {
           window.location.href = '/login.html?next=' + encodeURIComponent(window.location.pathname);
