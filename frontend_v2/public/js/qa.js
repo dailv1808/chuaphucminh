@@ -8,7 +8,7 @@ document.addEventListener('alpine:init', function() {
       searchQuery: '',
       statusFilter: '',
       priorityFilter: '',
-      sortBy: 'newest',
+      sortBy: 'newest_created',
       showQuestionModal: false,
       showDetailModal: false,
       showConfirmModal: false,
@@ -719,7 +719,16 @@ document.addEventListener('alpine:init', function() {
         return date.toLocaleDateString('vi-VN');
       },
 
-      navigateQuestion: function(direction) {
+
+
+
+      // Thay thế hàm navigateQuestion hiện tại
+      navigateQuestion: async function(direction) {
+        // Nếu đang ở modal chỉnh sửa và có thay đổi, tự động lưu trước
+        if (this.showQuestionModal && this.isEditing && this.hasChanges()) {
+          await this.autoSaveCurrentQuestion();
+        }
+        
         const newIndex = this.currentQuestionIndex + direction;
         if (newIndex >= 0 && newIndex < this.filteredQuestions.length) {
           const question = this.filteredQuestions[newIndex];
@@ -731,8 +740,82 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
+      // Thêm hàm kiểm tra thay đổi
+      hasChanges: function() {
+        if (!this.currentQuestion || !this.currentQuestion.id) return false;
+        
+        const originalQuestion = this.questions.find(q => q.id === this.currentQuestion.id);
+        if (!originalQuestion) return false;
+        
+        // So sánh các trường quan trọng để xem có thay đổi không
+        return this.currentQuestion.name !== originalQuestion.name ||
+              this.currentQuestion.content !== originalQuestion.content ||
+              this.currentQuestion.edited_content !== originalQuestion.edited_content ||
+              this.currentQuestion.answer !== originalQuestion.answer ||
+              this.currentQuestion.status !== originalQuestion.status ||
+              this.currentQuestion.priority !== originalQuestion.priority ||
+              this.currentQuestion.slideshow !== originalQuestion.slideshow ||
+              this.currentQuestion.is_faq !== originalQuestion.is_faq ||
+              this.currentQuestion.group !== originalQuestion.group ||
+              this.currentQuestion.tags !== originalQuestion.tags;
+      },
+
+      // Thêm hàm tự động lưu
+      autoSaveCurrentQuestion: async function() {
+        if (!this.currentQuestion.id) return;
+        
+        const token = localStorage.getItem('access_token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        try {
+          const payload = this.preparePayload();
+          const response = await fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
+            method: 'PUT',
+            headers: { 
+              'Authorization': `Bearer ${token}`, 
+              'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) throw new Error('Tự động lưu thất bại');
+          
+          // Cập nhật lại danh sách câu hỏi
+          const updatedQuestion = await response.json();
+          const index = this.questions.findIndex(q => q.id === updatedQuestion.id);
+          if (index !== -1) {
+            this.questions[index] = { ...this.questions[index], ...updatedQuestion };
+          }
+          
+          this.showTemporaryNotification('Đã tự động lưu thay đổi');
+        } catch (error) {
+          console.error('Error auto-saving:', error);
+          this.showNotificationMessage('Lỗi khi tự động lưu: ' + error.message, 'error');
+        }
+      },
+
+
+
+
+
+      // navigateQuestion: function(direction) {
+      //   const newIndex = this.currentQuestionIndex + direction;
+      //   if (newIndex >= 0 && newIndex < this.filteredQuestions.length) {
+      //     const question = this.filteredQuestions[newIndex];
+      //     if (this.showDetailModal) {
+      //       this.showQuestionDetail(question);
+      //     } else if (this.showQuestionModal) {
+      //       this.openEditQuestionModal(question);
+      //     }
+      //   }
+      // },
+
+
+
+
+      // Thay thế hàm handleKeyNavigation hiện tại
       handleKeyNavigation: function(event) {
-        if (this.showDetailModal || this.showQuestionModal) {
+        if ((this.showDetailModal || this.showQuestionModal) && event.ctrlKey) {
           if (event.key === 'ArrowLeft') {
             this.navigateQuestion(-1);
             event.preventDefault();
