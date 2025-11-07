@@ -448,9 +448,13 @@ document.addEventListener('alpine:init', function() {
       },
 
       applyFilters: function() {
-        this.currentPage = 1;
+        // this.currentPage = 1;
         this.sortAndFilterQuestions();
       },
+
+
+
+
 
       sortAndFilterQuestions: function() {
         let results = [...this.questions];
@@ -720,12 +724,9 @@ document.addEventListener('alpine:init', function() {
       },
 
 
-
-
-      // Thay thế hàm navigateQuestion hiện tại
       navigateQuestion: async function(direction) {
         // Nếu đang ở modal chỉnh sửa và có thay đổi, tự động lưu trước
-        if (this.showQuestionModal && this.isEditing && this.hasChanges()) {
+        if (this.showQuestionModal && this.isEditing) {
           await this.autoSaveCurrentQuestion();
         }
         
@@ -739,6 +740,67 @@ document.addEventListener('alpine:init', function() {
           }
         }
       },
+
+      // Thêm hàm tự động lưu
+      autoSaveCurrentQuestion: async function() {
+        if (!this.currentQuestion.id) return;
+        
+        const token = localStorage.getItem('access_token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        try {
+          const payload = this.preparePayload();
+          const response = await fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
+            method: 'PUT',
+            headers: { 
+              'Authorization': `Bearer ${token}`, 
+              'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) throw new Error('Tự động lưu thất bại');
+          
+          // Cập nhật lại danh sách câu hỏi
+          const updatedQuestion = await response.json();
+          const index = this.questions.findIndex(q => q.id === updatedQuestion.id);
+          if (index !== -1) {
+            this.questions[index] = { ...this.questions[index], ...updatedQuestion };
+          }
+          
+          // Cập nhật filteredQuestions để giữ nguyên bộ lọc và phân trang
+          this.updateFilteredQuestions();
+          
+          this.showTemporaryNotification('Đã tự động lưu thay đổi');
+        } catch (error) {
+          console.error('Error auto-saving:', error);
+          this.showNotificationMessage('Lỗi khi tự động lưu: ' + error.message, 'error');
+        }
+      },
+
+      // Thêm hàm cập nhật filteredQuestions mà không reset trang
+      updateFilteredQuestions: function() {
+        this.sortAndFilterQuestions();
+        // KHÔNG reset currentPage ở đây
+      },
+
+      // // Thay thế hàm navigateQuestion hiện tại
+      // navigateQuestion: async function(direction) {
+      //   // Nếu đang ở modal chỉnh sửa và có thay đổi, tự động lưu trước
+      //   if (this.showQuestionModal && this.isEditing && this.hasChanges()) {
+      //     await this.autoSaveCurrentQuestion();
+      //   }
+        
+      //   const newIndex = this.currentQuestionIndex + direction;
+      //   if (newIndex >= 0 && newIndex < this.filteredQuestions.length) {
+      //     const question = this.filteredQuestions[newIndex];
+      //     if (this.showDetailModal) {
+      //       this.showQuestionDetail(question);
+      //     } else if (this.showQuestionModal) {
+      //       this.openEditQuestionModal(question);
+      //     }
+      //   }
+      // },
 
       // Thêm hàm kiểm tra thay đổi
       hasChanges: function() {
@@ -793,23 +855,6 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage('Lỗi khi tự động lưu: ' + error.message, 'error');
         }
       },
-
-
-
-
-
-      // navigateQuestion: function(direction) {
-      //   const newIndex = this.currentQuestionIndex + direction;
-      //   if (newIndex >= 0 && newIndex < this.filteredQuestions.length) {
-      //     const question = this.filteredQuestions[newIndex];
-      //     if (this.showDetailModal) {
-      //       this.showQuestionDetail(question);
-      //     } else if (this.showQuestionModal) {
-      //       this.openEditQuestionModal(question);
-      //     }
-      //   }
-      // },
-
 
 
 
