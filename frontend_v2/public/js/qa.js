@@ -720,32 +720,67 @@ document.addEventListener('alpine:init', function() {
       },
 
 
-      // navigateQuestion: async function(direction) {
-      //   // Nếu đang ở modal chỉnh sửa và có thay đổi, tự động lưu trước
-      //   if (this.showQuestionModal && this.isEditing) {
-      //     await this.autoSaveCurrentQuestion();
-      //   }
-        
-      //   const newIndex = this.currentQuestionIndex + direction;
-      //   if (newIndex >= 0 && newIndex < this.filteredQuestions.length) {
-      //     const question = this.filteredQuestions[newIndex];
-      //     if (this.showDetailModal) {
-      //       this.showQuestionDetail(question);
-      //     } else if (this.showQuestionModal) {
-      //       this.openEditQuestionModal(question);
-      //     }
-      //   }
-      // },
-
-
-
       // THAY THÀNH:
       navigateQuestion: async function(direction) {
         // THÊM DÒNG NÀY - Tự động lưu trước khi chuyển câu hỏi
         if (this.showQuestionModal && this.isEditing) {
           await this.saveQuestion();
+        } else {
+          this.navigateToQuestion(direction);
         }
+
         
+        // const newIndex = this.currentQuestionIndex + direction;
+        // if (newIndex >= 0 && newIndex < this.filteredQuestions.length) {
+        //   const question = this.filteredQuestions[newIndex];
+        //   if (this.showDetailModal) {
+        //     this.showQuestionDetail(question);
+        //   } else if (this.showQuestionModal) {
+        //     this.openEditQuestionModal(question);
+        //   }
+        // }
+      },
+
+      // THÊM HÀM MỚI (đặt ngay sau hàm navigateQuestion):
+      autoSaveAndNavigate: async function() {
+        if (!this.currentQuestion.name.trim() || !this.currentQuestion.content.trim()) {
+          this.showNotificationMessage('Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
+          return;
+        }
+
+        // Set edited_content to content if empty
+        if (!this.currentQuestion.edited_content) {
+          this.currentQuestion.edited_content = this.currentQuestion.content;
+        }
+
+        const payload = this.preparePayload();
+        
+        const token = localStorage.getItem('access_token');
+        try {
+          const response = await fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
+            method: 'PUT',
+            headers: { 
+              'Authorization': `Bearer ${token}`, 
+              'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) throw new Error('Cập nhật thất bại');
+          
+          this.showTemporaryNotification('Đã tự động lưu thay đổi');
+          
+          // Sau khi lưu thành công, chuyển sang câu hỏi tiếp theo
+          this.navigateToQuestion(direction);
+          
+        } catch (error) {
+          console.error('Error:', error);
+          this.showNotificationMessage(error.message, 'error');
+        }
+      },
+
+      // THÊM HÀM NÀY (đặt ngay sau hàm autoSaveAndNavigate):
+      navigateToQuestion: function(direction) {
         const newIndex = this.currentQuestionIndex + direction;
         if (newIndex >= 0 && newIndex < this.filteredQuestions.length) {
           const question = this.filteredQuestions[newIndex];
