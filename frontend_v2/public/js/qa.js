@@ -544,27 +544,18 @@ document.addEventListener('alpine:init', function() {
         this.showQuestionModal = true;
       },
 
-      // openEditQuestionModal: function(question) {
-      //   this.isEditing = true;
-      //   this.currentQuestion = JSON.parse(JSON.stringify({
-      //     ...question,
-      //     edited_content: question.edited_content || question.content // Default to content if empty
-      //   }));
-      //   this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
-      //   this.showQuestionModal = true;
-      //   this.showDetailModal = false;
-      // },
-
       openEditQuestionModal: function(question) {
         this.isEditing = true;
         this.currentQuestion = JSON.parse(JSON.stringify({
           ...question,
-          edited_content: question.edited_content || question.content // Đảm bảo luôn có giá trị
+          edited_content: question.edited_content || question.content
         }));
         this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
         this.showQuestionModal = true;
         this.showDetailModal = false;
       },
+
+
 
       closeQuestionModal: function() {
         this.showQuestionModal = false;
@@ -720,9 +711,9 @@ document.addEventListener('alpine:init', function() {
       },
 
 
-      // THAY THÀNH:
+      // THAY THẾ HOÀN TOÀN HÀM navigateQuestion VÀ CÁC HÀM LIÊN QUAN:
       navigateQuestion: async function(direction) {
-  // Nếu đang ở modal chỉnh sửa, tự động lưu trước khi chuyển
+        // Nếu đang ở modal chỉnh sửa, tự động lưu trước khi chuyển
         if (this.showQuestionModal && this.isEditing) {
           await this.autoSaveAndNavigate(direction);
         } else {
@@ -730,28 +721,50 @@ document.addEventListener('alpine:init', function() {
           this.navigateToQuestion(direction);
         }
       },
-      
 
-
-
-
-
-
+      // HÀM TỰ ĐỘNG LƯU VÀ CHUYỂN CÂU HỎI
       autoSaveAndNavigate: async function(direction) {
-        if (!this.currentQuestion.name.trim() || !this.currentQuestion.content.trim()) {
+        console.log('Auto saving and navigating...');
+        
+        // Kiểm tra dữ liệu bắt buộc
+        if (!this.currentQuestion.name?.trim() || !this.currentQuestion.content?.trim()) {
           this.showNotificationMessage('Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
           return;
         }
 
-        // Set edited_content to content if empty
-        if (!this.currentQuestion.edited_content) {
+        // Đảm bảo edited_content có giá trị
+        if (!this.currentQuestion.edited_content?.trim()) {
           this.currentQuestion.edited_content = this.currentQuestion.content;
         }
 
-        const payload = this.preparePayload();
-        
         const token = localStorage.getItem('access_token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        
         try {
+          // Chuẩn bị payload - sử dụng cùng logic với saveQuestion
+          const payload = { 
+            ...this.currentQuestion,
+            updated_by: user?.id || null,
+            updated_at: new Date().toISOString()
+          };
+
+          // Cập nhật answered_at nếu có câu trả lời
+          if (payload.answer && !payload.answered_at) {
+            payload.answered_at = new Date().toISOString();
+            payload.status = 'answered';
+          } else if (!payload.answer && payload.answered_at) {
+            payload.answered_at = null;
+            payload.status = 'pending';
+          }
+
+          // Clean up payload
+          delete payload.showAnswerSection;
+          delete payload.newAnswer;
+          delete payload.created_by_obj;
+          delete payload.updated_by_obj;
+
+          console.log('Saving payload:', payload);
+
           const response = await fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
             method: 'PUT',
             headers: { 
@@ -761,7 +774,19 @@ document.addEventListener('alpine:init', function() {
             body: JSON.stringify(payload)
           });
 
-          if (!response.ok) throw new Error('Cập nhật thất bại');
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Cập nhật thất bại: ${response.status} - ${errorText}`);
+          }
+          
+          const updatedQuestion = await response.json();
+          console.log('Save successful:', updatedQuestion);
+          
+          // CẬP NHẬT DỮ LIỆU NGAY LẬP TỨC TRONG questions ARRAY
+          const index = this.questions.findIndex(q => q.id === updatedQuestion.id);
+          if (index !== -1) {
+            this.questions[index] = { ...this.questions[index], ...updatedQuestion };
+          }
           
           this.showTemporaryNotification('Đã tự động lưu thay đổi');
           
@@ -769,74 +794,33 @@ document.addEventListener('alpine:init', function() {
           this.navigateToQuestion(direction);
           
         } catch (error) {
-          console.error('Error:', error);
-          this.showNotificationMessage(error.message, 'error');
+          console.error('Error auto-saving:', error);
+          this.showNotificationMessage('Lỗi khi tự động lưu: ' + error.message, 'error');
         }
       },
 
-
-
-
-
-
-
-
-
-      // // THÊM HÀM MỚI (đặt ngay sau hàm navigateQuestion):
-      // autoSaveAndNavigate: async function() {
-      //   if (!this.currentQuestion.name.trim() || !this.currentQuestion.content.trim()) {
-      //     this.showNotificationMessage('Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
-      //     return;
-      //   }
-
-      //   // Set edited_content to content if empty
-      //   if (!this.currentQuestion.edited_content) {
-      //     this.currentQuestion.edited_content = this.currentQuestion.content;
-      //   }
-
-      //   const payload = this.preparePayload();
-        
-      //   const token = localStorage.getItem('access_token');
-      //   try {
-      //     const response = await fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
-      //       method: 'PUT',
-      //       headers: { 
-      //         'Authorization': `Bearer ${token}`, 
-      //         'Content-Type': 'application/json' 
-      //       },
-      //       body: JSON.stringify(payload)
-      //     });
-
-      //     if (!response.ok) throw new Error('Cập nhật thất bại');
-          
-      //     this.showTemporaryNotification('Đã tự động lưu thay đổi');
-          
-      //     // Sau khi lưu thành công, chuyển sang câu hỏi tiếp theo
-      //     this.navigateToQuestion(direction);
-          
-      //   } catch (error) {
-      //     console.error('Error:', error);
-      //     this.showNotificationMessage(error.message, 'error');
-      //   }
-      // },
-
-      // THÊM HÀM NÀY (đặt ngay sau hàm autoSaveAndNavigate):
+      // HÀM CHUYỂN CÂU HỎI
       navigateToQuestion: function(direction) {
         const newIndex = this.currentQuestionIndex + direction;
         if (newIndex >= 0 && newIndex < this.filteredQuestions.length) {
           const question = this.filteredQuestions[newIndex];
           if (this.showDetailModal) {
+            // Đối với modal chi tiết
             this.showQuestionDetail(question);
-          } else if (this.showQuestionModal) {
-            this.openEditQuestionModal(question);
+          } else if (this.showQuestionModal && this.isEditing) {
+            // Đối với modal chỉnh sửa - cập nhật currentQuestion mà không đóng modal
+            this.currentQuestion = JSON.parse(JSON.stringify({
+              ...question,
+              edited_content: question.edited_content || question.content
+            }));
+            this.currentQuestionIndex = newIndex;
           }
         }
       },
 
 
 
-
-
+      
 
 
 
