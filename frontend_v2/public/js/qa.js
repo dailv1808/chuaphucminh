@@ -720,10 +720,30 @@ document.addEventListener('alpine:init', function() {
       },
 
 
+      // navigateQuestion: async function(direction) {
+      //   // Nếu đang ở modal chỉnh sửa và có thay đổi, tự động lưu trước
+      //   if (this.showQuestionModal && this.isEditing) {
+      //     await this.autoSaveCurrentQuestion();
+      //   }
+        
+      //   const newIndex = this.currentQuestionIndex + direction;
+      //   if (newIndex >= 0 && newIndex < this.filteredQuestions.length) {
+      //     const question = this.filteredQuestions[newIndex];
+      //     if (this.showDetailModal) {
+      //       this.showQuestionDetail(question);
+      //     } else if (this.showQuestionModal) {
+      //       this.openEditQuestionModal(question);
+      //     }
+      //   }
+      // },
+
+
+
+      // THAY THÀNH:
       navigateQuestion: async function(direction) {
-        // Nếu đang ở modal chỉnh sửa và có thay đổi, tự động lưu trước
+        // THÊM DÒNG NÀY - Tự động lưu trước khi chuyển câu hỏi
         if (this.showQuestionModal && this.isEditing) {
-          await this.autoSaveCurrentQuestion();
+          await this.saveQuestion();
         }
         
         const newIndex = this.currentQuestionIndex + direction;
@@ -736,6 +756,13 @@ document.addEventListener('alpine:init', function() {
           }
         }
       },
+
+
+
+
+
+
+
 
       // Thêm hàm tự động lưu
       autoSaveCurrentQuestion: async function() {
@@ -780,23 +807,7 @@ document.addEventListener('alpine:init', function() {
         // KHÔNG reset currentPage ở đây
       },
 
-      // // Thay thế hàm navigateQuestion hiện tại
-      // navigateQuestion: async function(direction) {
-      //   // Nếu đang ở modal chỉnh sửa và có thay đổi, tự động lưu trước
-      //   if (this.showQuestionModal && this.isEditing && this.hasChanges()) {
-      //     await this.autoSaveCurrentQuestion();
-      //   }
-        
-      //   const newIndex = this.currentQuestionIndex + direction;
-      //   if (newIndex >= 0 && newIndex < this.filteredQuestions.length) {
-      //     const question = this.filteredQuestions[newIndex];
-      //     if (this.showDetailModal) {
-      //       this.showQuestionDetail(question);
-      //     } else if (this.showQuestionModal) {
-      //       this.openEditQuestionModal(question);
-      //     }
-      //   }
-      // },
+ 
 
       // Thêm hàm kiểm tra thay đổi
       hasChanges: function() {
