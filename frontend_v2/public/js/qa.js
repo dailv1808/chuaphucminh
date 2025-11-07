@@ -120,22 +120,21 @@ document.addEventListener('alpine:init', function() {
       // Thêm vào trong Alpine.data('qaData', function() { ... }), sau các hàm khác
 
       // Hàm nhân đôi câu hỏi
-      // Hàm nhân đôi câu hỏi
       duplicateQuestion: async function(question) {
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
         
         try {
-          // Lấy tên gốc (loại bỏ phần " (bản sao X)" nếu có)
-          const baseName = question.name.replace(/\s*\(bản sao\s*\d*\)\s*$/, '');
+          // Lấy tên gốc (loại bỏ phần " (bản sao X)" hoặc " (Bản sao X)" nếu có)
+          const baseName = question.name.replace(/\s*\([Bb]ản sao\s*\d*\)\s*$/, '');
           
           // Đếm số bản sao hiện có của câu hỏi gốc này
           const duplicateCount = this.questions.filter(q => {
-            const qBaseName = q.name.replace(/\s*\(bản sao\s*\d*\)\s*$/, '');
+            const qBaseName = q.name.replace(/\s*\([Bb]ản sao\s*\d*\)\s*$/, '');
             return qBaseName === baseName;
           }).length;
           
-          const newDuplicateNumber = duplicateCount + 1;
+          const newDuplicateNumber = duplicateCount;
           const newName = `${baseName} (bản sao ${newDuplicateNumber})`;
 
           // Tạo bản sao của câu hỏi, giữ nguyên mọi tham số
