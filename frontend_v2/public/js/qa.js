@@ -125,13 +125,31 @@ document.addEventListener('alpine:init', function() {
         const user = JSON.parse(localStorage.getItem('user'));
         
         try {
+          // Đếm số bản sao hiện có của câu hỏi này
+          const duplicateCount = this.questions.filter(q => 
+            q.name.startsWith(question.name + ' (bản sao')
+          ).length;
+          
+          const newDuplicateNumber = duplicateCount + 1;
+          const newName = `${question.name} (bản sao ${newDuplicateNumber})`;
+
           // Tạo bản sao của câu hỏi, giữ nguyên mọi tham số
           const duplicatedQuestion = {
             ...question,
-            name: `${question.name} (Bản sao)`,
+            name: newName,
             updated_at: new Date().toISOString(), // Chỉ cập nhật thời gian sửa
             updated_by: user?.id || null  // Cập nhật người sửa là người hiện tại
           };
+
+
+        // try {
+        //   // Tạo bản sao của câu hỏi, giữ nguyên mọi tham số
+        //   const duplicatedQuestion = {
+        //     ...question,
+        //     name: `${question.name} (Bản sao)`,
+        //     updated_at: new Date().toISOString(), // Chỉ cập nhật thời gian sửa
+        //     updated_by: user?.id || null  // Cập nhật người sửa là người hiện tại
+        //   };
 
           // Xóa các trường không cần thiết
           delete duplicatedQuestion.id;
