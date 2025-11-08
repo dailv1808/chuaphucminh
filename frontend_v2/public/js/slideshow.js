@@ -13,6 +13,7 @@ document.addEventListener('alpine:init', function() {
       youtubeLink: '',
       youtubePlayer: null,
       isYouTubeAPILoaded: false,
+      jumpToSlide: 1,
       answeredQuestions: new Set(), // Theo dõi câu hỏi đã được đánh dấu
       
       init: function() {
@@ -63,7 +64,15 @@ document.addEventListener('alpine:init', function() {
 
 
 
-      
+      jumpToSlideNumber: function() {
+        const slideNumber = parseInt(this.jumpToSlide);
+        if (slideNumber >= 1 && slideNumber <= this.slideshowQuestions.length) {
+          this.currentSlideIndex = slideNumber;
+        } else {
+          this.showNotificationMessage('Số slide không hợp lệ', 'error');
+        }
+        this.jumpToSlide = ''; // Reset input
+      },
 
       // Hàm hỗ trợ wrap text
       wrapText: function(text, maxLength) {
