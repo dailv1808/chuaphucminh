@@ -201,7 +201,8 @@
                 <td class="px-6 py-4" x-text="(currentPage - 1) * perPage + index + 1"></td>
                 <td class="px-6 py-4 whitespace-nowrap" x-text="formatDate(question.created_at)"></td>
                 <td class="px-6 py-4">
-                  <div class="font-medium text-gray-900" x-text="question.name"></div>
+                  <!-- <div class="font-medium text-gray-900" x-text="question.name"></div> -->
+                  <div class="font-medium text-gray-900" x-text="getDisplayName(question)"></div>
                 </td>
 
                 <td class="px-6 py-4">
