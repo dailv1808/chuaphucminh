@@ -48,8 +48,8 @@ class GuestQuestion(models.Model):
         default=False
     )
     
-    # Thông tin thời gian
-    created_at = models.DateTimeField("Ngày tạo", auto_now_add=True)
+    # Thông tin thời gian - ĐÃ SỬA: bỏ auto_now_add=True
+    created_at = models.DateTimeField("Ngày tạo", default=timezone.now)
     updated_at = models.DateTimeField("Ngày cập nhật", auto_now=True)
     
     # Thông tin người dùng
@@ -81,6 +81,10 @@ class GuestQuestion(models.Model):
         # Cập nhật answered_at nếu có answer và chưa có answered_at
         if self.answer and not self.answered_at:
             self.answered_at = timezone.now()
+            
+        # Nếu không có created_at, đặt giá trị mặc định
+        if not self.created_at:
+            self.created_at = timezone.now()
             
         super().save(*args, **kwargs)
 
