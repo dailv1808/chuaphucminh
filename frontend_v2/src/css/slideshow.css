@@ -57,3 +57,35 @@ td[style*="white-space: pre-line"] {
 .w-80 {
   width: 20rem;
 }
+
+
+/* Style cho sidebar preview hiển thị full nội dung */
+.sidebar-question-content {
+    white-space: pre-line !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    max-height: 8rem; /* Giới hạn chiều cao tối đa */
+    overflow-y: auto; /* Cho phép scroll nếu nội dung quá dài */
+    line-height: 1.4;
+    font-size: 0.75rem;
+    padding-right: 0.25rem;
+}
+
+/* Custom scrollbar cho sidebar */
+.sidebar-question-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-question-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.sidebar-question-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 2px;
+}
+
+.sidebar-question-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
