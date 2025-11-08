@@ -120,6 +120,60 @@ document.addEventListener('alpine:init', function() {
       // Thêm vào trong Alpine.data('qaData', function() { ... }), sau các hàm khác
 
       // Hàm nhân đôi câu hỏi
+      // duplicateQuestion: async function(question) {
+      //   const token = localStorage.getItem('access_token');
+      //   const user = JSON.parse(localStorage.getItem('user'));
+        
+      //   try {
+      //     // Lấy tên gốc (loại bỏ phần " (bản sao X)" hoặc " (Bản sao X)" nếu có)
+      //     const baseName = question.name.replace(/\s*\([Bb]ản sao\s*\d*\)\s*$/, '');
+          
+      //     // Đếm số bản sao hiện có của câu hỏi gốc này
+      //     const duplicateCount = this.questions.filter(q => {
+      //       const qBaseName = q.name.replace(/\s*\([Bb]ản sao\s*\d*\)\s*$/, '');
+      //       return qBaseName === baseName;
+      //     }).length;
+          
+      //     const newDuplicateNumber = duplicateCount;
+      //     const newName = `${baseName} (bản sao ${newDuplicateNumber})`;
+
+      //     // Tạo bản sao của câu hỏi, giữ nguyên mọi tham số
+      //     const duplicatedQuestion = {
+      //       ...question,
+      //       name: newName,
+      //       created_at: question.created_at,
+      //       updated_at: new Date().toISOString(), // Chỉ cập nhật thời gian sửa
+      //       updated_by: user?.id || null  // Cập nhật người sửa là người hiện tại
+      //     };
+
+      //     // Xóa id để tạo bản ghi mới
+      //     delete duplicatedQuestion.id;
+      //     delete duplicatedQuestion.showAnswerSection;
+      //     delete duplicatedQuestion.newAnswer;
+      //     delete duplicatedQuestion.created_by_obj;
+      //     delete duplicatedQuestion.updated_by_obj;
+
+      //     const response = await fetch('https://api.chuaphucminh.xyz/api/questions/', {
+      //       method: 'POST',
+      //       headers: { 
+      //         'Content-Type': 'application/json',
+      //         'Authorization': `Bearer ${token}`
+      //       },
+      //       body: JSON.stringify(duplicatedQuestion)
+      //     });
+
+      //     if (!response.ok) throw new Error('Nhân đôi câu hỏi thất bại');
+          
+      //     this.showNotificationMessage(`Đã nhân đôi câu hỏi thành "${newName}"`, 'success');
+      //     this.fetchQuestions(); // Tải lại danh sách
+          
+      //   } catch (error) {
+      //     console.error('Error:', error);
+      //     this.showNotificationMessage(error.message, 'error');
+      //   }
+      // },
+
+      // Hàm nhân đôi câu hỏi
       duplicateQuestion: async function(question) {
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
@@ -137,12 +191,12 @@ document.addEventListener('alpine:init', function() {
           const newDuplicateNumber = duplicateCount;
           const newName = `${baseName} (bản sao ${newDuplicateNumber})`;
 
-          // Tạo bản sao của câu hỏi, giữ nguyên mọi tham số
+          // Tạo bản sao của câu hỏi, giữ nguyên created_at của câu hỏi gốc
           const duplicatedQuestion = {
             ...question,
             name: newName,
-            created_at: question.created_at,
-            updated_at: new Date().toISOString(), // Chỉ cập nhật thời gian sửa
+            created_at: question.created_at, // Giữ nguyên created_at của câu hỏi gốc
+            updated_at: new Date().toISOString(), // Cập nhật thời gian sửa
             updated_by: user?.id || null  // Cập nhật người sửa là người hiện tại
           };
 
