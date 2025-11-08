@@ -116,9 +116,6 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
-
-      // Thêm vào trong Alpine.data('qaData', function() { ... }), sau các hàm khác
-
       // Hàm nhân đôi câu hỏi
       // duplicateQuestion: async function(question) {
       //   const token = localStorage.getItem('access_token');
@@ -137,12 +134,12 @@ document.addEventListener('alpine:init', function() {
       //     const newDuplicateNumber = duplicateCount;
       //     const newName = `${baseName} (bản sao ${newDuplicateNumber})`;
 
-      //     // Tạo bản sao của câu hỏi, giữ nguyên mọi tham số
+      //     // Tạo bản sao của câu hỏi, giữ nguyên created_at của câu hỏi gốc
       //     const duplicatedQuestion = {
       //       ...question,
       //       name: newName,
-      //       created_at: question.created_at,
-      //       updated_at: new Date().toISOString(), // Chỉ cập nhật thời gian sửa
+      //       created_at: question.created_at, // Giữ nguyên created_at của câu hỏi gốc
+      //       updated_at: new Date().toISOString(), // Cập nhật thời gian sửa
       //       updated_by: user?.id || null  // Cập nhật người sửa là người hiện tại
       //     };
 
@@ -173,6 +170,7 @@ document.addEventListener('alpine:init', function() {
       //   }
       // },
 
+
       // Hàm nhân đôi câu hỏi
       duplicateQuestion: async function(question) {
         const token = localStorage.getItem('access_token');
@@ -191,21 +189,30 @@ document.addEventListener('alpine:init', function() {
           const newDuplicateNumber = duplicateCount;
           const newName = `${baseName} (bản sao ${newDuplicateNumber})`;
 
-          // Tạo bản sao của câu hỏi, giữ nguyên created_at của câu hỏi gốc
+          // Tạo bản sao của câu hỏi, CHỈ giữ lại các trường cần thiết
           const duplicatedQuestion = {
-            ...question,
             name: newName,
-            created_at: question.created_at, // Giữ nguyên created_at của câu hỏi gốc
-            updated_at: new Date().toISOString(), // Cập nhật thời gian sửa
-            updated_by: user?.id || null  // Cập nhật người sửa là người hiện tại
+            email: question.email,
+            content: question.content,
+            edited_content: question.edited_content,
+            contact: question.contact,
+            answer: question.answer,
+            short_content: question.short_content,
+            answered_at: question.answered_at,
+            tags: question.tags,
+            group: question.group,
+            status: question.status,
+            priority: question.priority,
+            slideshow: question.slideshow,
+            is_faq: question.is_faq,
+            // QUAN TRỌNG: Truyền created_at từ câu hỏi gốc
+            created_at: question.created_at,
+            updated_at: new Date().toISOString(),
+            created_by: question.created_by?.id || question.created_by,
+            updated_by: user?.id || null
           };
 
-          // Xóa id để tạo bản ghi mới
-          delete duplicatedQuestion.id;
-          delete duplicatedQuestion.showAnswerSection;
-          delete duplicatedQuestion.newAnswer;
-          delete duplicatedQuestion.created_by_obj;
-          delete duplicatedQuestion.updated_by_obj;
+          console.log('Creating duplicate with created_at:', duplicatedQuestion.created_at);
 
           const response = await fetch('https://api.chuaphucminh.xyz/api/questions/', {
             method: 'POST',
@@ -216,7 +223,10 @@ document.addEventListener('alpine:init', function() {
             body: JSON.stringify(duplicatedQuestion)
           });
 
-          if (!response.ok) throw new Error('Nhân đôi câu hỏi thất bại');
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Nhân đôi câu hỏi thất bại: ${errorText}`);
+          }
           
           this.showNotificationMessage(`Đã nhân đôi câu hỏi thành "${newName}"`, 'success');
           this.fetchQuestions(); // Tải lại danh sách
@@ -226,6 +236,7 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage(error.message, 'error');
         }
       },
+
 
       quickEditField: async function(question, field, value) {
         const token = localStorage.getItem('access_token');
