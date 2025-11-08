@@ -141,6 +141,7 @@ document.addEventListener('alpine:init', function() {
           const duplicatedQuestion = {
             ...question,
             name: newName,
+            created_at: question.created_at,
             updated_at: new Date().toISOString(), // Chỉ cập nhật thời gian sửa
             updated_by: user?.id || null  // Cập nhật người sửa là người hiện tại
           };
