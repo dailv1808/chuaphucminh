@@ -201,6 +201,8 @@ document.addEventListener('alpine:init', function() {
       //   return question.name;
       // },
 
+      
+
       // Hàm lấy tên hiển thị (có thêm phần bản sao)
       getDisplayName: function(question) {
         // Lấy tên gốc (loại bỏ phần " (bản sao X)" nếu có)
