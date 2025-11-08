@@ -184,21 +184,46 @@ document.addEventListener('alpine:init', function() {
       },
 
       // Hàm lấy tên hiển thị (có thêm phần bản sao)
+      // getDisplayName: function(question) {
+      //   const baseName = question.name.replace(/\s*\([Bb]ản sao\s*\d*\)\s*$/, '');
+        
+      //   // Đếm số bản sao hiện có của câu hỏi gốc này
+      //   const duplicateCount = this.questions.filter(q => {
+      //     const qBaseName = q.name.replace(/\s*\([Bb]ản sao\s*\d*\)\s*$/, '');
+      //     return qBaseName === baseName && q.id !== question.id;
+      //   }).length;
+        
+      //   // Nếu là bản sao, thêm số thứ tự
+      //   if (duplicateCount > 0) {
+      //     return `${baseName} (bản sao ${duplicateCount})`;
+      //   }
+        
+      //   return question.name;
+      // },
+
+      // Hàm lấy tên hiển thị (có thêm phần bản sao)
       getDisplayName: function(question) {
+        // Lấy tên gốc (loại bỏ phần " (bản sao X)" nếu có)
         const baseName = question.name.replace(/\s*\([Bb]ản sao\s*\d*\)\s*$/, '');
         
-        // Đếm số bản sao hiện có của câu hỏi gốc này
-        const duplicateCount = this.questions.filter(q => {
+        // Tìm tất cả câu hỏi có cùng baseName
+        const sameBaseQuestions = this.questions.filter(q => {
           const qBaseName = q.name.replace(/\s*\([Bb]ản sao\s*\d*\)\s*$/, '');
-          return qBaseName === baseName && q.id !== question.id;
-        }).length;
+          return qBaseName === baseName;
+        });
         
-        // Nếu là bản sao, thêm số thứ tự
-        if (duplicateCount > 0) {
-          return `${baseName} (bản sao ${duplicateCount})`;
+        // Sắp xếp theo ID để xác định thứ tự
+        sameBaseQuestions.sort((a, b) => a.id - b.id);
+        
+        // Tìm vị trí của câu hỏi hiện tại trong danh sách
+        const currentIndex = sameBaseQuestions.findIndex(q => q.id === question.id);
+        
+        // Nếu không phải là câu hỏi đầu tiên, thêm số thứ tự
+        if (currentIndex > 0) {
+          return `${baseName} (bản sao ${currentIndex})`;
         }
         
-        return question.name;
+        return baseName;
       },
 
       quickEditField: async function(question, field, value) {
