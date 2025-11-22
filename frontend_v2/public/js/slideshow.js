@@ -43,81 +43,140 @@ document.addEventListener('alpine:init', function() {
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF();
           
-          // Tạo HTML ẩn để render
+          // Tạo container ẩn để render
           const tempContainer = document.createElement('div');
           tempContainer.style.position = 'absolute';
           tempContainer.style.left = '-9999px';
           tempContainer.style.top = '0';
-          tempContainer.style.width = '210mm'; // A4 width
-          tempContainer.style.padding = '20mm';
-          tempContainer.style.fontFamily = 'Arial, sans-serif';
+          tempContainer.style.width = '794px'; // A4 width in pixels (210mm * 3.78)
+          tempContainer.style.fontFamily = "'Times New Roman', Times, serif";
+          tempContainer.style.lineHeight = '1.6';
           document.body.appendChild(tempContainer);
-          
-          // Trang bìa
+
+          // ===== TRANG BÌA =====
           const coverPage = document.createElement('div');
-          coverPage.style.width = '100%';
-          coverPage.style.height = '297mm'; // A4 height
+          coverPage.style.width = '794px';
+          coverPage.style.height = '1123px'; // A4 height in pixels (297mm * 3.78)
           coverPage.style.backgroundColor = '#6a0000';
           coverPage.style.display = 'flex';
           coverPage.style.flexDirection = 'column';
           coverPage.style.justifyContent = 'center';
-          coverPage.style.alignItems = 'center';
+          coverPage.style.alignItems: 'center';
           coverPage.style.color = 'white';
+          coverPage.style.padding = '100px';
+          coverPage.style.boxSizing = 'border-box';
+
+          const titleContainer = document.createElement('div');
+          titleContainer.style.textAlign = 'center';
           
           const title1 = document.createElement('div');
           title1.textContent = 'HỎI ĐÁP';
-          title1.style.fontSize = '48px';
+          title1.style.fontSize = '72px';
           title1.style.fontWeight = 'bold';
-          title1.style.marginBottom = '20px';
+          title1.style.fontFamily = "'Times New Roman', Times, serif";
+          title1.style.marginBottom = '30px';
+          title1.style.letterSpacing = '8px';
           
           const title2 = document.createElement('div');
           title2.textContent = 'TRÌNH PHÁP';
-          title2.style.fontSize = '48px';
+          title2.style.fontSize = '72px';
           title2.style.fontWeight = 'bold';
+          title2.style.fontFamily = "'Times New Roman', Times, serif";
+          title2.style.letterSpacing = '8px';
+
+          titleContainer.appendChild(title1);
+          titleContainer.appendChild(title2);
+          coverPage.appendChild(titleContainer);
           
-          coverPage.appendChild(title1);
-          coverPage.appendChild(title2);
           tempContainer.appendChild(coverPage);
           
-          // Chuyển trang bìa sang PDF
-          const coverCanvas = await html2canvas(coverPage);
-          const coverImgData = coverCanvas.toDataURL('image/png');
-          doc.addImage(coverImgData, 'PNG', 0, 0, 210, 297);
+          const coverCanvas = await html2canvas(coverPage, {
+            scale: 2, // Tăng độ phân giải
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#6a0000'
+          });
           
-          // Tạo trang cho từng câu hỏi
+          const coverImgData = coverCanvas.toDataURL('image/jpeg', 0.9);
+          doc.addImage(coverImgData, 'JPEG', 0, 0, 210, 297);
+          
+          // ===== CÁC TRANG CÂU HỎI =====
           for (let i = 0; i < this.slideshowQuestions.length; i++) {
             const question = this.slideshowQuestions[i];
             doc.addPage();
             
             const questionPage = document.createElement('div');
-            questionPage.style.width = '100%';
-            questionPage.style.height = '297mm';
-            questionPage.style.padding = '20mm';
-            questionPage.style.fontFamily = 'Arial, sans-serif';
+            questionPage.style.width = '794px';
+            questionPage.style.height = '1123px';
+            questionPage.style.padding = '80px 60px';
+            questionPage.style.fontFamily = "'Times New Roman', Times, serif";
+            questionPage.style.lineHeight = '1.7';
+            questionPage.style.backgroundColor = 'white';
+            questionPage.style.boxSizing = 'border-box';
+            questionPage.style.position = 'relative';
             
-            const questionHTML = `
-              <div style="margin-bottom: 30px;">
-                <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">Câu hỏi ${i + 1}</h1>
-                <p style="font-size: 16px; font-weight: bold;">Hành giả: ${question.name || 'Ẩn danh'}</p>
+            const content = `
+              <div style="margin-bottom: 50px;">
+                <div style="font-size: 28px; font-weight: bold; color: #2c5530; margin-bottom: 15px;">
+                  Câu hỏi ${i + 1}
+                </div>
+                <div style="font-size: 20px; font-weight: bold; color: #1a365d;">
+                  Hành giả: ${question.name || 'Ẩn danh'}
+                </div>
               </div>
-              <hr style="border: 1px solid #e5e7eb; margin-bottom: 30px;">
-              <div style="font-size: 14px; line-height: 1.6;">
-                <p style="margin-bottom: 20px;"><strong>Dạ con thưa Sư, xin Sư cho con hỏi:</strong></p>
-                <div style="white-space: pre-line; margin-bottom: 30px;">${this.getQuestionContent(question)}</div>
-                <p><strong>Con thành kính tri ân Sư ạ!</strong></p>
+              
+              <div style="border-top: 2px solid #e2e8f0; margin-bottom: 40px; padding-top: 20px;"></div>
+              
+              <div style="font-size: 18px; line-height: 1.8;">
+                <div style="margin-bottom: 30px; font-weight: bold;">
+                  Dạ con thưa Sư, xin Sư cho con hỏi:
+                </div>
+                
+                <div style="
+                  white-space: pre-line; 
+                  margin-bottom: 40px; 
+                  font-size: 17px;
+                  text-align: justify;
+                  line-height: 1.9;
+                  padding: 0 10px;
+                ">
+                  ${this.getQuestionContent(question)}
+                </div>
+                
+                <div style="font-weight: bold; margin-top: 40px;">
+                  Con thành kính tri ân Sư ạ!
+                </div>
               </div>
-              <div style="position: absolute; bottom: 20mm; right: 20mm; font-size: 10px; color: #666;">
+              
+              <div style="
+                position: absolute;
+                bottom: 40px;
+                right: 60px;
+                font-size: 12px;
+                color: #718096;
+                font-family: Arial, sans-serif;
+              ">
                 Trang ${i + 2}
               </div>
             `;
             
-            questionPage.innerHTML = questionHTML;
+            questionPage.innerHTML = content;
             tempContainer.innerHTML = '';
             tempContainer.appendChild(questionPage);
             
-            const canvas = await html2canvas(questionPage);
-            const imgData = canvas.toDataURL('image/png');
-            doc.addImage(imgData, 'PNG', 0, 0, 210, 297);
+            const canvas = await html2canvas(questionPage, {
+              scale: 2, // Tăng độ phân giải
+              useCORS: true,
+              allowTaint: true,
+              backgroundColor: '#ffffff',
+              logging: false
+            });
+            
+            const imgData = canvas.toDataURL('image/jpeg', 0.9);
+            doc.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+            
+            // Thêm delay nhỏ để tránh quá tải
+            await new Promise(resolve => setTimeout(resolve, 100));
           }
           
           // Dọn dẹp
