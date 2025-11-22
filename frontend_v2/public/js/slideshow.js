@@ -31,14 +31,14 @@ document.addEventListener('alpine:init', function() {
 
 
 
-      downloadPDF: function() {
+      downloadPDF: async function() {
           if (this.slideshowQuestions.length === 0) {
               this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
               return;
           }
 
           try {
-              this.showNotificationMessage('Đang tạo PDF với font hỗ trợ tiếng Việt...', 'success');
+              this.showNotificationMessage('Đang tạo PDF với font tiếng Việt...', 'success');
               
               const { jsPDF } = window.jspdf;
               const doc = new jsPDF({
@@ -47,88 +47,63 @@ document.addEventListener('alpine:init', function() {
                   format: 'a4'
               });
 
-              // Thêm font hỗ trợ tiếng Việt (sử dụng font mặc định được cải thiện)
-              doc.setFont("helvetica", "normal");
+              // PHƯƠNG PHÁP 2: Sử dụng font có sẵn và encoding đúng
+              doc.setLanguage('vi-VN');
               
-              // Slide đầu tiên - Trang bìa
+              // Trang bìa đơn giản hơn
               doc.setFillColor(106, 0, 0);
               doc.rect(0, 0, 210, 297, 'F');
               
               doc.setTextColor(255, 255, 255);
-              doc.setFontSize(28);
+              doc.setFontSize(24);
               doc.setFont("helvetica", "bold");
+              doc.text("HOI DAP TRINH PHAP", 105, 120, { align: 'center' });
               
-              // Sử dụng text đơn giản, tránh ký tự đặc biệt
-              const titleLines = [
-                  "HỎI ĐÁP",
-                  "TRÌNH PHÁP"
-              ];
-              
-              doc.text(titleLines, 105, 120, { align: 'center' });
-              
-              // Phụ đề
-              doc.setFontSize(14);
+              doc.setFontSize(12);
               doc.setFont("helvetica", "normal");
-              doc.text(`Tổng cộng: ${this.slideshowQuestions.length} câu hỏi`, 105, 150, { align: 'center' });
-              
-              // Ngày tạo
-              const currentDate = new Date().toLocaleDateString('vi-VN');
-              doc.setFontSize(10);
-              doc.text(`Ngày tạo: ${currentDate}`, 20, 280);
+              doc.text(`Tong cong: ${this.slideshowQuestions.length} cau hoi`, 105, 140, { align: 'center' });
 
-              // Tạo trang cho từng câu hỏi
+              // Các trang câu hỏi
               this.slideshowQuestions.forEach((question, index) => {
                   if (index > 0) {
                       doc.addPage();
                   }
                   
-                  // Tiêu đề trang
                   doc.setFillColor(240, 240, 240);
                   doc.rect(0, 0, 210, 15, 'F');
                   
                   doc.setTextColor(0, 0, 0);
                   doc.setFontSize(12);
                   doc.setFont("helvetica", "bold");
-                  doc.text(`Câu hỏi ${index + 1}`, 20, 10);
+                  doc.text(`Cau hoi ${index + 1}`, 20, 10);
                   
-                  // Thông tin người hỏi
+                  // Thông tin người hỏi - sử dụng tên không dấu để tránh lỗi
                   doc.setFontSize(11);
-                  const askerName = this.sanitizeTextForPDF(question.name || 'Ẩn danh');
-                  doc.text(`Hành giả: ${askerName}`, 20, 25);
+                  const askerName = this.removeVietnameseAccents(question.name || 'An danh');
+                  doc.text(`Hanh gia: ${askerName}`, 20, 25);
                   
-                  // Nội dung câu hỏi - XỬ LÝ ĐẶC BIỆT CHO TIẾNG VIỆT
+                  // Nội dung câu hỏi - chuyển sang không dấu nếu cần
                   const content = this.getQuestionContentForPDF(question);
+                  const safeContent = this.removeVietnameseAccents(content);
+                  
                   doc.setFontSize(10);
                   doc.setFont("helvetica", "normal");
                   
-                  // Sử dụng splitTextToSize với options để hỗ trợ Unicode tốt hơn
-                  const lines = doc.splitTextToSize(content, 170);
+                  const lines = doc.splitTextToSize(safeContent, 170);
                   
                   let textY = 40;
                   const lineHeight = 5;
                   
                   lines.forEach(line => {
                       if (textY < 270) {
-                          // Thay thế ký tự lỗi trước khi hiển thị
-                          const cleanLine = this.sanitizeTextForPDF(line);
-                          doc.text(cleanLine, 20, textY);
+                          doc.text(line, 20, textY);
                           textY += lineHeight;
                       }
                   });
                   
-                  // Footer với số trang
                   doc.setFontSize(9);
                   doc.setTextColor(100, 100, 100);
                   doc.text(`Trang ${index + 2}`, 105, 285, { align: 'center' });
-                  
-                  // Thêm dấu hiệu đã trả lời
-                  if (this.isQuestionAnswered(question)) {
-                      doc.setFillColor(220, 255, 220);
-                      doc.rect(160, 3, 40, 8, 'F');
-                      doc.setTextColor(0, 128, 0);
-                      doc.setFontSize(7);
-                      doc.text('Đã trả lời', 165, 8);
-                  }
               });
 
               const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -142,53 +117,19 @@ document.addEventListener('alpine:init', function() {
           }
       },
 
-      // Hàm làm sạch văn bản tiếng Việt cho PDF
-      sanitizeTextForPDF: function(text) {
-          if (!text) return '';
+      // Hàm chuyển tiếng Việt có dấu thành không dấu
+      removeVietnameseAccents: function(str) {
+          if (!str) return '';
           
-          // Thay thế các ký tự có vấn đề
-          const charMap = {
-              '&': ' và ',
-              '£': 'ú',
-              'Ä': 'ă',
-              'ää': 'ă',
-              'Ñ': 'đ',
-              'Y': 'ự',
-              'U': 'ớ',
-              // Thêm các ký tự lỗi khác nếu cần
-          };
-          
-          let cleanedText = text;
-          
-          // Thay thế từng ký tự
-          Object.keys(charMap).forEach(badChar => {
-              const regex = new RegExp(badChar, 'g');
-              cleanedText = cleanedText.replace(regex, charMap[badChar]);
-          });
-          
-          // Loại bỏ các ký tự & thừa
-          cleanedText = cleanedText.replace(/&/g, '');
-          
-          return cleanedText;
+          return str
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .replace(/đ/g, 'd')
+              .replace(/Đ/g, 'D')
+              .replace(/&/g, ' va ')
+              .replace(/[^\w\s]/g, ' ');
       },
-
-      // Hàm lấy nội dung câu hỏi đã được làm sạch cho PDF
-      getQuestionContentForPDF: function(question) {
-          const content = question.edited_content && question.edited_content.trim() !== '' 
-              ? question.edited_content 
-              : question.content;
-          
-          if (!content) return '(Không có nội dung)';
-          
-          // Làm sạch nội dung trước khi trả về
-          let processedContent = content
-              .replace(/\s+/g, ' ') // Thay thế nhiều khoảng trắng
-              .replace(/\n/g, '\n') // Giữ xuống dòng
-              .trim();
-          
-          // Áp dụng làm sạch ký tự tiếng Việt
-          return this.sanitizeTextForPDF(processedContent);
-      },
+    
 
 
 
