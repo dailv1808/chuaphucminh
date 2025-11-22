@@ -31,14 +31,14 @@ document.addEventListener('alpine:init', function() {
 
 
 
-      downloadPDFWithRoboto: async function() {
+      downloadPDF: async function() {
         if (this.slideshowQuestions.length === 0) {
           this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
           return;
         }
 
         try {
-          this.showNotificationMessage('Đang tạo PDF với font Roboto...', 'success');
+          this.showNotificationMessage('Đang tạo PDF với font tiếng Việt...', 'success');
           
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF({
@@ -47,57 +47,59 @@ document.addEventListener('alpine:init', function() {
             format: 'a4'
           });
 
-          // Sử dụng Roboto font (hỗ trợ tiếng Việt tốt)
-          await this.loadRobotoFont(doc);
-          doc.setFont('Roboto');
-          doc.setFontType('normal');
+          // Sử dụng font mặc định (cố gắng hỗ trợ tiếng Việt)
+          // jsPDF 2.x sử dụng API khác
+          doc.setFont("helvetica", "normal");
 
           // Slide chào mừng
           doc.setFillColor(106, 0, 0);
           doc.rect(0, 0, 297, 210, 'F');
           
           doc.setTextColor(255, 255, 255);
-          doc.setFontSize(42);
-          doc.setFont('Roboto', 'bold');
+          doc.setFontSize(44);
+          doc.setFont("helvetica", "bold");
           
           doc.text('HỎI PHÁP', 20, 80);
           doc.text('TRÌNH PHÁP', 20, 120);
 
           // Các slide câu hỏi
           for (let i = 0; i < this.slideshowQuestions.length; i++) {
-            if (i > 0) doc.addPage();
+            doc.addPage();
             
             const question = this.slideshowQuestions[i];
             
-            // Tiêu đề
+            // Tiêu đề slide
             doc.setTextColor(46, 134, 171);
-            doc.setFontSize(18);
-            doc.setFont('Roboto', 'bold');
+            doc.setFontSize(20);
+            doc.setFont("helvetica", "bold");
             doc.text(`Câu hỏi ${i + 1}`, 15, 20);
             
-            // Người hỏi
+            // Thông tin người hỏi
             doc.setTextColor(0, 0, 0);
-            doc.setFontSize(14);
+            doc.setFontSize(16);
             doc.text(`Hành giả: ${question.name || 'Ẩn danh'}`, 15, 35);
             
-            // Nội dung
+            // Nội dung câu hỏi
             const content = this.getQuestionContent(question);
-            doc.setFontSize(12);
+            doc.setFontSize(14);
             doc.setTextColor(51, 51, 51);
             
+            // Xử lý nội dung tiếng Việt
             const lines = doc.splitTextToSize(content, 270);
+            
             let textY = 50;
+            const lineHeight = 7;
             
             for (let line of lines) {
               if (textY < 180) {
                 doc.text(line, 20, textY);
-                textY += 6;
+                textY += lineHeight;
               }
             }
             
             // Footer
             doc.setTextColor(102, 102, 102);
-            doc.setFontSize(9);
+            doc.setFontSize(10);
             doc.text(`Trang ${i + 2}`, 148, 200, { align: 'center' });
           }
 
@@ -109,33 +111,6 @@ document.addEventListener('alpine:init', function() {
         } catch (error) {
           console.error('Error creating PDF:', error);
           this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
-        }
-      },
-
-      // Tải Roboto font
-      loadRobotoFont: async function(doc) {
-        try {
-          // Roboto Regular
-          const robotoResponse = await fetch('https://cdn.jsdelivr.net/npm/roboto-font@0.1.0/fonts/Roboto/roboto-regular-webfont.ttf');
-          const robotoBoldResponse = await fetch('https://cdn.jsdelivr.net/npm/roboto-font@0.1.0/fonts/Roboto/roboto-bold-webfont.ttf');
-          
-          const [robotoBuffer, robotoBoldBuffer] = await Promise.all([
-            robotoResponse.arrayBuffer(),
-            robotoBoldResponse.arrayBuffer()
-          ]);
-          
-          const robotoBase64 = this.arrayBufferToBase64(robotoBuffer);
-          const robotoBoldBase64 = this.arrayBufferToBase64(robotoBoldBuffer);
-          
-          doc.addFileToVFS('Roboto-Regular.ttf', robotoBase64);
-          doc.addFileToVFS('Roboto-Bold.ttf', robotoBoldBase64);
-          
-          doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
-          doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
-          
-        } catch (error) {
-          console.warn('Không thể tải Roboto font, sử dụng font mặc định');
-          doc.setFont('helvetica');
         }
       },
 
