@@ -116,8 +116,12 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
-  
+      // Hàm lấy tên hiển thị - chỉ trả về name gốc
+      getDisplayName: function(question) {
+        return question.name;
+      },
 
+      // Hàm nhân đôi câu hỏi - sửa lại phần tên
       // duplicateQuestion: async function(question) {
       //   const token = localStorage.getItem('access_token');
       //   const user = JSON.parse(localStorage.getItem('user'));
@@ -176,25 +180,30 @@ document.addEventListener('alpine:init', function() {
       //   }
       // },
 
+
       // Hàm nhân đôi câu hỏi - sửa lại phần tên
       duplicateQuestion: async function(question) {
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
         
         try {
-          // Đếm số bản sao hiện có của câu hỏi gốc này (dựa trên content)
-          const duplicateCount = this.questions.filter(q => 
-            q.content === question.content && q.id !== question.id
-          ).length;
+          // Lấy tên gốc (loại bỏ phần " (bản sao X)" nếu có)
+          const baseName = question.name.replace(/\s*\(bản sao\s*\d+\)\s*$/, '');
+          
+          // Đếm số bản sao hiện có của câu hỏi gốc này (dựa trên baseName)
+          const duplicateCount = this.questions.filter(q => {
+            const qBaseName = q.name.replace(/\s*\(bản sao\s*\d+\)\s*$/, '');
+            return qBaseName === baseName && q.id !== question.id;
+          }).length;
           
           const newDuplicateNumber = duplicateCount + 1;
-          const newName = `${question.name} (bản sao ${newDuplicateNumber})`;
+          const newName = `${baseName} (bản sao ${newDuplicateNumber})`;
 
           // Tạo bản sao của câu hỏi
           const duplicatedQuestion = {
             name: newName, // Sử dụng tên mới với số bản sao
             email: question.email,
-            content: question.content, // Giữ nguyên content để nhận diện là bản sao
+            content: question.content,
             edited_content: question.edited_content,
             contact: question.contact,
             answer: question.answer,
@@ -235,56 +244,9 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
-  
 
-      // Hàm lấy tên hiển thị (chỉ hiển thị bản sao cho các câu hỏi được nhân đôi)
-      // getDisplayName: function(question) {
-      //   // Kiểm tra xem đây có phải là bản sao không bằng cách tìm trong danh sách câu hỏi
-      //   // Một câu hỏi được coi là bản sao nếu có cùng content với câu hỏi khác nhưng ID lớn hơn
-      //   const sameContentQuestions = this.questions.filter(q => 
-      //     q.content === question.content && q.id !== question.id
-      //   );
-        
-      //   // Sắp xếp theo ID để tìm câu hỏi gốc
-      //   sameContentQuestions.sort((a, b) => a.id - b.id);
-        
-      //   // Nếu có câu hỏi cùng content và ID của câu hỏi hiện tại không phải là nhỏ nhất
-      //   // thì đây là bản sao
-      //   if (sameContentQuestions.length > 0 && question.id > sameContentQuestions[0].id) {
-      //     // Tìm số thứ tự bản sao
-      //     const duplicateNumber = this.questions
-      //       .filter(q => q.content === question.content && q.id < question.id)
-      //       .length + 1;
-          
-      //     return `${question.name} (bản sao ${duplicateNumber})`;
-      //   }
-        
-      //   return question.name;
-      // },
 
-      getDisplayName: function(question) {
-        // Kiểm tra xem đây có phải là bản sao không bằng cách tìm trong danh sách câu hỏi
-        // Một câu hỏi được coi là bản sao nếu có cùng content với câu hỏi khác nhưng ID lớn hơn
-        const sameContentQuestions = this.questions.filter(q => 
-          q.content === question.content && q.id !== question.id
-        );
-        
-        // Sắp xếp theo ID để tìm câu hỏi gốc
-        sameContentQuestions.sort((a, b) => a.id - b.id);
-        
-        // Nếu có câu hỏi cùng content và ID của câu hỏi hiện tại không phải là nhỏ nhất
-        // thì đây là bản sao
-        if (sameContentQuestions.length > 0 && question.id > sameContentQuestions[0].id) {
-          // Tìm số thứ tự bản sao
-          const duplicateNumber = this.questions
-            .filter(q => q.content === question.content && q.id < question.id)
-            .length + 1;
-          
-          return `${question.name} (bản sao ${duplicateNumber})`;
-        }
-        
-        return question.name;
-      },
+     
 
 
       quickEditField: async function(question, field, value) {
