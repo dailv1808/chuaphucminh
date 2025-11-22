@@ -43,13 +43,11 @@ document.addEventListener('alpine:init', function() {
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF();
           
-          // Thêm font tiếng Việt (sử dụng font mặc định hỗ trợ Unicode)
-          doc.setFont('helvetica', 'normal');
+          // Đặt font mặc định - sử dụng font hỗ trợ Unicode
+          doc.setFont('helvetica');
+          doc.setFontSize(11);
           
-          let currentPage = 1;
-          let yPosition = 30;
-          
-          // Slide chào mừng
+          // Slide chào mừng (Trang 1)
           doc.setFillColor(106, 0, 0); // Màu nền đỏ đậm #6a0000
           doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
           
@@ -61,21 +59,24 @@ document.addEventListener('alpine:init', function() {
           const welcomeLines = doc.splitTextToSize(welcomeText, 180);
           doc.text(welcomeLines, 20, 100);
           
-          currentPage++;
-          doc.addPage();
-          
-          // Các slide câu hỏi
-          for (let i = 0; i < this.slideshowQuestions.length; i++) {
-            const question = this.slideshowQuestions[i];
+          // Mỗi câu hỏi là một trang riêng
+          this.slideshowQuestions.forEach((question, index) => {
+            // Tạo trang mới cho mỗi câu hỏi
+            if (index > 0) {
+              doc.addPage();
+            }
             
-            // Reset vị trí và màu sắc cho trang mới
-            yPosition = 30;
+            // Reset màu sắc và font
             doc.setTextColor(0, 0, 0);
+            doc.setFillColor(255, 255, 255);
+            doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
             
-            // Tiêu đề trang
+            let yPosition = 30;
+            
+            // Tiêu đề câu hỏi
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
-            doc.text(`Câu hỏi ${i + 1}`, 20, yPosition);
+            doc.text(`Câu hỏi ${index + 1}`, 20, yPosition);
             yPosition += 10;
             
             // Thông tin người hỏi
@@ -83,42 +84,47 @@ document.addEventListener('alpine:init', function() {
             doc.text(`Hành giả: ${question.name || 'Ẩn danh'}`, 20, yPosition);
             yPosition += 15;
             
-            // Nội dung câu hỏi
+            // Đường kẻ ngang
+            doc.setDrawColor(200, 200, 200);
+            doc.line(20, yPosition, 190, yPosition);
+            yPosition += 15;
+            
+            // Nội dung câu hỏi - Sử dụng format đặc biệt cho tiếng Việt
             const content = this.getQuestionContent(question);
+            
+            // Chuẩn bị nội dung với format đặc biệt
+            const questionLines = [
+              'Dạ con thưa Sư, xin Sư cho con hỏi:',
+              ''
+            ];
+            
+            // Thêm nội dung câu hỏi
+            const contentLines = doc.splitTextToSize(content, 170);
+            questionLines.push(...contentLines);
+            
+            questionLines.push('');
+            questionLines.push('Con thành kính tri ân Sư ạ!');
+            
+            // In từng dòng
             doc.setFontSize(11);
             doc.setFont('helvetica', 'normal');
             
-            // Tách nội dung thành các dòng phù hợp với chiều rộng PDF
-            const lines = doc.splitTextToSize(content, 170);
-            
-            // Thêm từng dòng vào PDF
-            for (let j = 0; j < lines.length; j++) {
-              // Kiểm tra nếu hết trang thì tạo trang mới
+            questionLines.forEach(line => {
               if (yPosition > 270) {
+                // Nếu sắp hết trang, tạo trang mới (cho câu hỏi rất dài)
                 doc.addPage();
                 yPosition = 30;
-                currentPage++;
               }
               
-              doc.text(lines[j], 20, yPosition);
-              yPosition += 6; // Khoảng cách giữa các dòng
-            }
+              doc.text(line, 20, yPosition);
+              yPosition += 6;
+            });
             
-            // Thêm khoảng trống giữa các câu hỏi
-            yPosition += 10;
-            
-            // Kiểm tra nếu còn câu hỏi tiếp theo và sắp hết trang thì tạo trang mới
-            if (i < this.slideshowQuestions.length - 1 && yPosition > 250) {
-              doc.addPage();
-              yPosition = 30;
-              currentPage++;
-            }
-            
-            // Thêm số trang
+            // Số trang
             doc.setFontSize(8);
             doc.setTextColor(128, 128, 128);
-            doc.text(`Trang ${currentPage}`, 180, 290);
-          }
+            doc.text(`Trang ${index + 2}`, 180, 290);
+          });
           
           // Tải file xuống
           const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -131,6 +137,7 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
         }
       },
+  
     
     
     
