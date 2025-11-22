@@ -120,7 +120,7 @@ document.addEventListener('alpine:init', function() {
                 line-height: 1.8;
                 margin-bottom: 40px;
               ">
-                <div style="font-weight: bold; margin-bottom: 30px;">
+                <div style="margin-bottom: 10px;">
                   Dạ con thưa Sư, xin Sư cho con hỏi:
                 </div>
                 
@@ -128,13 +128,13 @@ document.addEventListener('alpine:init', function() {
                   white-space: pre-line;
                   text-align: justify;
                   margin-bottom: 40px;
-                  font-size: 2rem;
+                  font-size: 1.8rem;
                   line-height: 1.9;
                 ">
                   ${content}
                 </div>
                 
-                <div style="font-weight: bold; margin-top: 50px;">
+                <div style="margin-top: 10px;">
                   Con thành kính tri ân Sư ạ!
                 </div>
               </div>
