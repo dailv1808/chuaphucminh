@@ -25,15 +25,14 @@ document.addEventListener('alpine:init', function() {
 
 
 
-      
-      downloadPDF: async function() {
+      downloadPDFWithScreenshot: async function() {
         if (this.slideshowQuestions.length === 0) {
           this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
           return;
         }
 
         try {
-          this.showNotificationMessage('Đang tạo PDF với font Times New Roman...', 'success');
+          this.showNotificationMessage('Đang chụp ảnh slide và tạo PDF...', 'success');
           
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF({
@@ -42,142 +41,72 @@ document.addEventListener('alpine:init', function() {
             format: 'a4'
           });
 
-          // Sử dụng Times New Roman - font hỗ trợ tốt tiếng Việt
-          doc.setFont('times');
-          doc.setFontType('normal');
+          // Lưu trạng thái hiện tại
+          const originalSlideIndex = this.currentSlideIndex;
+          const originalSlideshowState = this.isSlideshowActive;
           
-          // Slide chào mừng
-          doc.setFillColor(106, 0, 0);
-          doc.rect(0, 0, 297, 210, 'F');
+          // Tạm thời hiển thị slideshow để chụp ảnh
+          this.isSlideshowActive = true;
           
-          doc.setTextColor(255, 255, 255);
-          doc.setFontSize(42);
-          doc.setFont('times', 'bold');
+          // Chờ DOM cập nhật
+          await new Promise(resolve => setTimeout(resolve, 100));
           
-          // Sử dụng phương pháp render thủ công cho tiếng Việt
-          this.renderVietnameseTextManual(doc, 'HỎI PHÁP', 20, 80);
-          this.renderVietnameseTextManual(doc, 'TRÌNH PHÁP', 20, 120);
-
-          // Các slide câu hỏi
+          // Chụp slide chào mừng
+          this.currentSlideIndex = 0;
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          const welcomeCanvas = await html2canvas(document.querySelector('.welcome-slide'), {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true
+          });
+          
+          const welcomeImgData = welcomeCanvas.toDataURL('image/jpeg', 0.9);
+          doc.addImage(welcomeImgData, 'JPEG', 0, 0, 297, 210);
+          
+          // Chụp các slide câu hỏi
           for (let i = 0; i < this.slideshowQuestions.length; i++) {
-            if (i > 0) doc.addPage();
-            await this.createVietnameseQuestionSlide(doc, this.slideshowQuestions[i], i);
+            doc.addPage();
+            
+            this.currentSlideIndex = i + 1;
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            const slideElement = document.querySelector('.question-content');
+            if (slideElement) {
+              const canvas = await html2canvas(slideElement, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true
+              });
+              
+              const imgData = canvas.toDataURL('image/jpeg', 0.9);
+              doc.addImage(imgData, 'JPEG', 0, 0, 297, 210);
+            }
           }
-
+          
+          // Khôi phục trạng thái ban đầu
+          this.currentSlideIndex = originalSlideIndex;
+          this.isSlideshowActive = originalSlideshowState;
+          
           const fileName = `Slide-Hoi-Dap-${new Date().toISOString().split('T')[0]}.pdf`;
           doc.save(fileName);
           
-          this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
+          this.showNotificationMessage('Đã tạo PDF từ ảnh slide thành công!', 'success');
           
         } catch (error) {
-          console.error('Error creating PDF:', error);
+          console.error('Error creating PDF with screenshot:', error);
           this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
-        }
-      },
-
-      // Render text tiếng Việt thủ công
-      renderVietnameseTextManual: function(doc, text, x, y) {
-        try {
-          doc.text(text, x, y);
-        } catch (error) {
-          console.warn('Font error, using alternative method:', error);
-          // Phương pháp dự phòng: thay thế ký tự không hỗ trợ
-          const safeText = this.makeTextSafe(text);
-          doc.text(safeText, x, y);
-        }
-      },
-
-      // Làm cho text an toàn với font
-      makeTextSafe: function(text) {
-        if (!text) return '';
-        
-        // Thay thế các ký tự đặc biệt không được hỗ trợ
-        return text
-          .normalize('NFC')
-          .replace(/[̀-ͯ]/g, '') // Loại bỏ dấu phức tạp
-          .replace(/[^\w\sàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴĐ\.,!?\-:;/()]/g, '');
-      },
-
-      // Tạo slide câu hỏi với xử lý tiếng Việt
-      createVietnameseQuestionSlide: async function(doc, question, index) {
-        // Reset background
-        doc.setFillColor(255, 255, 255);
-        doc.rect(0, 0, 297, 210, 'F');
-        
-        // Tiêu đề
-        doc.setTextColor(46, 134, 171);
-        doc.setFontSize(18);
-        doc.setFont('times', 'bold');
-        this.renderVietnameseTextManual(doc, `Câu hỏi ${index + 1}`, 15, 20);
-        
-        // Người hỏi
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(14);
-        const askerText = `Hành giả: ${question.name || 'Ẩn danh'}`;
-        this.renderVietnameseTextManual(doc, askerText, 15, 35);
-        
-        // Nội dung câu hỏi
-        const content = this.getQuestionContent(question);
-        doc.setFontSize(12);
-        doc.setTextColor(51, 51, 51);
-        
-        await this.renderVietnameseContent(doc, content, 20, 50, 257, 140);
-        
-        // Footer
-        doc.setTextColor(102, 102, 102);
-        doc.setFontSize(9);
-        doc.text(`Trang ${index + 2}`, 148, 200, { align: 'center' });
-      },
-
-      // Render nội dung tiếng Việt
-      renderVietnameseContent: async function(doc, content, x, y, maxWidth, maxHeight) {
-        if (!content) return y;
-        
-        const safeContent = this.makeTextSafe(content);
-        const lines = this.wrapTextManual(safeContent, maxWidth, doc);
-        let currentY = y;
-        const lineHeight = 6;
-        
-        for (let line of lines) {
-          if (currentY > y + maxHeight) break;
           
-          try {
-            doc.text(line, x, currentY);
-            currentY += lineHeight;
-          } catch (error) {
-            console.warn('Error rendering line:', line, error);
-            // Bỏ qua dòng lỗi, tiếp tục với dòng khác
-            currentY += lineHeight;
-          }
+          // Đảm bảo khôi phục trạng thái ngay cả khi có lỗi
+          this.isSlideshowActive = false;
         }
-        
-        return currentY;
       },
 
-      // Wrap text thủ công
-      wrapTextManual: function(text, maxWidth, doc) {
-        const words = text.split(' ');
-        const lines = [];
-        let currentLine = '';
-        
-        for (let word of words) {
-          const testLine = currentLine ? currentLine + ' ' + word : word;
-          const testWidth = doc.getTextWidth(testLine);
-          
-          if (testWidth > maxWidth && currentLine !== '') {
-            lines.push(currentLine);
-            currentLine = word;
-          } else {
-            currentLine = testLine;
-          }
-        }
-        
-        if (currentLine) {
-          lines.push(currentLine);
-        }
-        
-        return lines;
-      },
+
+      
+      
+
+
 
 
 
