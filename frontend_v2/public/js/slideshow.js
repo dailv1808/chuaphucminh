@@ -107,16 +107,16 @@ document.addEventListener('alpine:init', function() {
             
             questionPage.innerHTML = `
               <div style="margin-bottom: 60px;">
-                <div style="font-size: 2.5rem; font-weight: bold; color: #1a365d;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #1a365d;">
                   Câu hỏi ${i + 1}
                 </div>
-                <div style="font-size: 1.8rem; font-weight: bold; color: #2d3748; margin-top: 15px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748; margin-top: 15px;">
                   Hành giả: ${question.name || 'Ẩn danh'}
                 </div>
               </div>
               
               <div style="
-                font-size: 2.2rem;
+                font-size: 1.5rem;
                 line-height: 1.8;
                 margin-bottom: 40px;
               ">
@@ -128,7 +128,7 @@ document.addEventListener('alpine:init', function() {
                   white-space: pre-line;
                   text-align: justify;
                   margin-bottom: 40px;
-                  font-size: 1.8rem;
+                  font-size: 1.5rem;
                   line-height: 1.9;
                 ">
                   ${content}
