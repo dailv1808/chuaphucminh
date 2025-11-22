@@ -32,95 +32,104 @@ document.addEventListener('alpine:init', function() {
 
 
       downloadPDF: async function() {
-          if (this.slideshowQuestions.length === 0) {
-              this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
-              return;
+        if (this.slideshowQuestions.length === 0) {
+          this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
+          return;
+        }
+
+        try {
+          this.showNotificationMessage('Đang tạo PDF...', 'success');
+          
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+          
+          // Thêm font tiếng Việt (sử dụng font mặc định hỗ trợ Unicode)
+          doc.setFont('helvetica', 'normal');
+          
+          let currentPage = 1;
+          let yPosition = 30;
+          
+          // Slide chào mừng
+          doc.setFillColor(106, 0, 0); // Màu nền đỏ đậm #6a0000
+          doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
+          
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(36);
+          doc.setFont('helvetica', 'bold');
+          
+          const welcomeText = 'HỎI ĐÁP\nTRÌNH PHÁP';
+          const welcomeLines = doc.splitTextToSize(welcomeText, 180);
+          doc.text(welcomeLines, 20, 100);
+          
+          currentPage++;
+          doc.addPage();
+          
+          // Các slide câu hỏi
+          for (let i = 0; i < this.slideshowQuestions.length; i++) {
+            const question = this.slideshowQuestions[i];
+            
+            // Reset vị trí và màu sắc cho trang mới
+            yPosition = 30;
+            doc.setTextColor(0, 0, 0);
+            
+            // Tiêu đề trang
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Câu hỏi ${i + 1}`, 20, yPosition);
+            yPosition += 10;
+            
+            // Thông tin người hỏi
+            doc.setFontSize(12);
+            doc.text(`Hành giả: ${question.name || 'Ẩn danh'}`, 20, yPosition);
+            yPosition += 15;
+            
+            // Nội dung câu hỏi
+            const content = this.getQuestionContent(question);
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            
+            // Tách nội dung thành các dòng phù hợp với chiều rộng PDF
+            const lines = doc.splitTextToSize(content, 170);
+            
+            // Thêm từng dòng vào PDF
+            for (let j = 0; j < lines.length; j++) {
+              // Kiểm tra nếu hết trang thì tạo trang mới
+              if (yPosition > 270) {
+                doc.addPage();
+                yPosition = 30;
+                currentPage++;
+              }
+              
+              doc.text(lines[j], 20, yPosition);
+              yPosition += 6; // Khoảng cách giữa các dòng
+            }
+            
+            // Thêm khoảng trống giữa các câu hỏi
+            yPosition += 10;
+            
+            // Kiểm tra nếu còn câu hỏi tiếp theo và sắp hết trang thì tạo trang mới
+            if (i < this.slideshowQuestions.length - 1 && yPosition > 250) {
+              doc.addPage();
+              yPosition = 30;
+              currentPage++;
+            }
+            
+            // Thêm số trang
+            doc.setFontSize(8);
+            doc.setTextColor(128, 128, 128);
+            doc.text(`Trang ${currentPage}`, 180, 290);
           }
-
-          try {
-              this.showNotificationMessage('Đang tạo PDF...', 'success');
-              
-              // Sử dụng jsPDF với font mặc định và chuyển sang không dấu
-              const { jsPDF } = window.jspdf;
-              const doc = new jsPDF({
-                  orientation: 'portrait',
-                  unit: 'mm',
-                  format: 'a4'
-              });
-
-              // Sử dụng font mặc định
-              doc.setFont("helvetica");
-              
-              // Trang bìa
-              doc.setFillColor(106, 0, 0);
-              doc.rect(0, 0, 210, 297, 'F');
-              
-              doc.setTextColor(255, 255, 255);
-              doc.setFontSize(24);
-              doc.setFont(undefined, 'bold');
-              doc.text("HOI DAP TRINH PHAP", 105, 120, { align: 'center' });
-              
-              doc.setFontSize(14);
-              doc.setFont(undefined, 'normal');
-              doc.text(`Tong cong: ${this.slideshowQuestions.length} cau hoi`, 105, 140, { align: 'center' });
-
-              // Ngày tạo
-              const currentDate = new Date().toLocaleDateString('vi-VN');
-              doc.setFontSize(10);
-              doc.text(`Ngay tao: ${currentDate}`, 20, 280);
-
-              // Tạo trang cho từng câu hỏi
-              this.slideshowQuestions.forEach((question, index) => {
-                  if (index > 0) {
-                      doc.addPage();
-                  }
-                  
-                  // Tiêu đề trang
-                  doc.setFillColor(240, 240, 240);
-                  doc.rect(0, 0, 210, 15, 'F');
-                  
-                  doc.setTextColor(0, 0, 0);
-                  doc.setFontSize(12);
-                  doc.setFont(undefined, 'bold');
-                  doc.text(`Cau hoi ${index + 1}`, 20, 10);
-                  
-                  // Thông tin người hỏi
-                  doc.setFontSize(11);
-                  const askerName = this.removeVietnameseAccents(question.name || 'An danh');
-                  doc.text(`Hanh gia: ${askerName}`, 20, 25);
-                  
-                  // Nội dung câu hỏi - không dấu
-                  const content = this.getQuestionContent(question);
-                  const safeContent = this.removeVietnameseAccents(content);
-                  doc.setFontSize(10);
-                  doc.setFont(undefined, 'normal');
-                  
-                  const lines = doc.splitTextToSize(safeContent, 170);
-                  let textY = 40;
-                  const lineHeight = 5;
-                  
-                  lines.forEach(line => {
-                      if (textY < 270) {
-                          doc.text(line, 20, textY);
-                          textY += lineHeight;
-                      }
-                  });
-                  
-                  // Footer
-                  doc.setFontSize(9);
-                  doc.setTextColor(100, 100, 100);
-                  doc.text(`Trang ${index + 2}`, 105, 285, { align: 'center' });
-              });
-
-              const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
-              doc.save(fileName);
-              
-              this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
-              
-          } catch (error) {
-              console.error('Error creating PDF:', error);
-              this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
-          }
+          
+          // Tải file xuống
+          const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
+          doc.save(fileName);
+          
+          this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
+          
+        } catch (error) {
+          console.error('Error creating PDF:', error);
+          this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
+        }
       },
     
     
