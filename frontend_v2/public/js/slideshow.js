@@ -33,6 +33,168 @@ document.addEventListener('alpine:init', function() {
       
 
 
+      // downloadPDF: async function() {
+      //   if (this.slideshowQuestions.length === 0) {
+      //     this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
+      //     return;
+      //   }
+
+      //   try {
+      //     this.showNotificationMessage('Đang tạo PDF..., vui lòng chờ!', 'success');
+          
+      //     const { jsPDF } = window.jspdf;
+      //     const doc = new jsPDF();
+          
+      //     const tempContainer = document.createElement('div');
+      //     tempContainer.style.position = 'absolute';
+      //     tempContainer.style.left = '-9999px';
+      //     tempContainer.style.top = '0';
+      //     tempContainer.style.width = '794px';
+      //     tempContainer.style.fontFamily = "'Times New Roman', Times, serif";
+      //     document.body.appendChild(tempContainer);
+
+      //     // TRANG BÌA - Giống slideshow
+      //     const coverPage = document.createElement('div');
+      //     coverPage.style.width = '794px';
+      //     coverPage.style.height = '1123px';
+      //     coverPage.style.backgroundColor = '#6a0000';
+      //     coverPage.style.display = 'flex';
+      //     coverPage.style.alignItems = 'center';
+      //     coverPage.style.paddingLeft = '120px';
+      //     coverPage.style.boxSizing = 'border-box';
+
+      //     const titleDiv = document.createElement('div');
+      //     titleDiv.innerHTML = `
+      //       <div style="
+      //         font-family: 'Times New Roman', Times, serif;
+      //         font-size: 90px;
+      //         font-weight: bold;
+      //         color: white;
+      //         line-height: 1.3;
+      //         letter-spacing: 8px;
+      //       ">
+      //         HỎI ĐÁP<br>TRÌNH PHÁP
+      //       </div>
+      //     `;
+          
+      //     coverPage.appendChild(titleDiv);
+      //     tempContainer.appendChild(coverPage);
+          
+      //     const coverCanvas = await html2canvas(coverPage, {
+      //       scale: 2,
+      //       useCORS: true,
+      //       backgroundColor: '#6a0000'
+      //     });
+          
+      //     doc.addImage(coverCanvas, 'JPEG', 0, 0, 210, 297);
+
+      //     // TRANG CÂU HỎI - Giống slideshow
+      //     for (let i = 0; i < this.slideshowQuestions.length; i++) {
+      //       const question = this.slideshowQuestions[i];
+      //       doc.addPage();
+            
+      //       const questionPage = document.createElement('div');
+      //       questionPage.style.width = '794px';
+      //       questionPage.style.height = '1123px';
+      //       questionPage.style.padding = '80px 120px 60px 120px';
+      //       questionPage.style.fontFamily = "'Times New Roman', Times, serif";
+      //       questionPage.style.backgroundColor = 'white';
+      //       questionPage.style.boxSizing = 'border-box';
+      //       questionPage.style.position = 'relative';
+      //       questionPage.style.lineHeight = '1.7';
+            
+      //       const content = this.getQuestionContent(question);
+
+
+      //       questionPage.innerHTML = `
+      //         <div style="margin-bottom: 10px;">
+      //           <div style="font-size: 1.5rem; font-weight: bold; color: #1a365d;">
+      //             Câu hỏi ${i + 1}
+      //           </div>
+      //           <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748; margin-top: 15px;">
+      //             Hành giả: ${question.name || 'Ẩn danh'}
+      //           </div>
+      //         </div>
+              
+      //         <div style="
+      //           font-size: 1.5rem;
+      //           line-height: 1.8;
+      //           margin-bottom: 10px;
+      //         ">
+      //           <div style="margin-bottom: 10px; text-align: justify;">
+      //             Dạ con thưa Sư, xin Sư cho con hỏi:
+      //           </div>
+                
+      //           <div class="pdf-content" style="
+      //             margin-bottom: 40px;
+      //             font-size: 1.5rem;
+      //             line-height: 1.9;
+      //             text-align: justify;
+      //             text-justify: inter-word;
+      //             word-spacing: 0.5px;
+      //             letter-spacing: 0.1px;
+      //             white-space: normal;
+      //             word-wrap: break-word;
+      //           ">
+      //             ${content.split('\n').map(para => 
+      //               para.trim() === '' ? '<br>' : para
+      //             ).join(' ')}
+      //           </div>
+                
+      //           <div style="margin-top: 10px; text-align: justify;">
+      //             Con thành kính tri ân Sư ạ!
+      //           </div>
+      //         </div>
+              
+      //         <div style="
+      //           position: absolute;
+      //           bottom: 40px;
+      //           right: 120px;
+      //           font-size: 14px;
+      //           color: #718096;
+      //           font-family: Arial, sans-serif;
+      //         ">
+      //           Trang ${i + 2}
+      //         </div>
+      //       `;
+
+
+            
+      //       tempContainer.innerHTML = '';
+      //       tempContainer.appendChild(questionPage);
+            
+      //       const canvas = await html2canvas(questionPage, {
+      //         scale: 2,
+      //         useCORS: true,
+      //         backgroundColor: '#ffffff',
+      //         onclone: function(clonedDoc) {
+      //           // Đảm bảo font được load đúng
+      //           const elements = clonedDoc.querySelectorAll('*');
+      //           elements.forEach(el => {
+      //             el.style.fontFamily = "'Times New Roman', Times, serif";
+      //           });
+      //         }
+      //       });
+            
+      //       doc.addImage(canvas, 'JPEG', 0, 0, 210, 297);
+            
+      //       await new Promise(resolve => setTimeout(resolve, 200));
+      //     }
+          
+      //     document.body.removeChild(tempContainer);
+          
+      //     const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
+      //     doc.save(fileName);
+          
+      //     this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
+          
+      //   } catch (error) {
+      //     console.error('Error creating PDF:', error);
+      //     this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
+      //   }
+      // },
+
+
       downloadPDF: async function() {
         if (this.slideshowQuestions.length === 0) {
           this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
@@ -40,8 +202,11 @@ document.addEventListener('alpine:init', function() {
         }
 
         try {
-          this.showNotificationMessage('Đang tạo PDF...', 'success');
-          
+          // Hiển thị thông báo và KHÔNG tự động tắt
+          this.notificationMessage = 'Đang tạo PDF...';
+          this.notificationType = 'success';
+          this.showNotification = true;
+
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF();
           
@@ -104,57 +269,7 @@ document.addEventListener('alpine:init', function() {
             questionPage.style.lineHeight = '1.7';
             
             const content = this.getQuestionContent(question);
-
-
-            // questionPage.innerHTML = `
-            //   <div style="margin-bottom: 10px;">
-            //     <div style="font-size: 1.5rem; font-weight: bold; color: #1a365d;">
-            //       Câu hỏi ${i + 1}
-            //     </div>
-            //     <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748; margin-top: 15px;">
-            //       Hành giả: ${question.name || 'Ẩn danh'}
-            //     </div>
-            //   </div>
-              
-            //   <div style="
-            //     font-size: 1.5rem;
-            //     line-height: 1.8;
-            //     margin-bottom: 10px;
-            //   ">
-            //     <div style="margin-bottom: 10px; text-align: justify;">
-            //       Dạ con thưa Sư, xin Sư cho con hỏi:
-            //     </div>
-                
-            //     <div style="
-            //       white-space: pre-line;
-            //       text-align: justify;
-            //       text-justify: inter-word;
-            //       margin-bottom: 40px;
-            //       font-size: 1.5rem;
-            //       line-height: 1.9;
-            //       word-spacing: 1px;
-            //       hyphens: auto;
-            //     ">
-            //       ${content}
-            //     </div>
-                
-            //     <div style="margin-top: 10px; text-align: justify;">
-            //       Con thành kính tri ân Sư ạ!
-            //     </div>
-            //   </div>
-              
-            //   <div style="
-            //     position: absolute;
-            //     bottom: 40px;
-            //     right: 120px;
-            //     font-size: 14px;
-            //     color: #718096;
-            //     font-family: Arial, sans-serif;
-            //   ">
-            //     Trang ${i + 2}
-            //   </div>
-            // `;
-
+            
             questionPage.innerHTML = `
               <div style="margin-bottom: 10px;">
                 <div style="font-size: 1.5rem; font-weight: bold; color: #1a365d;">
@@ -206,52 +321,6 @@ document.addEventListener('alpine:init', function() {
                 Trang ${i + 2}
               </div>
             `;
-
-            // questionPage.innerHTML = `
-            //   <div style="margin-bottom: 10px;">
-            //     <div style="font-size: 1.5rem; font-weight: bold; color: #1a365d;">
-            //       Câu hỏi ${i + 1}
-            //     </div>
-            //     <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748; margin-top: 15px;">
-            //       Hành giả: ${question.name || 'Ẩn danh'}
-            //     </div>
-            //   </div>
-              
-            //   <div style="
-            //     font-size: 1.5rem;
-            //     line-height: 1.8;
-            //     margin-bottom: 10px;
-            //   ">
-            //     <div style="margin-bottom: 10px;">
-            //       Dạ con thưa Sư, xin Sư cho con hỏi:
-            //     </div>
-                
-            //     <div style="
-            //       white-space: pre-line;
-            //       text-align: justify;
-            //       margin-bottom: 40px;
-            //       font-size: 1.5rem;
-            //       line-height: 1.9;
-            //     ">
-            //       ${content}
-            //     </div>
-                
-            //     <div style="margin-top: 10px;">
-            //       Con thành kính tri ân Sư ạ!
-            //     </div>
-            //   </div>
-              
-            //   <div style="
-            //     position: absolute;
-            //     bottom: 40px;
-            //     right: 120px;
-            //     font-size: 14px;
-            //     color: #718096;
-            //     font-family: Arial, sans-serif;
-            //   ">
-            //     Trang ${i + 2}
-            //   </div>
-            // `;
             
             tempContainer.innerHTML = '';
             tempContainer.appendChild(questionPage);
@@ -279,10 +348,12 @@ document.addEventListener('alpine:init', function() {
           const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
           doc.save(fileName);
           
+          // Cập nhật thông báo thành công và tự động tắt sau 3 giây
           this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
           
         } catch (error) {
           console.error('Error creating PDF:', error);
+          // Hiển thị thông báo lỗi và tự động tắt sau 3 giây
           this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
         }
       },
