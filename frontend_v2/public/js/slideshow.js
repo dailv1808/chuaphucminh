@@ -36,7 +36,7 @@ document.addEventListener('alpine:init', function() {
         }
 
         try {
-          this.showNotificationMessage('Đang tạo PDF...', 'success');
+          this.showNotificationMessage('Đang tạo PDF với font tiếng Việt...', 'success');
           
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF({
@@ -45,31 +45,34 @@ document.addEventListener('alpine:init', function() {
             format: 'a4'
           });
 
-          // Sử dụng font Times New Roman - hỗ trợ tiếng Việt tốt
-          doc.setFont('times');
+          // Thêm font Noto Sans Vietnamese
+          await this.loadVietnameseFont(doc);
           
+          // Sử dụng font tiếng Việt
+          doc.setFont('NotoSans');
+          doc.setFontType('normal');
+
           // Slide chào mừng
-          doc.setFillColor(106, 0, 0); // Màu nền #6a0000
+          doc.setFillColor(106, 0, 0);
           doc.rect(0, 0, 297, 210, 'F');
           
           doc.setTextColor(255, 255, 255);
           doc.setFontSize(44);
-          doc.setFont('times', 'bold');
+          doc.setFont('NotoSans', 'bold');
           
-          // Tiêu đề slide chào mừng
           doc.text('HỎI PHÁP', 20, 80);
           doc.text('TRÌNH PHÁP', 20, 120);
 
-          // Thêm các slide câu hỏi
+          // Các slide câu hỏi
           for (let i = 0; i < this.slideshowQuestions.length; i++) {
             doc.addPage();
             
             const question = this.slideshowQuestions[i];
             
             // Tiêu đề slide
-            doc.setTextColor(46, 134, 171); // Màu xanh #2E86AB
+            doc.setTextColor(46, 134, 171);
             doc.setFontSize(20);
-            doc.setFont('times', 'bold');
+            doc.setFont('NotoSans', 'bold');
             doc.text(`Câu hỏi ${i + 1}`, 15, 20);
             
             // Thông tin người hỏi
@@ -83,26 +86,24 @@ document.addEventListener('alpine:init', function() {
             doc.setTextColor(51, 51, 51);
             
             // Xử lý nội dung tiếng Việt
-            const processedContent = this.processContentForPDF(content);
-            const lines = doc.splitTextToSize(processedContent, 270); // Tự động xuống dòng
+            const lines = doc.splitTextToSize(content, 270);
             
             let textY = 50;
             const lineHeight = 7;
             
             for (let line of lines) {
-              if (textY < 180) { // Giới hạn chiều cao trang
+              if (textY < 180) {
                 doc.text(line, 20, textY);
                 textY += lineHeight;
               }
             }
             
-            // Footer với số trang
+            // Footer
             doc.setTextColor(102, 102, 102);
             doc.setFontSize(10);
             doc.text(`Trang ${i + 2}`, 148, 200, { align: 'center' });
           }
 
-          // Tải file xuống
           const fileName = `Slide-Hoi-Dap-${new Date().toISOString().split('T')[0]}.pdf`;
           doc.save(fileName);
           
@@ -114,16 +115,51 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
-      // Xử lý nội dung cho PDF
-      processContentForPDF: function(content) {
-        if (!content) return '';
-        
-        // Chuẩn hóa văn bản tiếng Việt
-        return content
-          .normalize('NFC') // Chuẩn hóa Unicode
-          .replace(/\s+/g, ' ') // Chuẩn hóa khoảng trắng
-          .trim();
+      // Tải font Noto Sans Vietnamese
+      loadVietnameseFont: async function(doc) {
+        try {
+          // Font Noto Sans Vietnamese từ CDN
+          const fontUrl = 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Regular.ttf';
+          const fontBoldUrl = 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Bold.ttf';
+          
+          // Tải font
+          const [fontResponse, fontBoldResponse] = await Promise.all([
+            fetch(fontUrl),
+            fetch(fontBoldUrl)
+          ]);
+          
+          const fontArrayBuffer = await fontResponse.arrayBuffer();
+          const fontBoldArrayBuffer = await fontBoldResponse.arrayBuffer();
+          
+          // Chuyển đổi sang base64
+          const fontBase64 = this.arrayBufferToBase64(fontArrayBuffer);
+          const fontBoldBase64 = this.arrayBufferToBase64(fontBoldArrayBuffer);
+          
+          // Thêm font vào jsPDF
+          doc.addFileToVFS('NotoSans-Regular.ttf', fontBase64);
+          doc.addFileToVFS('NotoSans-Bold.ttf', fontBoldBase64);
+          
+          doc.addFont('NotoSans-Regular.ttf', 'NotoSans', 'normal');
+          doc.addFont('NotoSans-Bold.ttf', 'NotoSans', 'bold');
+          
+        } catch (error) {
+          console.warn('Không thể tải font Noto Sans, sử dụng font mặc định');
+          // Fallback đến font mặc định
+          doc.setFont('helvetica');
+        }
       },
+
+      // Chuyển đổi ArrayBuffer sang Base64
+      arrayBufferToBase64: function(buffer) {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
+      },
+  
 
 
       
