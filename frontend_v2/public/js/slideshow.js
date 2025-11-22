@@ -31,120 +31,159 @@ document.addEventListener('alpine:init', function() {
 
 
 
-      downloadPDF: function() {
+      downloadPDF: async function() {
           if (this.slideshowQuestions.length === 0) {
               this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
               return;
           }
 
           try {
-              this.showNotificationMessage('Đang tạo PDF với font Unicode...', 'success');
+              this.showNotificationMessage('Đang tạo PDF với font tiếng Việt...', 'success');
               
-              const { jsPDF } = window.jspdf;
-              const doc = new jsPDF({
-                  orientation: 'portrait',
-                  unit: 'mm',
-                  format: 'a4'
-              });
-
-              // Sử dụng font Times có hỗ trợ Unicode tốt hơn
-              doc.setFont("times");
+              const { PDFDocument, rgb, degrees } = PDFLib;
+              const pdfDoc = await PDFDocument.create();
+              
+              // Đăng ký fontkit
+              pdfDoc.registerFontkit(fontkit);
+              
+              // Tải font tiếng Việt (sử dụng font Noto Sans hỗ trợ tiếng Việt)
+              const fontUrl = 'https://fonts.gstatic.com/s/notosans/v28/o-0IIpQlx3QUlC5A4PNr5TRG.woff2';
+              const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+              const customFont = await pdfDoc.embedFont(fontBytes);
               
               // Trang bìa
-              doc.setFillColor(106, 0, 0);
-              doc.rect(0, 0, 210, 297, 'F');
+              const coverPage = pdfDoc.addPage([595, 842]); // A4 portrait
+              const { width, height } = coverPage.getSize();
               
-              doc.setTextColor(255, 255, 255);
-              doc.setFontSize(22);
-              doc.setFont(undefined, 'bold');
+              // Nền đỏ
+              coverPage.drawRectangle({
+                  x: 0,
+                  y: 0,
+                  width: width,
+                  height: height,
+                  color: rgb(0.416, 0, 0), // #6a0000
+              });
               
-              // Thử với tiếng Việt có dấu
-              try {
-                  doc.text("HỎI ĐÁP TRÌNH PHÁP", 105, 120, { align: 'center' });
-                  
-                  doc.setFontSize(14);
-                  doc.setFont(undefined, 'normal');
-                  doc.text(`Tổng cộng: ${this.slideshowQuestions.length} câu hỏi`, 105, 140, { align: 'center' });
-              } catch (e) {
-                  // Fallback nếu lỗi font
-                  doc.text("HOI DAP TRINH PHAP", 105, 120, { align: 'center' });
-                  doc.setFontSize(14);
-                  doc.text(`Tong cong: ${this.slideshowQuestions.length} cau hoi`, 105, 140, { align: 'center' });
-              }
-
+              // Tiêu đề
+              coverPage.drawText('HỎI ĐÁP TRÌNH PHÁP', {
+                  x: 50,
+                  y: height - 200,
+                  size: 32,
+                  font: customFont,
+                  color: rgb(1, 1, 1),
+              });
+              
+              coverPage.drawText(`Tổng cộng: ${this.slideshowQuestions.length} câu hỏi`, {
+                  x: 50,
+                  y: height - 250,
+                  size: 18,
+                  font: customFont,
+                  color: rgb(1, 1, 1),
+              });
+              
               // Ngày tạo
               const currentDate = new Date().toLocaleDateString('vi-VN');
-              doc.setFontSize(10);
-              doc.text(`Ngày tạo: ${currentDate}`, 20, 280);
+              coverPage.drawText(`Ngày tạo: ${currentDate}`, {
+                  x: 50,
+                  y: 50,
+                  size: 12,
+                  font: customFont,
+                  color: rgb(1, 1, 1),
+              });
 
               // Tạo trang cho từng câu hỏi
-              this.slideshowQuestions.forEach((question, index) => {
-                  if (index > 0) {
-                      doc.addPage();
-                  }
+              for (let index = 0; index < this.slideshowQuestions.length; index++) {
+                  const question = this.slideshowQuestions[index];
+                  const page = pdfDoc.addPage([595, 842]);
+                  const { width, height } = page.getSize();
                   
                   // Tiêu đề trang
-                  doc.setFillColor(240, 240, 240);
-                  doc.rect(0, 0, 210, 15, 'F');
+                  page.drawRectangle({
+                      x: 0,
+                      y: height - 40,
+                      width: width,
+                      height: 40,
+                      color: rgb(0.94, 0.94, 0.94),
+                  });
                   
-                  doc.setTextColor(0, 0, 0);
-                  doc.setFontSize(12);
-                  doc.setFont(undefined, 'bold');
-                  
-                  try {
-                      doc.text(`Câu hỏi ${index + 1}`, 20, 10);
-                  } catch (e) {
-                      doc.text(`Cau hoi ${index + 1}`, 20, 10);
-                  }
+                  page.drawText(`Câu hỏi ${index + 1}`, {
+                      x: 50,
+                      y: height - 25,
+                      size: 14,
+                      font: customFont,
+                      color: rgb(0, 0, 0),
+                  });
                   
                   // Thông tin người hỏi
-                  doc.setFontSize(11);
                   const askerName = question.name || 'Ẩn danh';
-                  try {
-                      doc.text(`Hành giả: ${askerName}`, 20, 25);
-                  } catch (e) {
-                      doc.text(`Hanh gia: ${this.removeVietnameseAccents(askerName)}`, 20, 25);
-                  }
+                  page.drawText(`Hành giả: ${askerName}`, {
+                      x: 50,
+                      y: height - 70,
+                      size: 12,
+                      font: customFont,
+                      color: rgb(0, 0, 0),
+                  });
                   
                   // Nội dung câu hỏi
                   const content = this.getQuestionContent(question);
-                  doc.setFontSize(10);
-                  doc.setFont(undefined, 'normal');
+                  const lines = this.splitTextIntoLines(content, 80); // 80 ký tự mỗi dòng
                   
-                  try {
-                      const lines = doc.splitTextToSize(content, 170);
-                      let textY = 40;
-                      const lineHeight = 5;
-                      
-                      lines.forEach(line => {
-                          if (textY < 270) {
-                              doc.text(line, 20, textY);
-                              textY += lineHeight;
-                          }
-                      });
-                  } catch (e) {
-                      // Fallback: không dấu nếu có lỗi
-                      const safeContent = this.removeVietnameseAccents(content);
-                      const lines = doc.splitTextToSize(safeContent, 170);
-                      let textY = 40;
-                      const lineHeight = 5;
-                      
-                      lines.forEach(line => {
-                          if (textY < 270) {
-                              doc.text(line, 20, textY);
-                              textY += lineHeight;
-                          }
-                      });
+                  let textY = height - 100;
+                  const lineHeight = 15;
+                  
+                  for (const line of lines) {
+                      if (textY > 50) { // Đảm bảo không vượt quá chiều cao trang
+                          page.drawText(line, {
+                              x: 50,
+                              y: textY,
+                              size: 10,
+                              font: customFont,
+                              color: rgb(0, 0, 0),
+                          });
+                          textY -= lineHeight;
+                      }
                   }
                   
-                  // Footer
-                  doc.setFontSize(9);
-                  doc.setTextColor(100, 100, 100);
-                  doc.text(`Trang ${index + 2}`, 105, 285, { align: 'center' });
-              });
+                  // Footer với số trang
+                  page.drawText(`Trang ${index + 2}`, {
+                      x: width / 2,
+                      y: 30,
+                      size: 9,
+                      font: customFont,
+                      color: rgb(0.4, 0.4, 0.4),
+                  });
+                  
+                  // Đánh dấu đã trả lời
+                  if (this.isQuestionAnswered(question)) {
+                      page.drawRectangle({
+                          x: width - 100,
+                          y: height - 35,
+                          width: 80,
+                          height: 20,
+                          color: rgb(0.86, 1, 0.86),
+                      });
+                      
+                      page.drawText('Đã trả lời', {
+                          x: width - 90,
+                          y: height - 25,
+                          size: 8,
+                          font: customFont,
+                          color: rgb(0, 0.5, 0),
+                      });
+                  }
+              }
 
-              const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
-              doc.save(fileName);
+              // Lưu file
+              const pdfBytes = await pdfDoc.save();
+              const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+              const url = URL.createObjectURL(blob);
+              
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
+              link.click();
+              
+              URL.revokeObjectURL(url);
               
               this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
               
@@ -154,42 +193,30 @@ document.addEventListener('alpine:init', function() {
           }
       },
 
-      // Hàm chuyển tiếng Việt có dấu thành không dấu
-      removeVietnameseAccents: function(str) {
-          if (!str) return '';
+      // Hàm hỗ trợ tách văn bản thành các dòng
+      splitTextIntoLines: function(text, maxLength) {
+          if (!text) return [];
           
-          try {
-              return str
-                  .normalize('NFD')
-                  .replace(/[\u0300-\u036f]/g, '')
-                  .replace(/đ/g, 'd')
-                  .replace(/Đ/g, 'D')
-                  .replace(/&/g, ' va ')
-                  .replace(/[^\w\s.,?!-]/g, ' ')
-                  .replace(/\s+/g, ' ')
-                  .trim();
-          } catch (error) {
-              // Fallback đơn giản
-              return str
-                  .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a')
-                  .replace(/[èéẹẻẽêềếệểễ]/g, 'e')
-                  .replace(/[ìíịỉĩ]/g, 'i')
-                  .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o')
-                  .replace(/[ùúụủũưừứựửữ]/g, 'u')
-                  .replace(/[ỳýỵỷỹ]/g, 'y')
-                  .replace(/đ/g, 'd')
-                  .replace(/[ÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴ]/g, 'A')
-                  .replace(/[ÈÉẸẺẼÊỀẾỆỂỄ]/g, 'E')
-                  .replace(/[ÌÍỊỈĨ]/g, 'I')
-                  .replace(/[ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠ]/g, 'O')
-                  .replace(/[ÙÚỤỦŨƯỪỨỰỬỮ]/g, 'U')
-                  .replace(/[ỲÝỴỶỸ]/g, 'Y')
-                  .replace(/Đ/g, 'D')
-                  .replace(/&/g, ' va ')
-                  .replace(/[^\w\s.,?!-]/g, ' ')
-                  .replace(/\s+/g, ' ')
-                  .trim();
+          const words = text.split(' ');
+          const lines = [];
+          let currentLine = '';
+          
+          for (const word of words) {
+              if ((currentLine + word).length <= maxLength) {
+                  currentLine += (currentLine ? ' ' : '') + word;
+              } else {
+                  if (currentLine) {
+                      lines.push(currentLine);
+                  }
+                  currentLine = word;
+              }
           }
+          
+          if (currentLine) {
+              lines.push(currentLine);
+          }
+          
+          return lines;
       },
     
     
