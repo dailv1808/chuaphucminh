@@ -36,7 +36,7 @@ document.addEventListener('alpine:init', function() {
         }
 
         try {
-          this.showNotificationMessage('Đang tạo PDF với font tiếng Việt...', 'success');
+          this.showNotificationMessage('Đang tạo PDF...', 'success');
           
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF({
@@ -45,31 +45,64 @@ document.addEventListener('alpine:init', function() {
             format: 'a4'
           });
 
-          // Thêm font Noto Sans hỗ trợ tiếng Việt
-          await this.addVietnameseFont(doc);
-          
-          // Sử dụng font tiếng Việt
-          doc.setFont('NotoSans');
+          // Sử dụng font Times New Roman - hỗ trợ tiếng Việt tốt
+          doc.setFont('times');
           
           // Slide chào mừng
-          doc.setFillColor(106, 0, 0);
+          doc.setFillColor(106, 0, 0); // Màu nền #6a0000
           doc.rect(0, 0, 297, 210, 'F');
           
           doc.setTextColor(255, 255, 255);
           doc.setFontSize(44);
-          doc.setFont('NotoSans', 'bold');
+          doc.setFont('times', 'bold');
           
+          // Tiêu đề slide chào mừng
           doc.text('HỎI PHÁP', 20, 80);
-          doc.text('TRÌNH PHÁP', 20, 110);
+          doc.text('TRÌNH PHÁP', 20, 120);
 
-          // Các slide câu hỏi
+          // Thêm các slide câu hỏi
           for (let i = 0; i < this.slideshowQuestions.length; i++) {
-            if (i > 0) doc.addPage();
+            doc.addPage();
             
             const question = this.slideshowQuestions[i];
-            await this.createVietnameseSlide(doc, question, i);
+            
+            // Tiêu đề slide
+            doc.setTextColor(46, 134, 171); // Màu xanh #2E86AB
+            doc.setFontSize(20);
+            doc.setFont('times', 'bold');
+            doc.text(`Câu hỏi ${i + 1}`, 15, 20);
+            
+            // Thông tin người hỏi
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(16);
+            doc.text(`Hành giả: ${question.name || 'Ẩn danh'}`, 15, 35);
+            
+            // Nội dung câu hỏi
+            const content = this.getQuestionContent(question);
+            doc.setFontSize(14);
+            doc.setTextColor(51, 51, 51);
+            
+            // Xử lý nội dung tiếng Việt
+            const processedContent = this.processContentForPDF(content);
+            const lines = doc.splitTextToSize(processedContent, 270); // Tự động xuống dòng
+            
+            let textY = 50;
+            const lineHeight = 7;
+            
+            for (let line of lines) {
+              if (textY < 180) { // Giới hạn chiều cao trang
+                doc.text(line, 20, textY);
+                textY += lineHeight;
+              }
+            }
+            
+            // Footer với số trang
+            doc.setTextColor(102, 102, 102);
+            doc.setFontSize(10);
+            doc.text(`Trang ${i + 2}`, 148, 200, { align: 'center' });
           }
 
+          // Tải file xuống
           const fileName = `Slide-Hoi-Dap-${new Date().toISOString().split('T')[0]}.pdf`;
           doc.save(fileName);
           
@@ -81,22 +114,15 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
-      // Thêm font Noto Sans hỗ trợ tiếng Việt
-      addVietnameseFont: async function(doc) {
-        // Font Noto Sans Vietnamese dạng base64
-        const notoSansVietnamese = {
-          normal: 'AAEAAAASAQAABAAgR0RFRgAAA...', // Base64 font data sẽ được cung cấp đầy đủ
-          bold: 'AAEAAAASAQAABAAgR0RFRgAAA...',
-          italics: 'AAEAAAASAQAABAAgR0RFRgAAA...',
-          bolditalics: 'AAEAAAASAQAABAAgR0RFRgAAA...'
-        };
+      // Xử lý nội dung cho PDF
+      processContentForPDF: function(content) {
+        if (!content) return '';
         
-        // Thêm font vào jsPDF
-        doc.addFileToVFS('NotoSans-Vietnamese-normal.ttf', notoSansVietnamese.normal);
-        doc.addFileToVFS('NotoSans-Vietnamese-bold.ttf', notoSansVietnamese.bold);
-        
-        doc.addFont('NotoSans-Vietnamese-normal.ttf', 'NotoSans', 'normal');
-        doc.addFont('NotoSans-Vietnamese-bold.ttf', 'NotoSans', 'bold');
+        // Chuẩn hóa văn bản tiếng Việt
+        return content
+          .normalize('NFC') // Chuẩn hóa Unicode
+          .replace(/\s+/g, ' ') // Chuẩn hóa khoảng trắng
+          .trim();
       },
 
 
