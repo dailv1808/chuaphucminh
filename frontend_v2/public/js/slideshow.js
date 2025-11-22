@@ -32,132 +32,163 @@ document.addEventListener('alpine:init', function() {
 
 
       downloadPDF: function() {
-        if (this.slideshowQuestions.length === 0) {
-          this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
-          return;
-        }
+          if (this.slideshowQuestions.length === 0) {
+              this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
+              return;
+          }
 
-        try {
-          this.showNotificationMessage('Đang tạo PDF...', 'success');
-          
-          const { jsPDF } = window.jspdf;
-          const doc = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4'
-          });
+          try {
+              this.showNotificationMessage('Đang tạo PDF với font hỗ trợ tiếng Việt...', 'success');
+              
+              const { jsPDF } = window.jspdf;
+              const doc = new jsPDF({
+                  orientation: 'portrait',
+                  unit: 'mm',
+                  format: 'a4'
+              });
 
-          // Font settings - sử dụng font mặc định (helvetica) cho khả năng tương thích tốt
-          doc.setFont("helvetica", "normal");
-          
-          // Slide đầu tiên - Trang bìa
-          doc.setFillColor(106, 0, 0); // Màu nền đỏ đậm
-          doc.rect(0, 0, 210, 297, 'F');
-          
-          doc.setTextColor(255, 255, 255);
-          doc.setFontSize(32);
-          doc.setFont("helvetica", "bold");
-          
-          // Tiêu đề chính
-          const title = "HỎI ĐÁP TRÌNH PHÁP";
-          const titleWidth = doc.getTextWidth(title);
-          doc.text(title, (210 - titleWidth) / 2, 120);
-          
-          // Phụ đề
-          doc.setFontSize(16);
-          doc.setFont("helvetica", "normal");
-          const subtitle = `Tổng cộng: ${this.slideshowQuestions.length} câu hỏi`;
-          const subtitleWidth = doc.getTextWidth(subtitle);
-          doc.text(subtitle, (210 - subtitleWidth) / 2, 140);
-          
-          // Ngày tạo
-          const currentDate = new Date().toLocaleDateString('vi-VN');
-          doc.setFontSize(12);
-          doc.text(`Ngày tạo: ${currentDate}`, 20, 270);
+              // Thêm font hỗ trợ tiếng Việt (sử dụng font mặc định được cải thiện)
+              doc.setFont("helvetica", "normal");
+              
+              // Slide đầu tiên - Trang bìa
+              doc.setFillColor(106, 0, 0);
+              doc.rect(0, 0, 210, 297, 'F');
+              
+              doc.setTextColor(255, 255, 255);
+              doc.setFontSize(28);
+              doc.setFont("helvetica", "bold");
+              
+              // Sử dụng text đơn giản, tránh ký tự đặc biệt
+              const titleLines = [
+                  "HỎI ĐÁP",
+                  "TRÌNH PHÁP"
+              ];
+              
+              doc.text(titleLines, 105, 120, { align: 'center' });
+              
+              // Phụ đề
+              doc.setFontSize(14);
+              doc.setFont("helvetica", "normal");
+              doc.text(`Tổng cộng: ${this.slideshowQuestions.length} câu hỏi`, 105, 150, { align: 'center' });
+              
+              // Ngày tạo
+              const currentDate = new Date().toLocaleDateString('vi-VN');
+              doc.setFontSize(10);
+              doc.text(`Ngày tạo: ${currentDate}`, 20, 280);
 
-          // Tạo trang cho từng câu hỏi
-          this.slideshowQuestions.forEach((question, index) => {
-            // Thêm trang mới cho mỗi câu hỏi (trừ câu hỏi đầu tiên)
-            if (index > 0) {
-              doc.addPage();
-            }
-            
-            // Tiêu đề trang
-            doc.setFillColor(240, 240, 240);
-            doc.rect(0, 0, 210, 20, 'F');
-            
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(14);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Câu hỏi ${index + 1}`, 20, 12);
-            
-            // Thông tin người hỏi
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "bold");
-            const askerName = question.name || 'Ẩn danh';
-            doc.text(`Hành giả: ${askerName}`, 20, 30);
-            
-            // Nội dung câu hỏi
-            const content = this.getQuestionContent(question);
-            doc.setFontSize(11);
-            doc.setFont("helvetica", "normal");
-            
-            // Tách nội dung thành các dòng phù hợp với chiều rộng trang
-            const lines = doc.splitTextToSize(content, 170); // 170mm chiều rộng
-            
-            let textY = 45;
-            const lineHeight = 6; // Khoảng cách giữa các dòng
-            
-            lines.forEach(line => {
-              if (textY < 270) { // Đảm bảo không vượt quá chiều cao trang
-                doc.text(line, 20, textY);
-                textY += lineHeight;
-              }
-            });
-            
-            // Footer với số trang
-            doc.setFontSize(10);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Trang ${index + 2}`, 105, 285, { align: 'center' });
-            
-            // Thêm dấu hiệu đã trả lời nếu câu hỏi đã được đánh dấu
-            if (this.isQuestionAnswered(question)) {
-              doc.setFillColor(220, 255, 220);
-              doc.rect(160, 5, 40, 10, 'F');
-              doc.setTextColor(0, 128, 0);
-              doc.setFontSize(8);
-              doc.text('Đã trả lời', 165, 11);
-            }
-          });
+              // Tạo trang cho từng câu hỏi
+              this.slideshowQuestions.forEach((question, index) => {
+                  if (index > 0) {
+                      doc.addPage();
+                  }
+                  
+                  // Tiêu đề trang
+                  doc.setFillColor(240, 240, 240);
+                  doc.rect(0, 0, 210, 15, 'F');
+                  
+                  doc.setTextColor(0, 0, 0);
+                  doc.setFontSize(12);
+                  doc.setFont("helvetica", "bold");
+                  doc.text(`Câu hỏi ${index + 1}`, 20, 10);
+                  
+                  // Thông tin người hỏi
+                  doc.setFontSize(11);
+                  const askerName = this.sanitizeTextForPDF(question.name || 'Ẩn danh');
+                  doc.text(`Hành giả: ${askerName}`, 20, 25);
+                  
+                  // Nội dung câu hỏi - XỬ LÝ ĐẶC BIỆT CHO TIẾNG VIỆT
+                  const content = this.getQuestionContentForPDF(question);
+                  doc.setFontSize(10);
+                  doc.setFont("helvetica", "normal");
+                  
+                  // Sử dụng splitTextToSize với options để hỗ trợ Unicode tốt hơn
+                  const lines = doc.splitTextToSize(content, 170);
+                  
+                  let textY = 40;
+                  const lineHeight = 5;
+                  
+                  lines.forEach(line => {
+                      if (textY < 270) {
+                          // Thay thế ký tự lỗi trước khi hiển thị
+                          const cleanLine = this.sanitizeTextForPDF(line);
+                          doc.text(cleanLine, 20, textY);
+                          textY += lineHeight;
+                      }
+                  });
+                  
+                  // Footer với số trang
+                  doc.setFontSize(9);
+                  doc.setTextColor(100, 100, 100);
+                  doc.text(`Trang ${index + 2}`, 105, 285, { align: 'center' });
+                  
+                  // Thêm dấu hiệu đã trả lời
+                  if (this.isQuestionAnswered(question)) {
+                      doc.setFillColor(220, 255, 220);
+                      doc.rect(160, 3, 40, 8, 'F');
+                      doc.setTextColor(0, 128, 0);
+                      doc.setFontSize(7);
+                      doc.text('Đã trả lời', 165, 8);
+                  }
+              });
 
-          const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
-          doc.save(fileName);
-          
-          this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
-          
-        } catch (error) {
-          console.error('Error creating PDF:', error);
-          this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
-        }
+              const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
+              doc.save(fileName);
+              
+              this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
+              
+          } catch (error) {
+              console.error('Error creating PDF:', error);
+              this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
+          }
       },
 
-      // Hàm lấy nội dung câu hỏi
-      getQuestionContent: function(question) {
-        const content = question.edited_content && question.edited_content.trim() !== '' 
-          ? question.edited_content 
-          : question.content;
-        
-        if (!content) return '(Không có nội dung)';
-        
-        // Xử lý nội dung - thay thế nhiều khoảng trắng
-        let processedContent = content.replace(/\s+/g, ' ');
-        
-        // Đảm bảo định dạng xuống dòng
-        processedContent = processedContent.replace(/\n/g, '\n');
-        
-        return processedContent;
+      // Hàm làm sạch văn bản tiếng Việt cho PDF
+      sanitizeTextForPDF: function(text) {
+          if (!text) return '';
+          
+          // Thay thế các ký tự có vấn đề
+          const charMap = {
+              '&': ' và ',
+              '£': 'ú',
+              'Ä': 'ă',
+              'ää': 'ă',
+              'Ñ': 'đ',
+              'Y': 'ự',
+              'U': 'ớ',
+              // Thêm các ký tự lỗi khác nếu cần
+          };
+          
+          let cleanedText = text;
+          
+          // Thay thế từng ký tự
+          Object.keys(charMap).forEach(badChar => {
+              const regex = new RegExp(badChar, 'g');
+              cleanedText = cleanedText.replace(regex, charMap[badChar]);
+          });
+          
+          // Loại bỏ các ký tự & thừa
+          cleanedText = cleanedText.replace(/&/g, '');
+          
+          return cleanedText;
       },
 
+      // Hàm lấy nội dung câu hỏi đã được làm sạch cho PDF
+      getQuestionContentForPDF: function(question) {
+          const content = question.edited_content && question.edited_content.trim() !== '' 
+              ? question.edited_content 
+              : question.content;
+          
+          if (!content) return '(Không có nội dung)';
+          
+          // Làm sạch nội dung trước khi trả về
+          let processedContent = content
+              .replace(/\s+/g, ' ') // Thay thế nhiều khoảng trắng
+              .replace(/\n/g, '\n') // Giữ xuống dòng
+              .trim();
+          
+          // Áp dụng làm sạch ký tự tiếng Việt
+          return this.sanitizeTextForPDF(processedContent);
+      },
 
 
 
