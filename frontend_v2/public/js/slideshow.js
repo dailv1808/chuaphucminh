@@ -31,14 +31,14 @@ document.addEventListener('alpine:init', function() {
 
 
 
-      downloadPDF: async function() {
+      downloadPDFWithTimes: function() {
         if (this.slideshowQuestions.length === 0) {
           this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
           return;
         }
 
         try {
-          this.showNotificationMessage('Đang tạo PDF với font tiếng Việt...', 'success');
+          this.showNotificationMessage('Đang tạo PDF với font Times...', 'success');
           
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF({
@@ -47,59 +47,64 @@ document.addEventListener('alpine:init', function() {
             format: 'a4'
           });
 
-          // Sử dụng font mặc định (cố gắng hỗ trợ tiếng Việt)
-          // jsPDF 2.x sử dụng API khác
-          doc.setFont("helvetica", "normal");
+          // Sử dụng font Times (hỗ trợ tiếng Việt tốt hơn)
+          doc.setFont("times", "normal");
 
           // Slide chào mừng
           doc.setFillColor(106, 0, 0);
           doc.rect(0, 0, 297, 210, 'F');
           
           doc.setTextColor(255, 255, 255);
-          doc.setFontSize(44);
-          doc.setFont("helvetica", "bold");
+          doc.setFontSize(42);
+          doc.setFont("times", "bold");
           
-          doc.text('HỎI PHÁP', 20, 80);
-          doc.text('TRÌNH PHÁP', 20, 120);
+          // Thử render tiếng Việt
+          try {
+            doc.text('HỎI PHÁP', 20, 80);
+            doc.text('TRÌNH PHÁP', 20, 120);
+          } catch (e) {
+            // Fallback nếu có lỗi font
+            doc.text('HOI PHAP', 20, 80);
+            doc.text('TRINH PHAP', 20, 120);
+          }
 
           // Các slide câu hỏi
           for (let i = 0; i < this.slideshowQuestions.length; i++) {
-            doc.addPage();
+            if (i > 0) doc.addPage();
             
             const question = this.slideshowQuestions[i];
             
-            // Tiêu đề slide
+            // Tiêu đề
             doc.setTextColor(46, 134, 171);
-            doc.setFontSize(20);
-            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.setFont("times", "bold");
             doc.text(`Câu hỏi ${i + 1}`, 15, 20);
             
-            // Thông tin người hỏi
+            // Người hỏi
             doc.setTextColor(0, 0, 0);
-            doc.setFontSize(16);
-            doc.text(`Hành giả: ${question.name || 'Ẩn danh'}`, 15, 35);
-            
-            // Nội dung câu hỏi
-            const content = this.getQuestionContent(question);
             doc.setFontSize(14);
+            const askerName = this.sanitizeVietnameseText(question.name || 'Ẩn danh');
+            doc.text(`Hành giả: ${askerName}`, 15, 35);
+            
+            // Nội dung
+            const content = this.getQuestionContent(question);
+            const safeContent = this.sanitizeVietnameseText(content);
+            doc.setFontSize(12);
             doc.setTextColor(51, 51, 51);
             
-            // Xử lý nội dung tiếng Việt
-            const lines = doc.splitTextToSize(content, 270);
-            
+            const lines = doc.splitTextToSize(safeContent, 270);
             let textY = 50;
-            const lineHeight = 7;
             
             for (let line of lines) {
               if (textY < 180) {
                 doc.text(line, 20, textY);
-                textY += lineHeight;
+                textY += 6;
               }
             }
             
             // Footer
             doc.setTextColor(102, 102, 102);
-            doc.setFontSize(10);
+            doc.setFontSize(9);
             doc.text(`Trang ${i + 2}`, 148, 200, { align: 'center' });
           }
 
@@ -113,6 +118,39 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
         }
       },
+
+      // Hàm làm sạch văn bản tiếng Việt
+      sanitizeVietnameseText: function(text) {
+        if (!text) return '';
+        
+        // Thay thế các ký tự tiếng Việt có vấn đề
+        const charMap = {
+          'Ả': 'A', 'ả': 'a', 'Ã': 'A', 'ã': 'a', 'Ạ': 'A', 'ạ': 'a',
+          'Ắ': 'A', 'ắ': 'a', 'Ằ': 'A', 'ằ': 'a', 'Ẳ': 'A', 'ẳ': 'a',
+          'Ẵ': 'A', 'ẵ': 'a', 'Ặ': 'A', 'ặ': 'a', 'Ấ': 'A', 'ấ': 'a',
+          'Ầ': 'A', 'ầ': 'a', 'Ẩ': 'A', 'ẩ': 'a', 'Ẫ': 'A', 'ẫ': 'a',
+          'Ậ': 'A', 'ậ': 'a', 'È': 'E', 'è': 'e', 'É': 'E', 'é': 'e',
+          'Ẻ': 'E', 'ẻ': 'e', 'Ẽ': 'E', 'ẽ': 'e', 'Ẹ': 'E', 'ẹ': 'e',
+          'Ế': 'E', 'ế': 'e', 'Ề': 'E', 'ề': 'e', 'Ể': 'E', 'ể': 'e',
+          'Ễ': 'E', 'ễ': 'e', 'Ệ': 'E', 'ệ': 'e', 'Ỉ': 'I', 'ỉ': 'i',
+          'Ĩ': 'I', 'ĩ': 'i', 'Ị': 'I', 'ị': 'i', 'Ò': 'O', 'ò': 'o',
+          'Ó': 'O', 'ó': 'o', 'Ỏ': 'O', 'ỏ': 'o', 'Õ': 'O', 'õ': 'o',
+          'Ọ': 'O', 'ọ': 'o', 'Ố': 'O', 'ố': 'o', 'Ồ': 'O', 'ồ': 'o',
+          'Ổ': 'O', 'ổ': 'o', 'Ỗ': 'O', 'ỗ': 'o', 'Ộ': 'O', 'ộ': 'o',
+          'Ớ': 'O', 'ớ': 'o', 'Ờ': 'O', 'ờ': 'o', 'Ở': 'O', 'ở': 'o',
+          'Ỡ': 'O', 'ỡ': 'o', 'Ợ': 'O', 'ợ': 'o', 'Ù': 'U', 'ù': 'u',
+          'Ú': 'U', 'ú': 'u', 'Ủ': 'U', 'ủ': 'u', 'Ũ': 'U', 'ũ': 'u',
+          'Ụ': 'U', 'ụ': 'u', 'Ứ': 'U', 'ứ': 'u', 'Ừ': 'U', 'ừ': 'u',
+          'Ử': 'U', 'ử': 'u', 'Ữ': 'U', 'ữ': 'u', 'Ự': 'U', 'ự': 'u',
+          'Ỳ': 'Y', 'ỳ': 'y', 'Ý': 'Y', 'ý': 'y', 'Ỷ': 'Y', 'ỷ': 'y',
+          'Ỹ': 'Y', 'ỹ': 'y', 'Ỵ': 'Y', 'ỵ': 'y', 'Đ': 'D', 'đ': 'd'
+        };
+        
+        return text.replace(/[^\x00-\x7F]/g, function(char) {
+          return charMap[char] || char;
+        });
+      },
+
 
 
 
