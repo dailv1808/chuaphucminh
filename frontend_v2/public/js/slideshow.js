@@ -21,15 +21,19 @@ document.addEventListener('alpine:init', function() {
         this.loadYouTubeAPI();
         this.loadCachedYouTubeLink();
       },
+
+
+
+
       
-      downloadPDFSimple: async function() {
+      downloadPDF: async function() {
         if (this.slideshowQuestions.length === 0) {
           this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
           return;
         }
 
         try {
-          this.showNotificationMessage('Đang tạo PDF...', 'success');
+          this.showNotificationMessage('Đang tạo PDF với font Times New Roman...', 'success');
           
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF({
@@ -38,57 +42,26 @@ document.addEventListener('alpine:init', function() {
             format: 'a4'
           });
 
-          // Sử dụng font 'times' thay vì 'helvetica'
-          doc.setFont('times', 'normal');
+          // Sử dụng Times New Roman - font hỗ trợ tốt tiếng Việt
+          doc.setFont('times');
+          doc.setFontType('normal');
           
           // Slide chào mừng
           doc.setFillColor(106, 0, 0);
           doc.rect(0, 0, 297, 210, 'F');
           
           doc.setTextColor(255, 255, 255);
-          doc.setFontSize(44);
+          doc.setFontSize(42);
           doc.setFont('times', 'bold');
           
-          doc.text('HỎI PHÁP', 20, 80);
-          doc.text('TRÌNH PHÁP', 20, 110);
+          // Sử dụng phương pháp render thủ công cho tiếng Việt
+          this.renderVietnameseTextManual(doc, 'HỎI PHÁP', 20, 80);
+          this.renderVietnameseTextManual(doc, 'TRÌNH PHÁP', 20, 120);
 
           // Các slide câu hỏi
           for (let i = 0; i < this.slideshowQuestions.length; i++) {
             if (i > 0) doc.addPage();
-            
-            const question = this.slideshowQuestions[i];
-            
-            // Tiêu đề
-            doc.setTextColor(46, 134, 171);
-            doc.setFontSize(18);
-            doc.setFont('times', 'bold');
-            doc.text(`Câu hỏi ${i + 1}`, 15, 20);
-            
-            // Người hỏi
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(14);
-            doc.text(`Hành giả: ${question.name || 'Ẩn danh'}`, 15, 35);
-            
-            // Nội dung
-            const content = this.getQuestionContent(question);
-            doc.setFontSize(12);
-            doc.setTextColor(51, 51, 51);
-            
-            // Sử dụng splitTextToSize với font times
-            const lines = doc.splitTextToSize(content, 270);
-            let textY = 50;
-            
-            for (let line of lines) {
-              if (textY < 180) {
-                doc.text(line, 20, textY);
-                textY += 6;
-              }
-            }
-            
-            // Footer
-            doc.setTextColor(102, 102, 102);
-            doc.setFontSize(9);
-            doc.text(`Trang ${i + 2}`, 148, 200, { align: 'center' });
+            await this.createVietnameseQuestionSlide(doc, this.slideshowQuestions[i], i);
           }
 
           const fileName = `Slide-Hoi-Dap-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -101,6 +74,115 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
         }
       },
+
+      // Render text tiếng Việt thủ công
+      renderVietnameseTextManual: function(doc, text, x, y) {
+        try {
+          doc.text(text, x, y);
+        } catch (error) {
+          console.warn('Font error, using alternative method:', error);
+          // Phương pháp dự phòng: thay thế ký tự không hỗ trợ
+          const safeText = this.makeTextSafe(text);
+          doc.text(safeText, x, y);
+        }
+      },
+
+      // Làm cho text an toàn với font
+      makeTextSafe: function(text) {
+        if (!text) return '';
+        
+        // Thay thế các ký tự đặc biệt không được hỗ trợ
+        return text
+          .normalize('NFC')
+          .replace(/[̀-ͯ]/g, '') // Loại bỏ dấu phức tạp
+          .replace(/[^\w\sàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴĐ\.,!?\-:;/()]/g, '');
+      },
+
+      // Tạo slide câu hỏi với xử lý tiếng Việt
+      createVietnameseQuestionSlide: async function(doc, question, index) {
+        // Reset background
+        doc.setFillColor(255, 255, 255);
+        doc.rect(0, 0, 297, 210, 'F');
+        
+        // Tiêu đề
+        doc.setTextColor(46, 134, 171);
+        doc.setFontSize(18);
+        doc.setFont('times', 'bold');
+        this.renderVietnameseTextManual(doc, `Câu hỏi ${index + 1}`, 15, 20);
+        
+        // Người hỏi
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(14);
+        const askerText = `Hành giả: ${question.name || 'Ẩn danh'}`;
+        this.renderVietnameseTextManual(doc, askerText, 15, 35);
+        
+        // Nội dung câu hỏi
+        const content = this.getQuestionContent(question);
+        doc.setFontSize(12);
+        doc.setTextColor(51, 51, 51);
+        
+        await this.renderVietnameseContent(doc, content, 20, 50, 257, 140);
+        
+        // Footer
+        doc.setTextColor(102, 102, 102);
+        doc.setFontSize(9);
+        doc.text(`Trang ${index + 2}`, 148, 200, { align: 'center' });
+      },
+
+      // Render nội dung tiếng Việt
+      renderVietnameseContent: async function(doc, content, x, y, maxWidth, maxHeight) {
+        if (!content) return y;
+        
+        const safeContent = this.makeTextSafe(content);
+        const lines = this.wrapTextManual(safeContent, maxWidth, doc);
+        let currentY = y;
+        const lineHeight = 6;
+        
+        for (let line of lines) {
+          if (currentY > y + maxHeight) break;
+          
+          try {
+            doc.text(line, x, currentY);
+            currentY += lineHeight;
+          } catch (error) {
+            console.warn('Error rendering line:', line, error);
+            // Bỏ qua dòng lỗi, tiếp tục với dòng khác
+            currentY += lineHeight;
+          }
+        }
+        
+        return currentY;
+      },
+
+      // Wrap text thủ công
+      wrapTextManual: function(text, maxWidth, doc) {
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = '';
+        
+        for (let word of words) {
+          const testLine = currentLine ? currentLine + ' ' + word : word;
+          const testWidth = doc.getTextWidth(testLine);
+          
+          if (testWidth > maxWidth && currentLine !== '') {
+            lines.push(currentLine);
+            currentLine = word;
+          } else {
+            currentLine = testLine;
+          }
+        }
+        
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+        
+        return lines;
+      },
+
+
+
+
+
 
       // Hàm lấy nội dung câu hỏi - ưu tiên edited_content, nếu trống thì lấy content
    
