@@ -106,7 +106,7 @@ document.addEventListener('alpine:init', function() {
             const content = this.getQuestionContent(question);
             
             questionPage.innerHTML = `
-              <div style="margin-bottom: 60px;">
+              <div style="margin-bottom: 10px;">
                 <div style="font-size: 1.5rem; font-weight: bold; color: #1a365d;">
                   Câu hỏi ${i + 1}
                 </div>
@@ -118,7 +118,7 @@ document.addEventListener('alpine:init', function() {
               <div style="
                 font-size: 1.5rem;
                 line-height: 1.8;
-                margin-bottom: 40px;
+                margin-bottom: 10px;
               ">
                 <div style="margin-bottom: 10px;">
                   Dạ con thưa Sư, xin Sư cho con hỏi:
