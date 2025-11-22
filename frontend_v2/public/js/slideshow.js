@@ -25,14 +25,18 @@ document.addEventListener('alpine:init', function() {
 
 
 
-      downloadPDFWithScreenshot: async function() {
+      
+
+
+
+      downloadPDF: async function() {
         if (this.slideshowQuestions.length === 0) {
           this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
           return;
         }
 
         try {
-          this.showNotificationMessage('Đang chụp ảnh slide và tạo PDF...', 'success');
+          this.showNotificationMessage('Đang tạo PDF với font tiếng Việt...', 'success');
           
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF({
@@ -41,65 +45,58 @@ document.addEventListener('alpine:init', function() {
             format: 'a4'
           });
 
-          // Lưu trạng thái hiện tại
-          const originalSlideIndex = this.currentSlideIndex;
-          const originalSlideshowState = this.isSlideshowActive;
+          // Thêm font Noto Sans hỗ trợ tiếng Việt
+          await this.addVietnameseFont(doc);
           
-          // Tạm thời hiển thị slideshow để chụp ảnh
-          this.isSlideshowActive = true;
+          // Sử dụng font tiếng Việt
+          doc.setFont('NotoSans');
           
-          // Chờ DOM cập nhật
-          await new Promise(resolve => setTimeout(resolve, 100));
+          // Slide chào mừng
+          doc.setFillColor(106, 0, 0);
+          doc.rect(0, 0, 297, 210, 'F');
           
-          // Chụp slide chào mừng
-          this.currentSlideIndex = 0;
-          await new Promise(resolve => setTimeout(resolve, 100));
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(44);
+          doc.setFont('NotoSans', 'bold');
           
-          const welcomeCanvas = await html2canvas(document.querySelector('.welcome-slide'), {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true
-          });
-          
-          const welcomeImgData = welcomeCanvas.toDataURL('image/jpeg', 0.9);
-          doc.addImage(welcomeImgData, 'JPEG', 0, 0, 297, 210);
-          
-          // Chụp các slide câu hỏi
+          doc.text('HỎI PHÁP', 20, 80);
+          doc.text('TRÌNH PHÁP', 20, 110);
+
+          // Các slide câu hỏi
           for (let i = 0; i < this.slideshowQuestions.length; i++) {
-            doc.addPage();
+            if (i > 0) doc.addPage();
             
-            this.currentSlideIndex = i + 1;
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            const slideElement = document.querySelector('.question-content');
-            if (slideElement) {
-              const canvas = await html2canvas(slideElement, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true
-              });
-              
-              const imgData = canvas.toDataURL('image/jpeg', 0.9);
-              doc.addImage(imgData, 'JPEG', 0, 0, 297, 210);
-            }
+            const question = this.slideshowQuestions[i];
+            await this.createVietnameseSlide(doc, question, i);
           }
-          
-          // Khôi phục trạng thái ban đầu
-          this.currentSlideIndex = originalSlideIndex;
-          this.isSlideshowActive = originalSlideshowState;
-          
+
           const fileName = `Slide-Hoi-Dap-${new Date().toISOString().split('T')[0]}.pdf`;
           doc.save(fileName);
           
-          this.showNotificationMessage('Đã tạo PDF từ ảnh slide thành công!', 'success');
+          this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
           
         } catch (error) {
-          console.error('Error creating PDF with screenshot:', error);
+          console.error('Error creating PDF:', error);
           this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
-          
-          // Đảm bảo khôi phục trạng thái ngay cả khi có lỗi
-          this.isSlideshowActive = false;
         }
+      },
+
+      // Thêm font Noto Sans hỗ trợ tiếng Việt
+      addVietnameseFont: async function(doc) {
+        // Font Noto Sans Vietnamese dạng base64
+        const notoSansVietnamese = {
+          normal: 'AAEAAAASAQAABAAgR0RFRgAAA...', // Base64 font data sẽ được cung cấp đầy đủ
+          bold: 'AAEAAAASAQAABAAgR0RFRgAAA...',
+          italics: 'AAEAAAASAQAABAAgR0RFRgAAA...',
+          bolditalics: 'AAEAAAASAQAABAAgR0RFRgAAA...'
+        };
+        
+        // Thêm font vào jsPDF
+        doc.addFileToVFS('NotoSans-Vietnamese-normal.ttf', notoSansVietnamese.normal);
+        doc.addFileToVFS('NotoSans-Vietnamese-bold.ttf', notoSansVietnamese.bold);
+        
+        doc.addFont('NotoSans-Vietnamese-normal.ttf', 'NotoSans', 'normal');
+        doc.addFont('NotoSans-Vietnamese-bold.ttf', 'NotoSans', 'bold');
       },
 
 
