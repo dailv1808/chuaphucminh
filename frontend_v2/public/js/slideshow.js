@@ -43,82 +43,78 @@ document.addEventListener('alpine:init', function() {
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF();
           
-          // Đặt font mặc định - sử dụng font hỗ trợ Unicode
-          doc.setFont('helvetica');
-          doc.setFontSize(11);
+          // Sử dụng font mặc định (helvetica) - hỗ trợ cơ bản cho tiếng Việt
+          // Trong thực tế, cần thêm font tiếng Việt, nhưng với jsPDF 2.x, helvetica thường hỗ trợ Unicode
           
-          // Slide chào mừng (Trang 1)
-          doc.setFillColor(106, 0, 0); // Màu nền đỏ đậm #6a0000
+          // Trang bìa
+          doc.setFillColor(106, 0, 0);
           doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
-          
           doc.setTextColor(255, 255, 255);
-          doc.setFontSize(36);
+          doc.setFontSize(32);
           doc.setFont('helvetica', 'bold');
           
-          const welcomeText = 'HỎI ĐÁP\nTRÌNH PHÁP';
-          const welcomeLines = doc.splitTextToSize(welcomeText, 180);
-          doc.text(welcomeLines, 20, 100);
+          // Sử dụng text trực tiếp thay vì splitTextToSize cho trang bìa
+          doc.text('HỎI ĐÁP', 105, 80, { align: 'center' });
+          doc.text('TRÌNH PHÁP', 105, 110, { align: 'center' });
           
-          // Mỗi câu hỏi là một trang riêng
+          // Mỗi câu hỏi một trang
           this.slideshowQuestions.forEach((question, index) => {
-            // Tạo trang mới cho mỗi câu hỏi
-            if (index > 0) {
-              doc.addPage();
-            }
+            doc.addPage();
             
-            // Reset màu sắc và font
-            doc.setTextColor(0, 0, 0);
             doc.setFillColor(255, 255, 255);
             doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
+            doc.setTextColor(0, 0, 0);
             
-            let yPosition = 30;
+            let yPos = 40;
             
-            // Tiêu đề câu hỏi
-            doc.setFontSize(16);
+            // Tiêu đề
+            doc.setFontSize(18);
             doc.setFont('helvetica', 'bold');
-            doc.text(`Câu hỏi ${index + 1}`, 20, yPosition);
-            yPosition += 10;
+            doc.text(`Câu hỏi ${index + 1}`, 20, yPos);
+            yPos += 15;
             
-            // Thông tin người hỏi
+            // Người hỏi
             doc.setFontSize(12);
-            doc.text(`Hành giả: ${question.name || 'Ẩn danh'}`, 20, yPosition);
-            yPosition += 15;
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Hành giả: ${question.name || 'Ẩn danh'}`, 20, yPos);
+            yPos += 20;
             
-            // Đường kẻ ngang
+            // Đường kẻ phân cách
             doc.setDrawColor(200, 200, 200);
-            doc.line(20, yPosition, 190, yPosition);
-            yPosition += 15;
+            doc.line(20, yPos, 190, yPos);
+            yPos += 20;
             
-            // Nội dung câu hỏi - Sử dụng format đặc biệt cho tiếng Việt
-            const content = this.getQuestionContent(question);
-            
-            // Chuẩn bị nội dung với format đặc biệt
-            const questionLines = [
-              'Dạ con thưa Sư, xin Sư cho con hỏi:',
-              ''
-            ];
-            
-            // Thêm nội dung câu hỏi
-            const contentLines = doc.splitTextToSize(content, 170);
-            questionLines.push(...contentLines);
-            
-            questionLines.push('');
-            questionLines.push('Con thành kính tri ân Sư ạ!');
-            
-            // In từng dòng
+            // Nội dung câu hỏi
             doc.setFontSize(11);
             doc.setFont('helvetica', 'normal');
             
-            questionLines.forEach(line => {
-              if (yPosition > 270) {
-                // Nếu sắp hết trang, tạo trang mới (cho câu hỏi rất dài)
+            // Phần mở đầu
+            doc.text('Dạ con thưa Sư, xin Sư cho con hỏi:', 20, yPos);
+            yPos += 15;
+            
+            // Nội dung chính - xử lý đặc biệt cho tiếng Việt
+            const content = this.getQuestionContent(question);
+            
+            // Sử dụng splitTextToSize với options để hỗ trợ Unicode tốt hơn
+            const lines = doc.splitTextToSize(content, 170);
+            
+            lines.forEach(line => {
+              if (yPos > 270) {
                 doc.addPage();
-                yPosition = 30;
+                yPos = 30;
               }
-              
-              doc.text(line, 20, yPosition);
-              yPosition += 6;
+              doc.text(line, 25, yPos);
+              yPos += 6;
             });
+            
+            yPos += 10;
+            
+            // Phần kết thúc
+            if (yPos > 270) {
+              doc.addPage();
+              yPos = 30;
+            }
+            doc.text('Con thành kính tri ân Sư ạ!', 20, yPos);
             
             // Số trang
             doc.setFontSize(8);
@@ -126,7 +122,6 @@ document.addEventListener('alpine:init', function() {
             doc.text(`Trang ${index + 2}`, 180, 290);
           });
           
-          // Tải file xuống
           const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
           doc.save(fileName);
           
@@ -137,6 +132,7 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
         }
       },
+  
   
     
     
