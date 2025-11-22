@@ -22,6 +22,97 @@ document.addEventListener('alpine:init', function() {
         this.loadCachedYouTubeLink();
       },
 
+      downloadPDF: async function() {
+        if (this.slideshowQuestions.length === 0) {
+          this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
+          return;
+        }
+
+        try {
+          this.showNotificationMessage('Đang tạo PDF...', 'success');
+          
+          // Sử dụng jsPDF
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4'
+          });
+
+          // Font chữ Times New Roman
+          doc.setFont('Times', 'normal');
+          
+          // Slide chào mừng
+          doc.setFillColor(106, 0, 0); // Màu nền #6a0000
+          doc.rect(0, 0, 297, 210, 'F'); // Kích thước A4 landscape
+          
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(48);
+          doc.setFont('Times', 'bold');
+          
+          // Tiêu đề với khoảng cách dòng
+          const welcomeText = ['HỎI PHÁP', 'TRÌNH PHÁP'];
+          let yPosition = 80;
+          
+          welcomeText.forEach(line => {
+            doc.text(line, 20, yPosition);
+            yPosition += 30;
+          });
+
+          doc.addPage();
+
+          // Các slide câu hỏi
+          for (let i = 0; i < this.slideshowQuestions.length; i++) {
+            if (i > 0) {
+              doc.addPage();
+            }
+            
+            const question = this.slideshowQuestions[i];
+            const content = this.getQuestionContent(question);
+            
+            // Tiêu đề slide
+            doc.setTextColor(46, 134, 171); // Màu xanh #2E86AB
+            doc.setFontSize(20);
+            doc.setFont('Times', 'bold');
+            doc.text(`Câu hỏi ${i + 1}`, 15, 20);
+            
+            // Thông tin người hỏi
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(16);
+            doc.text(`Hành giả: ${question.name || 'Ẩn danh'}`, 15, 35);
+            
+            // Nội dung câu hỏi
+            doc.setFontSize(14);
+            doc.setTextColor(51, 51, 51); // Màu chữ đậm
+            
+            const lines = doc.splitTextToSize(content, 270); // Tự động xuống dòng
+            let textY = 50;
+            
+            lines.forEach(line => {
+              if (textY < 180) { // Giới hạn chiều cao trang
+                doc.text(line, 20, textY);
+                textY += 8; // Khoảng cách dòng
+              }
+            });
+            
+            // Footer với số trang
+            doc.setTextColor(102, 102, 102);
+            doc.setFontSize(10);
+            doc.text(`Trang ${i + 2}`, 148, 200, { align: 'center' });
+          }
+
+          // Tải file xuống
+          const fileName = `Slide-Hoi-Dap-Phap-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
+          doc.save(fileName);
+          
+          this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
+          
+        } catch (error) {
+          console.error('Error creating PDF:', error);
+          this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
+        }
+      },
+
       // Hàm lấy nội dung câu hỏi - ưu tiên edited_content, nếu trống thì lấy content
    
       // THÊM METHOD MỚI - Cache YouTube link
