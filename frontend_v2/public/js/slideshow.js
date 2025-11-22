@@ -174,18 +174,16 @@ document.addEventListener('alpine:init', function() {
                   Dạ con thưa Sư, xin Sư cho con hỏi:
                 </div>
                 
+                
+
                 <div style="
-                  white-space: pre-line;
-                  text-align: justify;
-                  text-justify: inter-word;
                   margin-bottom: 40px;
                   font-size: 1.5rem;
                   line-height: 1.9;
-                  word-spacing: 0.5px;
-                  letter-spacing: 0.2px;
-                  hyphens: auto;
+                  text-align: justify;
+                  word-wrap: break-word;
                 ">
-                  ${content}
+                  ${this.formatContentForPDF(content)}
                 </div>
                 
                 <div style="margin-top: 10px; text-align: justify; text-justify: inter-word;">
@@ -285,6 +283,35 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
+      // Hàm format nội dung cho PDF - căn đều 2 bên
+      formatContentForPDF: function(content) {
+        if (!content) return '';
+        
+        // 1. Xử lý xuống dòng - giữ các dòng mới quan trọng
+        let processedContent = content
+          .replace(/\r\n/g, '\n') // Chuẩn hóa xuống dòng
+          .replace(/\n+/g, '\n')  // Gộp nhiều dòng trống liên tiếp
+          .trim();
+        
+        // 2. Tách thành các đoạn dựa trên xuống dòng
+        const paragraphs = processedContent.split('\n');
+        
+        // 3. Xử lý từng đoạn - thêm span để căn đều
+        const formattedParagraphs = paragraphs.map(paragraph => {
+          if (paragraph.trim() === '') {
+            return '<div style="height: 1.2em;"></div>'; // Dòng trống
+          }
+          
+          // Thay thế nhiều khoảng trắng bằng một khoảng
+          const cleanParagraph = paragraph.replace(/\s+/g, ' ').trim();
+          
+          // Tạo đoạn văn với căn đều
+          return `<div style="text-align: justify; margin-bottom: 0.8em; word-spacing: 0.5px; letter-spacing: 0.1px;">${cleanParagraph}</div>`;
+        });
+        
+        return formattedParagraphs.join('');
+      },
+
 
 
 
@@ -321,6 +348,8 @@ document.addEventListener('alpine:init', function() {
           localStorage.setItem('cached_youtube_link', this.youtubeLink);
         }
       },
+
+
 
       getQuestionContent: function(question) {
         const content = question.edited_content && question.edited_content.trim() !== '' 
