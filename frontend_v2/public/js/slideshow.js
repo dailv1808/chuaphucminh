@@ -38,77 +38,99 @@ document.addEventListener('alpine:init', function() {
         }
 
         try {
-          this.showNotificationMessage('Đang tạo PDF với font Times...', 'success');
+          this.showNotificationMessage('Đang tạo PDF...', 'success');
           
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF({
-            orientation: 'landscape',
+            orientation: 'portrait',
             unit: 'mm',
             format: 'a4'
           });
 
-          // Sử dụng font Times (hỗ trợ tiếng Việt tốt hơn)
-          doc.setFont("times", "normal");
-
-          // Slide chào mừng
-          doc.setFillColor(106, 0, 0);
-          doc.rect(0, 0, 297, 210, 'F');
+          // Font settings - sử dụng font mặc định (helvetica) cho khả năng tương thích tốt
+          doc.setFont("helvetica", "normal");
+          
+          // Slide đầu tiên - Trang bìa
+          doc.setFillColor(106, 0, 0); // Màu nền đỏ đậm
+          doc.rect(0, 0, 210, 297, 'F');
           
           doc.setTextColor(255, 255, 255);
-          doc.setFontSize(42);
-          doc.setFont("times", "bold");
+          doc.setFontSize(32);
+          doc.setFont("helvetica", "bold");
           
-          // Thử render tiếng Việt
-          try {
-            doc.text('HỎI PHÁP', 20, 80);
-            doc.text('TRÌNH PHÁP', 20, 120);
-          } catch (e) {
-            // Fallback nếu có lỗi font
-            doc.text('HOI PHAP', 20, 80);
-            doc.text('TRINH PHAP', 20, 120);
-          }
+          // Tiêu đề chính
+          const title = "HỎI ĐÁP TRÌNH PHÁP";
+          const titleWidth = doc.getTextWidth(title);
+          doc.text(title, (210 - titleWidth) / 2, 120);
+          
+          // Phụ đề
+          doc.setFontSize(16);
+          doc.setFont("helvetica", "normal");
+          const subtitle = `Tổng cộng: ${this.slideshowQuestions.length} câu hỏi`;
+          const subtitleWidth = doc.getTextWidth(subtitle);
+          doc.text(subtitle, (210 - subtitleWidth) / 2, 140);
+          
+          // Ngày tạo
+          const currentDate = new Date().toLocaleDateString('vi-VN');
+          doc.setFontSize(12);
+          doc.text(`Ngày tạo: ${currentDate}`, 20, 270);
 
-          // Các slide câu hỏi
-          for (let i = 0; i < this.slideshowQuestions.length; i++) {
-            if (i > 0) doc.addPage();
-            
-            const question = this.slideshowQuestions[i];
-            
-            // Tiêu đề
-            doc.setTextColor(46, 134, 171);
-            doc.setFontSize(18);
-            doc.setFont("times", "bold");
-            doc.text(`Câu hỏi ${i + 1}`, 15, 20);
-            
-            // Người hỏi
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(14);
-            const askerName = this.sanitizeVietnameseText(question.name || 'Ẩn danh');
-            doc.text(`Hành giả: ${askerName}`, 15, 35);
-            
-            // Nội dung
-            const content = this.getQuestionContent(question);
-            const safeContent = this.sanitizeVietnameseText(content);
-            doc.setFontSize(12);
-            doc.setTextColor(51, 51, 51);
-            
-            const lines = doc.splitTextToSize(safeContent, 270);
-            let textY = 50;
-            
-            for (let line of lines) {
-              if (textY < 180) {
-                doc.text(line, 20, textY);
-                textY += 6;
-              }
+          // Tạo trang cho từng câu hỏi
+          this.slideshowQuestions.forEach((question, index) => {
+            // Thêm trang mới cho mỗi câu hỏi (trừ câu hỏi đầu tiên)
+            if (index > 0) {
+              doc.addPage();
             }
             
-            // Footer
-            doc.setTextColor(102, 102, 102);
-            doc.setFontSize(9);
-            doc.text(`Trang ${i + 2}`, 148, 200, { align: 'center' });
-          }
+            // Tiêu đề trang
+            doc.setFillColor(240, 240, 240);
+            doc.rect(0, 0, 210, 20, 'F');
+            
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Câu hỏi ${index + 1}`, 20, 12);
+            
+            // Thông tin người hỏi
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            const askerName = question.name || 'Ẩn danh';
+            doc.text(`Hành giả: ${askerName}`, 20, 30);
+            
+            // Nội dung câu hỏi
+            const content = this.getQuestionContent(question);
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "normal");
+            
+            // Tách nội dung thành các dòng phù hợp với chiều rộng trang
+            const lines = doc.splitTextToSize(content, 170); // 170mm chiều rộng
+            
+            let textY = 45;
+            const lineHeight = 6; // Khoảng cách giữa các dòng
+            
+            lines.forEach(line => {
+              if (textY < 270) { // Đảm bảo không vượt quá chiều cao trang
+                doc.text(line, 20, textY);
+                textY += lineHeight;
+              }
+            });
+            
+            // Footer với số trang
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Trang ${index + 2}`, 105, 285, { align: 'center' });
+            
+            // Thêm dấu hiệu đã trả lời nếu câu hỏi đã được đánh dấu
+            if (this.isQuestionAnswered(question)) {
+              doc.setFillColor(220, 255, 220);
+              doc.rect(160, 5, 40, 10, 'F');
+              doc.setTextColor(0, 128, 0);
+              doc.setFontSize(8);
+              doc.text('Đã trả lời', 165, 11);
+            }
+          });
 
-          const fileName = `Slide-Hoi-Dap-${new Date().toISOString().split('T')[0]}.pdf`;
+          const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
           doc.save(fileName);
           
           this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
@@ -119,36 +141,21 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
-      // Hàm làm sạch văn bản tiếng Việt
-      sanitizeVietnameseText: function(text) {
-        if (!text) return '';
+      // Hàm lấy nội dung câu hỏi
+      getQuestionContent: function(question) {
+        const content = question.edited_content && question.edited_content.trim() !== '' 
+          ? question.edited_content 
+          : question.content;
         
-        // Thay thế các ký tự tiếng Việt có vấn đề
-        const charMap = {
-          'Ả': 'A', 'ả': 'a', 'Ã': 'A', 'ã': 'a', 'Ạ': 'A', 'ạ': 'a',
-          'Ắ': 'A', 'ắ': 'a', 'Ằ': 'A', 'ằ': 'a', 'Ẳ': 'A', 'ẳ': 'a',
-          'Ẵ': 'A', 'ẵ': 'a', 'Ặ': 'A', 'ặ': 'a', 'Ấ': 'A', 'ấ': 'a',
-          'Ầ': 'A', 'ầ': 'a', 'Ẩ': 'A', 'ẩ': 'a', 'Ẫ': 'A', 'ẫ': 'a',
-          'Ậ': 'A', 'ậ': 'a', 'È': 'E', 'è': 'e', 'É': 'E', 'é': 'e',
-          'Ẻ': 'E', 'ẻ': 'e', 'Ẽ': 'E', 'ẽ': 'e', 'Ẹ': 'E', 'ẹ': 'e',
-          'Ế': 'E', 'ế': 'e', 'Ề': 'E', 'ề': 'e', 'Ể': 'E', 'ể': 'e',
-          'Ễ': 'E', 'ễ': 'e', 'Ệ': 'E', 'ệ': 'e', 'Ỉ': 'I', 'ỉ': 'i',
-          'Ĩ': 'I', 'ĩ': 'i', 'Ị': 'I', 'ị': 'i', 'Ò': 'O', 'ò': 'o',
-          'Ó': 'O', 'ó': 'o', 'Ỏ': 'O', 'ỏ': 'o', 'Õ': 'O', 'õ': 'o',
-          'Ọ': 'O', 'ọ': 'o', 'Ố': 'O', 'ố': 'o', 'Ồ': 'O', 'ồ': 'o',
-          'Ổ': 'O', 'ổ': 'o', 'Ỗ': 'O', 'ỗ': 'o', 'Ộ': 'O', 'ộ': 'o',
-          'Ớ': 'O', 'ớ': 'o', 'Ờ': 'O', 'ờ': 'o', 'Ở': 'O', 'ở': 'o',
-          'Ỡ': 'O', 'ỡ': 'o', 'Ợ': 'O', 'ợ': 'o', 'Ù': 'U', 'ù': 'u',
-          'Ú': 'U', 'ú': 'u', 'Ủ': 'U', 'ủ': 'u', 'Ũ': 'U', 'ũ': 'u',
-          'Ụ': 'U', 'ụ': 'u', 'Ứ': 'U', 'ứ': 'u', 'Ừ': 'U', 'ừ': 'u',
-          'Ử': 'U', 'ử': 'u', 'Ữ': 'U', 'ữ': 'u', 'Ự': 'U', 'ự': 'u',
-          'Ỳ': 'Y', 'ỳ': 'y', 'Ý': 'Y', 'ý': 'y', 'Ỷ': 'Y', 'ỷ': 'y',
-          'Ỹ': 'Y', 'ỹ': 'y', 'Ỵ': 'Y', 'ỵ': 'y', 'Đ': 'D', 'đ': 'd'
-        };
+        if (!content) return '(Không có nội dung)';
         
-        return text.replace(/[^\x00-\x7F]/g, function(char) {
-          return charMap[char] || char;
-        });
+        // Xử lý nội dung - thay thế nhiều khoảng trắng
+        let processedContent = content.replace(/\s+/g, ' ');
+        
+        // Đảm bảo định dạng xuống dòng
+        processedContent = processedContent.replace(/\n/g, '\n');
+        
+        return processedContent;
       },
 
 
