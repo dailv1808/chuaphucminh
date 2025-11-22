@@ -30,9 +30,6 @@ document.addEventListener('alpine:init', function() {
 
 
 
-      
-
-
       // downloadPDF: async function() {
       //   if (this.slideshowQuestions.length === 0) {
       //     this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
@@ -40,8 +37,11 @@ document.addEventListener('alpine:init', function() {
       //   }
 
       //   try {
-      //     this.showNotificationMessage('Đang tạo PDF..., vui lòng chờ!', 'success');
-          
+      //     // Hiển thị thông báo và KHÔNG tự động tắt
+      //     this.notificationMessage = 'Đang tạo PDF...';
+      //     this.notificationType = 'success';
+      //     this.showNotification = true;
+
       //     const { jsPDF } = window.jspdf;
       //     const doc = new jsPDF();
           
@@ -96,7 +96,7 @@ document.addEventListener('alpine:init', function() {
       //       const questionPage = document.createElement('div');
       //       questionPage.style.width = '794px';
       //       questionPage.style.height = '1123px';
-      //       questionPage.style.padding = '80px 120px 60px 120px';
+      //       questionPage.style.padding = '50px 60px 40px 60px';
       //       questionPage.style.fontFamily = "'Times New Roman', Times, serif";
       //       questionPage.style.backgroundColor = 'white';
       //       questionPage.style.boxSizing = 'border-box';
@@ -104,8 +104,7 @@ document.addEventListener('alpine:init', function() {
       //       questionPage.style.lineHeight = '1.7';
             
       //       const content = this.getQuestionContent(question);
-
-
+            
       //       questionPage.innerHTML = `
       //         <div style="margin-bottom: 10px;">
       //           <div style="font-size: 1.5rem; font-weight: bold; color: #1a365d;">
@@ -157,8 +156,6 @@ document.addEventListener('alpine:init', function() {
       //           Trang ${i + 2}
       //         </div>
       //       `;
-
-
             
       //       tempContainer.innerHTML = '';
       //       tempContainer.appendChild(questionPage);
@@ -186,10 +183,12 @@ document.addEventListener('alpine:init', function() {
       //     const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
       //     doc.save(fileName);
           
+      //     // Cập nhật thông báo thành công và tự động tắt sau 3 giây
       //     this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
           
       //   } catch (error) {
       //     console.error('Error creating PDF:', error);
+      //     // Hiển thị thông báo lỗi và tự động tắt sau 3 giây
       //     this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
       //   }
       // },
@@ -202,7 +201,6 @@ document.addEventListener('alpine:init', function() {
         }
 
         try {
-          // Hiển thị thông báo và KHÔNG tự động tắt
           this.notificationMessage = 'Đang tạo PDF...';
           this.notificationType = 'success';
           this.showNotification = true;
@@ -218,7 +216,7 @@ document.addEventListener('alpine:init', function() {
           tempContainer.style.fontFamily = "'Times New Roman', Times, serif";
           document.body.appendChild(tempContainer);
 
-          // TRANG BÌA - Giống slideshow
+          // TRANG BÌA - Giữ nguyên
           const coverPage = document.createElement('div');
           coverPage.style.width = '794px';
           coverPage.style.height = '1123px';
@@ -253,7 +251,7 @@ document.addEventListener('alpine:init', function() {
           
           doc.addImage(coverCanvas, 'JPEG', 0, 0, 210, 297);
 
-          // TRANG CÂU HỎI - Giống slideshow
+          // TRANG CÂU HỎI - CĂN LỀ NGẮN HƠN
           for (let i = 0; i < this.slideshowQuestions.length; i++) {
             const question = this.slideshowQuestions[i];
             doc.addPage();
@@ -261,42 +259,43 @@ document.addEventListener('alpine:init', function() {
             const questionPage = document.createElement('div');
             questionPage.style.width = '794px';
             questionPage.style.height = '1123px';
-            questionPage.style.padding = '80px 120px 60px 120px';
+            questionPage.style.padding = '40px 50px 30px 50px'; // GIẢM PADDING
             questionPage.style.fontFamily = "'Times New Roman', Times, serif";
             questionPage.style.backgroundColor = 'white';
             questionPage.style.boxSizing = 'border-box';
             questionPage.style.position = 'relative';
-            questionPage.style.lineHeight = '1.7';
+            questionPage.style.lineHeight = '1.6'; // GIẢM LINE-HEIGHT
             
             const content = this.getQuestionContent(question);
             
             questionPage.innerHTML = `
-              <div style="margin-bottom: 10px;">
-                <div style="font-size: 1.5rem; font-weight: bold; color: #1a365d;">
+              <div style="margin-bottom: 5px;">
+                <div style="font-size: 1.3rem; font-weight: bold; color: #1a365d;">
                   Câu hỏi ${i + 1}
                 </div>
-                <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748; margin-top: 15px;">
+                <div style="font-size: 1.3rem; font-weight: bold; color: #2d3748; margin-top: 5px;">
                   Hành giả: ${question.name || 'Ẩn danh'}
                 </div>
               </div>
               
+              <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 15px 0;">
+              
               <div style="
-                font-size: 1.5rem;
-                line-height: 1.8;
-                margin-bottom: 10px;
+                font-size: 1.3rem;
+                line-height: 1.6;
               ">
-                <div style="margin-bottom: 10px; text-align: justify;">
+                <div style="margin-bottom: 8px; text-align: justify; font-weight: bold;">
                   Dạ con thưa Sư, xin Sư cho con hỏi:
                 </div>
                 
                 <div class="pdf-content" style="
-                  margin-bottom: 40px;
-                  font-size: 1.5rem;
-                  line-height: 1.9;
+                  margin-bottom: 15px;
+                  font-size: 1.3rem;
+                  line-height: 1.6;
                   text-align: justify;
                   text-justify: inter-word;
-                  word-spacing: 0.5px;
-                  letter-spacing: 0.1px;
+                  word-spacing: 0.3px;
+                  letter-spacing: 0.05px;
                   white-space: normal;
                   word-wrap: break-word;
                 ">
@@ -305,16 +304,16 @@ document.addEventListener('alpine:init', function() {
                   ).join(' ')}
                 </div>
                 
-                <div style="margin-top: 10px; text-align: justify;">
+                <div style="margin-top: 8px; text-align: justify; font-weight: bold;">
                   Con thành kính tri ân Sư ạ!
                 </div>
               </div>
               
               <div style="
                 position: absolute;
-                bottom: 40px;
-                right: 120px;
-                font-size: 14px;
+                bottom: 20px;
+                right: 50px;
+                font-size: 10px;
                 color: #718096;
                 font-family: Arial, sans-serif;
               ">
@@ -330,7 +329,6 @@ document.addEventListener('alpine:init', function() {
               useCORS: true,
               backgroundColor: '#ffffff',
               onclone: function(clonedDoc) {
-                // Đảm bảo font được load đúng
                 const elements = clonedDoc.querySelectorAll('*');
                 elements.forEach(el => {
                   el.style.fontFamily = "'Times New Roman', Times, serif";
@@ -348,12 +346,10 @@ document.addEventListener('alpine:init', function() {
           const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
           doc.save(fileName);
           
-          // Cập nhật thông báo thành công và tự động tắt sau 3 giây
           this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
           
         } catch (error) {
           console.error('Error creating PDF:', error);
-          // Hiển thị thông báo lỗi và tự động tắt sau 3 giây
           this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
         }
       },
