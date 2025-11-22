@@ -25,18 +25,20 @@ document.addEventListener('alpine:init', function() {
 
 
 
-      
 
 
 
-      downloadPDF: async function() {
+
+
+
+      downloadPDFWithRoboto: async function() {
         if (this.slideshowQuestions.length === 0) {
           this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
           return;
         }
 
         try {
-          this.showNotificationMessage('Đang tạo PDF với font tiếng Việt...', 'success');
+          this.showNotificationMessage('Đang tạo PDF với font Roboto...', 'success');
           
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF({
@@ -45,11 +47,9 @@ document.addEventListener('alpine:init', function() {
             format: 'a4'
           });
 
-          // Thêm font Noto Sans Vietnamese
-          await this.loadVietnameseFont(doc);
-          
-          // Sử dụng font tiếng Việt
-          doc.setFont('NotoSans');
+          // Sử dụng Roboto font (hỗ trợ tiếng Việt tốt)
+          await this.loadRobotoFont(doc);
+          doc.setFont('Roboto');
           doc.setFontType('normal');
 
           // Slide chào mừng
@@ -57,50 +57,47 @@ document.addEventListener('alpine:init', function() {
           doc.rect(0, 0, 297, 210, 'F');
           
           doc.setTextColor(255, 255, 255);
-          doc.setFontSize(44);
-          doc.setFont('NotoSans', 'bold');
+          doc.setFontSize(42);
+          doc.setFont('Roboto', 'bold');
           
           doc.text('HỎI PHÁP', 20, 80);
           doc.text('TRÌNH PHÁP', 20, 120);
 
           // Các slide câu hỏi
           for (let i = 0; i < this.slideshowQuestions.length; i++) {
-            doc.addPage();
+            if (i > 0) doc.addPage();
             
             const question = this.slideshowQuestions[i];
             
-            // Tiêu đề slide
+            // Tiêu đề
             doc.setTextColor(46, 134, 171);
-            doc.setFontSize(20);
-            doc.setFont('NotoSans', 'bold');
+            doc.setFontSize(18);
+            doc.setFont('Roboto', 'bold');
             doc.text(`Câu hỏi ${i + 1}`, 15, 20);
             
-            // Thông tin người hỏi
+            // Người hỏi
             doc.setTextColor(0, 0, 0);
-            doc.setFontSize(16);
+            doc.setFontSize(14);
             doc.text(`Hành giả: ${question.name || 'Ẩn danh'}`, 15, 35);
             
-            // Nội dung câu hỏi
+            // Nội dung
             const content = this.getQuestionContent(question);
-            doc.setFontSize(14);
+            doc.setFontSize(12);
             doc.setTextColor(51, 51, 51);
             
-            // Xử lý nội dung tiếng Việt
             const lines = doc.splitTextToSize(content, 270);
-            
             let textY = 50;
-            const lineHeight = 7;
             
             for (let line of lines) {
               if (textY < 180) {
                 doc.text(line, 20, textY);
-                textY += lineHeight;
+                textY += 6;
               }
             }
             
             // Footer
             doc.setTextColor(102, 102, 102);
-            doc.setFontSize(10);
+            doc.setFontSize(9);
             doc.text(`Trang ${i + 2}`, 148, 200, { align: 'center' });
           }
 
@@ -115,50 +112,41 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
-      // Tải font Noto Sans Vietnamese
-      loadVietnameseFont: async function(doc) {
+      // Tải Roboto font
+      loadRobotoFont: async function(doc) {
         try {
-          // Font Noto Sans Vietnamese từ CDN
-          const fontUrl = 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Regular.ttf';
-          const fontBoldUrl = 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Bold.ttf';
+          // Roboto Regular
+          const robotoResponse = await fetch('https://cdn.jsdelivr.net/npm/roboto-font@0.1.0/fonts/Roboto/roboto-regular-webfont.ttf');
+          const robotoBoldResponse = await fetch('https://cdn.jsdelivr.net/npm/roboto-font@0.1.0/fonts/Roboto/roboto-bold-webfont.ttf');
           
-          // Tải font
-          const [fontResponse, fontBoldResponse] = await Promise.all([
-            fetch(fontUrl),
-            fetch(fontBoldUrl)
+          const [robotoBuffer, robotoBoldBuffer] = await Promise.all([
+            robotoResponse.arrayBuffer(),
+            robotoBoldResponse.arrayBuffer()
           ]);
           
-          const fontArrayBuffer = await fontResponse.arrayBuffer();
-          const fontBoldArrayBuffer = await fontBoldResponse.arrayBuffer();
+          const robotoBase64 = this.arrayBufferToBase64(robotoBuffer);
+          const robotoBoldBase64 = this.arrayBufferToBase64(robotoBoldBuffer);
           
-          // Chuyển đổi sang base64
-          const fontBase64 = this.arrayBufferToBase64(fontArrayBuffer);
-          const fontBoldBase64 = this.arrayBufferToBase64(fontBoldArrayBuffer);
+          doc.addFileToVFS('Roboto-Regular.ttf', robotoBase64);
+          doc.addFileToVFS('Roboto-Bold.ttf', robotoBoldBase64);
           
-          // Thêm font vào jsPDF
-          doc.addFileToVFS('NotoSans-Regular.ttf', fontBase64);
-          doc.addFileToVFS('NotoSans-Bold.ttf', fontBoldBase64);
-          
-          doc.addFont('NotoSans-Regular.ttf', 'NotoSans', 'normal');
-          doc.addFont('NotoSans-Bold.ttf', 'NotoSans', 'bold');
+          doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+          doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
           
         } catch (error) {
-          console.warn('Không thể tải font Noto Sans, sử dụng font mặc định');
-          // Fallback đến font mặc định
+          console.warn('Không thể tải Roboto font, sử dụng font mặc định');
           doc.setFont('helvetica');
         }
       },
 
-      // Chuyển đổi ArrayBuffer sang Base64
-      arrayBufferToBase64: function(buffer) {
-        let binary = '';
-        const bytes = new Uint8Array(buffer);
-        const len = bytes.byteLength;
-        for (let i = 0; i < len; i++) {
-          binary += String.fromCharCode(bytes[i]);
-        }
-        return window.btoa(binary);
-      },
+
+
+
+      
+
+
+
+      
   
 
 
