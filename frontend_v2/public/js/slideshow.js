@@ -170,12 +170,11 @@ document.addEventListener('alpine:init', function() {
                 line-height: 1.8;
                 margin-bottom: 10px;
               ">
-                <div style="margin-bottom: 10px; text-align: justify; text-justify: inter-word;">
+                <div style="margin-bottom: 10px; text-align: justify;">
                   Dạ con thưa Sư, xin Sư cho con hỏi:
                 </div>
                 
-        
-                <div style="
+                <div class="pdf-content" style="
                   margin-bottom: 40px;
                   font-size: 1.5rem;
                   line-height: 1.9;
@@ -185,14 +184,13 @@ document.addEventListener('alpine:init', function() {
                   letter-spacing: 0.1px;
                   white-space: normal;
                   word-wrap: break-word;
-                  word-break: break-word;
                 ">
-                  ${content.replace(/\n/g, '<br>')}
+                  ${content.split('\n').map(para => 
+                    para.trim() === '' ? '<br>' : para
+                  ).join(' ')}
                 </div>
-
                 
-                
-                <div style="margin-top: 10px; text-align: justify; text-justify: inter-word;">
+                <div style="margin-top: 10px; text-align: justify;">
                   Con thành kính tri ân Sư ạ!
                 </div>
               </div>
