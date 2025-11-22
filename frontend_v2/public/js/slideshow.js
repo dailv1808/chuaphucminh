@@ -31,6 +31,7 @@ document.addEventListener('alpine:init', function() {
 
 
 
+      
       downloadPDF: async function() {
         if (this.slideshowQuestions.length === 0) {
           this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
@@ -43,64 +44,50 @@ document.addEventListener('alpine:init', function() {
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF();
           
-          // Tạo container ẩn để render
           const tempContainer = document.createElement('div');
           tempContainer.style.position = 'absolute';
           tempContainer.style.left = '-9999px';
           tempContainer.style.top = '0';
-          tempContainer.style.width = '794px'; // A4 width in pixels (210mm * 3.78)
+          tempContainer.style.width = '794px';
           tempContainer.style.fontFamily = "'Times New Roman', Times, serif";
-          tempContainer.style.lineHeight = '1.6';
           document.body.appendChild(tempContainer);
 
-          // ===== TRANG BÌA =====
+          // TRANG BÌA - Giống slideshow
           const coverPage = document.createElement('div');
           coverPage.style.width = '794px';
-          coverPage.style.height = '1123px'; // A4 height in pixels (297mm * 3.78)
+          coverPage.style.height = '1123px';
           coverPage.style.backgroundColor = '#6a0000';
           coverPage.style.display = 'flex';
-          coverPage.style.flexDirection = 'column';
-          coverPage.style.justifyContent = 'center';
-          coverPage.style.alignItems: 'center';
-          coverPage.style.color = 'white';
-          coverPage.style.padding = '100px';
+          coverPage.style.alignItems = 'center';
+          coverPage.style.paddingLeft = '120px';
           coverPage.style.boxSizing = 'border-box';
 
-          const titleContainer = document.createElement('div');
-          titleContainer.style.textAlign = 'center';
+          const titleDiv = document.createElement('div');
+          titleDiv.innerHTML = `
+            <div style="
+              font-family: 'Times New Roman', Times, serif;
+              font-size: 90px;
+              font-weight: bold;
+              color: white;
+              line-height: 1.3;
+              letter-spacing: 8px;
+            ">
+              HỎI ĐÁP<br>TRÌNH PHÁP
+            </div>
+          `;
           
-          const title1 = document.createElement('div');
-          title1.textContent = 'HỎI ĐÁP';
-          title1.style.fontSize = '72px';
-          title1.style.fontWeight = 'bold';
-          title1.style.fontFamily = "'Times New Roman', Times, serif";
-          title1.style.marginBottom = '30px';
-          title1.style.letterSpacing = '8px';
-          
-          const title2 = document.createElement('div');
-          title2.textContent = 'TRÌNH PHÁP';
-          title2.style.fontSize = '72px';
-          title2.style.fontWeight = 'bold';
-          title2.style.fontFamily = "'Times New Roman', Times, serif";
-          title2.style.letterSpacing = '8px';
-
-          titleContainer.appendChild(title1);
-          titleContainer.appendChild(title2);
-          coverPage.appendChild(titleContainer);
-          
+          coverPage.appendChild(titleDiv);
           tempContainer.appendChild(coverPage);
           
           const coverCanvas = await html2canvas(coverPage, {
-            scale: 2, // Tăng độ phân giải
+            scale: 2,
             useCORS: true,
-            allowTaint: true,
             backgroundColor: '#6a0000'
           });
           
-          const coverImgData = coverCanvas.toDataURL('image/jpeg', 0.9);
-          doc.addImage(coverImgData, 'JPEG', 0, 0, 210, 297);
-          
-          // ===== CÁC TRANG CÂU HỎI =====
+          doc.addImage(coverCanvas, 'JPEG', 0, 0, 210, 297);
+
+          // TRANG CÂU HỎI - Giống slideshow
           for (let i = 0; i < this.slideshowQuestions.length; i++) {
             const question = this.slideshowQuestions[i];
             doc.addPage();
@@ -108,42 +95,45 @@ document.addEventListener('alpine:init', function() {
             const questionPage = document.createElement('div');
             questionPage.style.width = '794px';
             questionPage.style.height = '1123px';
-            questionPage.style.padding = '80px 60px';
+            questionPage.style.padding = '80px 120px 60px 120px';
             questionPage.style.fontFamily = "'Times New Roman', Times, serif";
-            questionPage.style.lineHeight = '1.7';
             questionPage.style.backgroundColor = 'white';
             questionPage.style.boxSizing = 'border-box';
             questionPage.style.position = 'relative';
+            questionPage.style.lineHeight = '1.7';
             
-            const content = `
-              <div style="margin-bottom: 50px;">
-                <div style="font-size: 28px; font-weight: bold; color: #2c5530; margin-bottom: 15px;">
+            const content = this.getQuestionContent(question);
+            
+            questionPage.innerHTML = `
+              <div style="margin-bottom: 60px;">
+                <div style="font-size: 2.5rem; font-weight: bold; color: #1a365d;">
                   Câu hỏi ${i + 1}
                 </div>
-                <div style="font-size: 20px; font-weight: bold; color: #1a365d;">
+                <div style="font-size: 1.8rem; font-weight: bold; color: #2d3748; margin-top: 15px;">
                   Hành giả: ${question.name || 'Ẩn danh'}
                 </div>
               </div>
               
-              <div style="border-top: 2px solid #e2e8f0; margin-bottom: 40px; padding-top: 20px;"></div>
-              
-              <div style="font-size: 18px; line-height: 1.8;">
-                <div style="margin-bottom: 30px; font-weight: bold;">
+              <div style="
+                font-size: 2.2rem;
+                line-height: 1.8;
+                margin-bottom: 40px;
+              ">
+                <div style="font-weight: bold; margin-bottom: 30px;">
                   Dạ con thưa Sư, xin Sư cho con hỏi:
                 </div>
                 
                 <div style="
-                  white-space: pre-line; 
-                  margin-bottom: 40px; 
-                  font-size: 17px;
+                  white-space: pre-line;
                   text-align: justify;
+                  margin-bottom: 40px;
+                  font-size: 2rem;
                   line-height: 1.9;
-                  padding: 0 10px;
                 ">
-                  ${this.getQuestionContent(question)}
+                  ${content}
                 </div>
                 
-                <div style="font-weight: bold; margin-top: 40px;">
+                <div style="font-weight: bold; margin-top: 50px;">
                   Con thành kính tri ân Sư ạ!
                 </div>
               </div>
@@ -151,8 +141,8 @@ document.addEventListener('alpine:init', function() {
               <div style="
                 position: absolute;
                 bottom: 40px;
-                right: 60px;
-                font-size: 12px;
+                right: 120px;
+                font-size: 14px;
                 color: #718096;
                 font-family: Arial, sans-serif;
               ">
@@ -160,26 +150,27 @@ document.addEventListener('alpine:init', function() {
               </div>
             `;
             
-            questionPage.innerHTML = content;
             tempContainer.innerHTML = '';
             tempContainer.appendChild(questionPage);
             
             const canvas = await html2canvas(questionPage, {
-              scale: 2, // Tăng độ phân giải
+              scale: 2,
               useCORS: true,
-              allowTaint: true,
               backgroundColor: '#ffffff',
-              logging: false
+              onclone: function(clonedDoc) {
+                // Đảm bảo font được load đúng
+                const elements = clonedDoc.querySelectorAll('*');
+                elements.forEach(el => {
+                  el.style.fontFamily = "'Times New Roman', Times, serif";
+                });
+              }
             });
             
-            const imgData = canvas.toDataURL('image/jpeg', 0.9);
-            doc.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+            doc.addImage(canvas, 'JPEG', 0, 0, 210, 297);
             
-            // Thêm delay nhỏ để tránh quá tải
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, 200));
           }
           
-          // Dọn dẹp
           document.body.removeChild(tempContainer);
           
           const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -192,7 +183,6 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage('Lỗi khi tạo PDF: ' + error.message, 'error');
         }
       },
-  
   
     
     
