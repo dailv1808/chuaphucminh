@@ -38,7 +38,7 @@ document.addEventListener('alpine:init', function() {
           }
 
           try {
-              this.showNotificationMessage('Đang tạo PDF...', 'success');
+              this.showNotificationMessage('Đang tạo PDF với font Unicode...', 'success');
               
               const { jsPDF } = window.jspdf;
               const doc = new jsPDF({
@@ -47,30 +47,35 @@ document.addEventListener('alpine:init', function() {
                   format: 'a4'
               });
 
-              // Sử dụng font mặc định
-              doc.setFont("helvetica");
+              // Sử dụng font Times có hỗ trợ Unicode tốt hơn
+              doc.setFont("times");
               
               // Trang bìa
               doc.setFillColor(106, 0, 0);
               doc.rect(0, 0, 210, 297, 'F');
               
               doc.setTextColor(255, 255, 255);
-              doc.setFontSize(24);
+              doc.setFontSize(22);
               doc.setFont(undefined, 'bold');
               
-              // Sử dụng tiếng Việt không dấu cho an toàn
-              const titleLines = [
-                  "HOI DAP TRINH PHAP",
-                  `Tong cong: ${this.slideshowQuestions.length} cau hoi`
-              ];
-              
-              doc.text(titleLines, 105, 140, { align: 'center' });
-              
+              // Thử với tiếng Việt có dấu
+              try {
+                  doc.text("HỎI ĐÁP TRÌNH PHÁP", 105, 120, { align: 'center' });
+                  
+                  doc.setFontSize(14);
+                  doc.setFont(undefined, 'normal');
+                  doc.text(`Tổng cộng: ${this.slideshowQuestions.length} câu hỏi`, 105, 140, { align: 'center' });
+              } catch (e) {
+                  // Fallback nếu lỗi font
+                  doc.text("HOI DAP TRINH PHAP", 105, 120, { align: 'center' });
+                  doc.setFontSize(14);
+                  doc.text(`Tong cong: ${this.slideshowQuestions.length} cau hoi`, 105, 140, { align: 'center' });
+              }
+
               // Ngày tạo
               const currentDate = new Date().toLocaleDateString('vi-VN');
               doc.setFontSize(10);
-              doc.setFont(undefined, 'normal');
-              doc.text(`Ngay tao: ${currentDate}`, 20, 280);
+              doc.text(`Ngày tạo: ${currentDate}`, 20, 280);
 
               // Tạo trang cho từng câu hỏi
               this.slideshowQuestions.forEach((question, index) => {
@@ -85,45 +90,57 @@ document.addEventListener('alpine:init', function() {
                   doc.setTextColor(0, 0, 0);
                   doc.setFontSize(12);
                   doc.setFont(undefined, 'bold');
-                  doc.text(`Cau hoi ${index + 1}`, 20, 10);
+                  
+                  try {
+                      doc.text(`Câu hỏi ${index + 1}`, 20, 10);
+                  } catch (e) {
+                      doc.text(`Cau hoi ${index + 1}`, 20, 10);
+                  }
                   
                   // Thông tin người hỏi
                   doc.setFontSize(11);
-                  const askerName = this.removeVietnameseAccents(question.name || 'An danh');
-                  doc.text(`Hanh gia: ${askerName}`, 20, 25);
+                  const askerName = question.name || 'Ẩn danh';
+                  try {
+                      doc.text(`Hành giả: ${askerName}`, 20, 25);
+                  } catch (e) {
+                      doc.text(`Hanh gia: ${this.removeVietnameseAccents(askerName)}`, 20, 25);
+                  }
                   
                   // Nội dung câu hỏi
                   const content = this.getQuestionContent(question);
-                  const safeContent = this.removeVietnameseAccents(content);
-                  
                   doc.setFontSize(10);
                   doc.setFont(undefined, 'normal');
                   
-                  const lines = doc.splitTextToSize(safeContent, 170);
-                  
-                  let textY = 40;
-                  const lineHeight = 5;
-                  
-                  lines.forEach(line => {
-                      if (textY < 270) {
-                          doc.text(line, 20, textY);
-                          textY += lineHeight;
-                      }
-                  });
+                  try {
+                      const lines = doc.splitTextToSize(content, 170);
+                      let textY = 40;
+                      const lineHeight = 5;
+                      
+                      lines.forEach(line => {
+                          if (textY < 270) {
+                              doc.text(line, 20, textY);
+                              textY += lineHeight;
+                          }
+                      });
+                  } catch (e) {
+                      // Fallback: không dấu nếu có lỗi
+                      const safeContent = this.removeVietnameseAccents(content);
+                      const lines = doc.splitTextToSize(safeContent, 170);
+                      let textY = 40;
+                      const lineHeight = 5;
+                      
+                      lines.forEach(line => {
+                          if (textY < 270) {
+                              doc.text(line, 20, textY);
+                              textY += lineHeight;
+                          }
+                      });
+                  }
                   
                   // Footer
                   doc.setFontSize(9);
                   doc.setTextColor(100, 100, 100);
                   doc.text(`Trang ${index + 2}`, 105, 285, { align: 'center' });
-                  
-                  // Đánh dấu đã trả lời
-                  if (this.isQuestionAnswered(question)) {
-                      doc.setFillColor(220, 255, 220);
-                      doc.rect(160, 3, 40, 8, 'F');
-                      doc.setTextColor(0, 128, 0);
-                      doc.setFontSize(7);
-                      doc.text('Da tra loi', 165, 8);
-                  }
               });
 
               const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -148,11 +165,11 @@ document.addEventListener('alpine:init', function() {
                   .replace(/đ/g, 'd')
                   .replace(/Đ/g, 'D')
                   .replace(/&/g, ' va ')
-                  .replace(/[^\w\s.,?!]/g, ' ')
+                  .replace(/[^\w\s.,?!-]/g, ' ')
                   .replace(/\s+/g, ' ')
                   .trim();
           } catch (error) {
-              // Fallback: xử lý đơn giản nếu normalize không hỗ trợ
+              // Fallback đơn giản
               return str
                   .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a')
                   .replace(/[èéẹẻẽêềếệểễ]/g, 'e')
@@ -169,11 +186,12 @@ document.addEventListener('alpine:init', function() {
                   .replace(/[ỲÝỴỶỸ]/g, 'Y')
                   .replace(/Đ/g, 'D')
                   .replace(/&/g, ' va ')
-                  .replace(/[^\w\s.,?!]/g, ' ')
+                  .replace(/[^\w\s.,?!-]/g, ' ')
                   .replace(/\s+/g, ' ')
                   .trim();
           }
       },
+    
     
 
 
