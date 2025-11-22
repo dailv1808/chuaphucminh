@@ -117,8 +117,13 @@ document.addEventListener('alpine:init', function() {
       },
 
       // Hàm lấy tên hiển thị - chỉ trả về name gốc
+      // getDisplayName: function(question) {
+      //   return question.name;
+      // },
+
+      // Hàm lấy tên hiển thị - ưu tiên display_name, nếu không có thì dùng name
       getDisplayName: function(question) {
-        return question.name;
+        return question.display_name || question.name;
       },
 
 
@@ -199,53 +204,131 @@ document.addEventListener('alpine:init', function() {
       // },
 
       // Hàm nhân đôi câu hỏi - giữ nguyên cấu trúc tên
+      // duplicateQuestion: async function(question) {
+      //   const token = localStorage.getItem('access_token');
+      //   const user = JSON.parse(localStorage.getItem('user'));
+        
+      //   try {
+      //     // Lấy tên gốc (loại bỏ hoàn toàn phần " (bản sao X)" nếu có)
+      //     const baseName = question.name.replace(/\s*\(bản sao\s*\d+\)\s*$/, '').trim();
+          
+      //     // Tìm tất cả các câu hỏi có cùng baseName (bao gồm cả câu hỏi gốc)
+      //     const relatedQuestions = this.questions.filter(q => {
+      //       const qBaseName = q.name.replace(/\s*\(bản sao\s*\d+\)\s*$/, '').trim();
+      //       return qBaseName === baseName;
+      //     });
+          
+      //     // Tìm số bản sao cao nhất hiện có
+      //     let maxDuplicateNumber = 0;
+      //     relatedQuestions.forEach(q => {
+      //       const match = q.name.match(/\(bản sao\s*(\d+)\)$/);
+      //       if (match) {
+      //         const num = parseInt(match[1]);
+      //         if (num > maxDuplicateNumber) {
+      //           maxDuplicateNumber = num;
+      //         }
+      //       }
+      //     });
+          
+      //     const newDuplicateNumber = maxDuplicateNumber + 1;
+      //     const newName = `${baseName} (bản sao ${newDuplicateNumber})`;
+
+      //     // Tạo bản sao của câu hỏi
+      //     const duplicatedQuestion = {
+      //       name: newName, // Chỉ thêm phần "bản sao" vào trường name để hiển thị
+      //       email: question.email,
+      //       content: question.content,
+      //       edited_content: question.edited_content,
+      //       contact: question.contact,
+      //       answer: question.answer,
+      //       short_content: question.short_content,
+      //       answered_at: question.answered_at,
+      //       tags: question.tags,
+      //       group: question.group,
+      //       status: question.status,
+      //       priority: question.priority,
+      //       slideshow: question.slideshow,
+      //       is_faq: question.is_faq,
+      //       created_at: new Date().toISOString(),
+      //       updated_at: new Date().toISOString(),
+      //       created_by: question.created_by?.id || question.created_by,
+      //       updated_by: user?.id || null
+      //     };
+
+      //     const response = await fetch('https://api.chuaphucminh.xyz/api/questions/', {
+      //       method: 'POST',
+      //       headers: { 
+      //         'Content-Type': 'application/json',
+      //         'Authorization': `Bearer ${token}`
+      //       },
+      //       body: JSON.stringify(duplicatedQuestion)
+      //     });
+
+      //     if (!response.ok) {
+      //       const errorText = await response.text();
+      //       throw new Error(`Nhân đôi câu hỏi thất bại: ${errorText}`);
+      //     }
+          
+      //     this.showNotificationMessage(`Đã nhân đôi câu hỏi thành "${newName}"`, 'success');
+      //     this.fetchQuestions(); // Tải lại danh sách
+          
+      //   } catch (error) {
+      //     console.error('Error:', error);
+      //     this.showNotificationMessage(error.message, 'error');
+      //   }
+      // },
+
+
+
+      // Hàm nhân đôi câu hỏi - thêm trường display_name
       duplicateQuestion: async function(question) {
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
         
         try {
-          // Lấy tên gốc (loại bỏ hoàn toàn phần " (bản sao X)" nếu có)
-          const baseName = question.name.replace(/\s*\(bản sao\s*\d+\)\s*$/, '').trim();
+          // Lấy tên gốc từ question.name (không xử lý gì)
+          const baseName = question.name;
           
-          // Tìm tất cả các câu hỏi có cùng baseName (bao gồm cả câu hỏi gốc)
-          const relatedQuestions = this.questions.filter(q => {
-            const qBaseName = q.name.replace(/\s*\(bản sao\s*\d+\)\s*$/, '').trim();
-            return qBaseName === baseName;
-          });
+          // Tìm tất cả các câu hỏi có cùng baseName
+          const relatedQuestions = this.questions.filter(q => q.name === baseName);
           
           // Tìm số bản sao cao nhất hiện có
           let maxDuplicateNumber = 0;
           relatedQuestions.forEach(q => {
-            const match = q.name.match(/\(bản sao\s*(\d+)\)$/);
-            if (match) {
-              const num = parseInt(match[1]);
-              if (num > maxDuplicateNumber) {
-                maxDuplicateNumber = num;
+            // Kiểm tra trong display_name nếu có phần bản sao
+            if (q.display_name) {
+              const match = q.display_name.match(/\(bản sao\s*(\d+)\)$/);
+              if (match) {
+                const num = parseInt(match[1]);
+                if (num > maxDuplicateNumber) {
+                  maxDuplicateNumber = num;
+                }
               }
             }
           });
           
           const newDuplicateNumber = maxDuplicateNumber + 1;
-          const newName = `${baseName} (bản sao ${newDuplicateNumber})`;
+          const displayName = `${baseName} (bản sao ${newDuplicateNumber})`;
 
-          // Tạo bản sao của câu hỏi
+          // Tạo bản sao của câu hỏi - GIỮ NGUYÊN tất cả các trường khác
           const duplicatedQuestion = {
-            name: newName, // Chỉ thêm phần "bản sao" vào trường name để hiển thị
+            name: baseName, // Giữ nguyên tên gốc
+            display_name: displayName, // Thêm trường display_name để hiển thị trong trang Q&A
             email: question.email,
             content: question.content,
             edited_content: question.edited_content,
             contact: question.contact,
             answer: question.answer,
             short_content: question.short_content,
-            answered_at: question.answered_at,
+            answered_at: question.answered_at, // Giữ nguyên thời gian trả lời
             tags: question.tags,
             group: question.group,
             status: question.status,
             priority: question.priority,
             slideshow: question.slideshow,
             is_faq: question.is_faq,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            created_at: question.created_at, // Giữ nguyên thời gian tạo
+            updated_at: question.updated_at, // Giữ nguyên thời gian sửa
             created_by: question.created_by?.id || question.created_by,
             updated_by: user?.id || null
           };
@@ -264,7 +347,7 @@ document.addEventListener('alpine:init', function() {
             throw new Error(`Nhân đôi câu hỏi thất bại: ${errorText}`);
           }
           
-          this.showNotificationMessage(`Đã nhân đôi câu hỏi thành "${newName}"`, 'success');
+          this.showNotificationMessage(`Đã nhân đôi câu hỏi thành "${displayName}"`, 'success');
           this.fetchQuestions(); // Tải lại danh sách
           
         } catch (error) {
@@ -272,6 +355,8 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage(error.message, 'error');
         }
       },
+
+
 
 
 
