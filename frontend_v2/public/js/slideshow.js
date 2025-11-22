@@ -31,7 +31,7 @@ document.addEventListener('alpine:init', function() {
 
 
 
-      downloadPDFWithTimes: function() {
+      downloadPDF: function() {
         if (this.slideshowQuestions.length === 0) {
           this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
           return;
