@@ -104,7 +104,8 @@ document.addEventListener('alpine:init', function() {
             questionPage.style.lineHeight = '1.7';
             
             const content = this.getQuestionContent(question);
-            
+
+
             questionPage.innerHTML = `
               <div style="margin-bottom: 10px;">
                 <div style="font-size: 1.5rem; font-weight: bold; color: #1a365d;">
@@ -120,21 +121,24 @@ document.addEventListener('alpine:init', function() {
                 line-height: 1.8;
                 margin-bottom: 10px;
               ">
-                <div style="margin-bottom: 10px;">
+                <div style="margin-bottom: 10px; text-align: justify;">
                   Dạ con thưa Sư, xin Sư cho con hỏi:
                 </div>
                 
                 <div style="
                   white-space: pre-line;
                   text-align: justify;
+                  text-justify: inter-word;
                   margin-bottom: 40px;
                   font-size: 1.5rem;
                   line-height: 1.9;
+                  word-spacing: 1px;
+                  hyphens: auto;
                 ">
                   ${content}
                 </div>
                 
-                <div style="margin-top: 10px;">
+                <div style="margin-top: 10px; text-align: justify;">
                   Con thành kính tri ân Sư ạ!
                 </div>
               </div>
@@ -150,6 +154,52 @@ document.addEventListener('alpine:init', function() {
                 Trang ${i + 2}
               </div>
             `;
+
+            // questionPage.innerHTML = `
+            //   <div style="margin-bottom: 10px;">
+            //     <div style="font-size: 1.5rem; font-weight: bold; color: #1a365d;">
+            //       Câu hỏi ${i + 1}
+            //     </div>
+            //     <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748; margin-top: 15px;">
+            //       Hành giả: ${question.name || 'Ẩn danh'}
+            //     </div>
+            //   </div>
+              
+            //   <div style="
+            //     font-size: 1.5rem;
+            //     line-height: 1.8;
+            //     margin-bottom: 10px;
+            //   ">
+            //     <div style="margin-bottom: 10px;">
+            //       Dạ con thưa Sư, xin Sư cho con hỏi:
+            //     </div>
+                
+            //     <div style="
+            //       white-space: pre-line;
+            //       text-align: justify;
+            //       margin-bottom: 40px;
+            //       font-size: 1.5rem;
+            //       line-height: 1.9;
+            //     ">
+            //       ${content}
+            //     </div>
+                
+            //     <div style="margin-top: 10px;">
+            //       Con thành kính tri ân Sư ạ!
+            //     </div>
+            //   </div>
+              
+            //   <div style="
+            //     position: absolute;
+            //     bottom: 40px;
+            //     right: 120px;
+            //     font-size: 14px;
+            //     color: #718096;
+            //     font-family: Arial, sans-serif;
+            //   ">
+            //     Trang ${i + 2}
+            //   </div>
+            // `;
             
             tempContainer.innerHTML = '';
             tempContainer.appendChild(questionPage);
