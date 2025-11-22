@@ -31,14 +31,14 @@ document.addEventListener('alpine:init', function() {
 
 
 
-      downloadPDF: async function() {
+      downloadPDF: function() {
           if (this.slideshowQuestions.length === 0) {
               this.showNotificationMessage('Không có câu hỏi nào để tạo PDF', 'error');
               return;
           }
 
           try {
-              this.showNotificationMessage('Đang tạo PDF với font tiếng Việt...', 'success');
+              this.showNotificationMessage('Đang tạo PDF...', 'success');
               
               const { jsPDF } = window.jspdf;
               const doc = new jsPDF({
@@ -47,47 +47,57 @@ document.addEventListener('alpine:init', function() {
                   format: 'a4'
               });
 
-              // PHƯƠNG PHÁP 2: Sử dụng font có sẵn và encoding đúng
-              doc.setLanguage('vi-VN');
+              // Sử dụng font mặc định
+              doc.setFont("helvetica");
               
-              // Trang bìa đơn giản hơn
+              // Trang bìa
               doc.setFillColor(106, 0, 0);
               doc.rect(0, 0, 210, 297, 'F');
               
               doc.setTextColor(255, 255, 255);
               doc.setFontSize(24);
-              doc.setFont("helvetica", "bold");
-              doc.text("HOI DAP TRINH PHAP", 105, 120, { align: 'center' });
+              doc.setFont(undefined, 'bold');
               
-              doc.setFontSize(12);
-              doc.setFont("helvetica", "normal");
-              doc.text(`Tong cong: ${this.slideshowQuestions.length} cau hoi`, 105, 140, { align: 'center' });
+              // Sử dụng tiếng Việt không dấu cho an toàn
+              const titleLines = [
+                  "HOI DAP TRINH PHAP",
+                  `Tong cong: ${this.slideshowQuestions.length} cau hoi`
+              ];
+              
+              doc.text(titleLines, 105, 140, { align: 'center' });
+              
+              // Ngày tạo
+              const currentDate = new Date().toLocaleDateString('vi-VN');
+              doc.setFontSize(10);
+              doc.setFont(undefined, 'normal');
+              doc.text(`Ngay tao: ${currentDate}`, 20, 280);
 
-              // Các trang câu hỏi
+              // Tạo trang cho từng câu hỏi
               this.slideshowQuestions.forEach((question, index) => {
                   if (index > 0) {
                       doc.addPage();
                   }
                   
+                  // Tiêu đề trang
                   doc.setFillColor(240, 240, 240);
                   doc.rect(0, 0, 210, 15, 'F');
                   
                   doc.setTextColor(0, 0, 0);
                   doc.setFontSize(12);
-                  doc.setFont("helvetica", "bold");
+                  doc.setFont(undefined, 'bold');
                   doc.text(`Cau hoi ${index + 1}`, 20, 10);
                   
-                  // Thông tin người hỏi - sử dụng tên không dấu để tránh lỗi
+                  // Thông tin người hỏi
                   doc.setFontSize(11);
                   const askerName = this.removeVietnameseAccents(question.name || 'An danh');
                   doc.text(`Hanh gia: ${askerName}`, 20, 25);
                   
-                  // Nội dung câu hỏi - chuyển sang không dấu nếu cần
-                  const content = this.getQuestionContentForPDF(question);
+                  // Nội dung câu hỏi
+                  const content = this.getQuestionContent(question);
                   const safeContent = this.removeVietnameseAccents(content);
                   
                   doc.setFontSize(10);
-                  doc.setFont("helvetica", "normal");
+                  doc.setFont(undefined, 'normal');
                   
                   const lines = doc.splitTextToSize(safeContent, 170);
                   
@@ -101,9 +111,19 @@ document.addEventListener('alpine:init', function() {
                       }
                   });
                   
+                  // Footer
                   doc.setFontSize(9);
                   doc.setTextColor(100, 100, 100);
                   doc.text(`Trang ${index + 2}`, 105, 285, { align: 'center' });
+                  
+                  // Đánh dấu đã trả lời
+                  if (this.isQuestionAnswered(question)) {
+                      doc.setFillColor(220, 255, 220);
+                      doc.rect(160, 3, 40, 8, 'F');
+                      doc.setTextColor(0, 128, 0);
+                      doc.setFontSize(7);
+                      doc.text('Da tra loi', 165, 8);
+                  }
               });
 
               const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -121,13 +141,38 @@ document.addEventListener('alpine:init', function() {
       removeVietnameseAccents: function(str) {
           if (!str) return '';
           
-          return str
-              .normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '')
-              .replace(/đ/g, 'd')
-              .replace(/Đ/g, 'D')
-              .replace(/&/g, ' va ')
-              .replace(/[^\w\s]/g, ' ');
+          try {
+              return str
+                  .normalize('NFD')
+                  .replace(/[\u0300-\u036f]/g, '')
+                  .replace(/đ/g, 'd')
+                  .replace(/Đ/g, 'D')
+                  .replace(/&/g, ' va ')
+                  .replace(/[^\w\s.,?!]/g, ' ')
+                  .replace(/\s+/g, ' ')
+                  .trim();
+          } catch (error) {
+              // Fallback: xử lý đơn giản nếu normalize không hỗ trợ
+              return str
+                  .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a')
+                  .replace(/[èéẹẻẽêềếệểễ]/g, 'e')
+                  .replace(/[ìíịỉĩ]/g, 'i')
+                  .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o')
+                  .replace(/[ùúụủũưừứựửữ]/g, 'u')
+                  .replace(/[ỳýỵỷỹ]/g, 'y')
+                  .replace(/đ/g, 'd')
+                  .replace(/[ÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴ]/g, 'A')
+                  .replace(/[ÈÉẸẺẼÊỀẾỆỂỄ]/g, 'E')
+                  .replace(/[ÌÍỊỈĨ]/g, 'I')
+                  .replace(/[ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠ]/g, 'O')
+                  .replace(/[ÙÚỤỦŨƯỪỨỰỬỮ]/g, 'U')
+                  .replace(/[ỲÝỴỶỸ]/g, 'Y')
+                  .replace(/Đ/g, 'D')
+                  .replace(/&/g, ' va ')
+                  .replace(/[^\w\s.,?!]/g, ' ')
+                  .replace(/\s+/g, ' ')
+                  .trim();
+          }
       },
     
 
