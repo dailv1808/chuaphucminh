@@ -1010,6 +1010,25 @@ document.addEventListener('alpine:init', function() {
         this.showConfirmModal = true;
       },
 
+      // deleteQuestion: function() {
+      //   const token = localStorage.getItem('access_token');
+      //   fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
+      //     method: 'DELETE',
+      //     headers: { 'Authorization': `Bearer ${token}` }
+      //   })
+      //   .then(response => {
+      //     if (!response.ok) throw new Error('Xóa câu hỏi thất bại');
+      //     this.showNotificationMessage('Xóa câu hỏi thành công', 'success');
+      //     this.showConfirmModal = false;
+      //     this.showDetailModal = false;
+      //     this.fetchQuestions();
+      //   })
+      //   .catch(error => {
+      //     console.error('Error:', error);
+      //     this.showNotificationMessage(error.message, 'error');
+      //   });
+      // },
+
       deleteQuestion: function() {
         const token = localStorage.getItem('access_token');
         fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
@@ -1021,7 +1040,14 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage('Xóa câu hỏi thành công', 'success');
           this.showConfirmModal = false;
           this.showDetailModal = false;
-          this.fetchQuestions();
+          
+          // CẬP NHẬT QUAN TRỌNG: Nếu đang ở modal câu hỏi tương tự, cập nhật lại danh sách
+          if (this.showSimilarModal && this.currentSimilarQuestion) {
+            // Gọi lại hàm hiển thị câu hỏi tương tự để refresh danh sách
+            this.showSimilarQuestions(this.currentSimilarQuestion);
+          }
+          
+          this.fetchQuestions(); // Tải lại toàn bộ danh sách câu hỏi
         })
         .catch(error => {
           console.error('Error:', error);
