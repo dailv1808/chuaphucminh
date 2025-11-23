@@ -266,16 +266,39 @@ document.addEventListener('alpine:init', function() {
       },
 
       // Tính độ tương đồng sử dụng Jaccard similarity
+
       calculateSimilarity: function(text1, text2) {
-        const words1 = new Set(text1.split(' ').filter(word => word.length > 2)); // Lọc từ ngắn
-        const words2 = new Set(text2.split(' ').filter(word => word.length > 2));
+        if (!text1 || !text2) return 0;
         
-        if (words1.size === 0 || words2.size === 0) return 0;
+        // Chuẩn hóa văn bản
+        const normalize = (text) => {
+          return text
+            .toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^\w\s]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+        };
+
+        const norm1 = normalize(text1);
+        const norm2 = normalize(text2);
         
-        const intersection = new Set([...words1].filter(x => words2.has(x)));
-        const union = new Set([...words1, ...words2]);
+        if (norm1.length < 10 || norm2.length < 10) return 0;
         
-        return intersection.size / union.size;
+        // Sử dụng thuật toán Levenshtein distance đơn giản hóa
+        const words1 = norm1.split(' ').filter(word => word.length > 2);
+        const words2 = norm2.split(' ').filter(word => word.length > 2);
+        
+        if (words1.length === 0 || words2.length === 0) return 0;
+        
+        // Tìm số từ chung
+        const commonWords = words1.filter(word => 
+          words2.some(w => w.includes(word) || word.includes(w))
+        );
+        
+        const totalUniqueWords = [...new Set([...words1, ...words2])].length;
+        
+        return totalUniqueWords > 0 ? commonWords.length / totalUniqueWords : 0;
       },
 
       // Kiểm tra xem câu hỏi có trùng lặp không
@@ -456,7 +479,7 @@ document.addEventListener('alpine:init', function() {
       },
 
 
-      
+
 
       get paginatedQuestions() {
         const start = (this.currentPage - 1) * this.perPage;
