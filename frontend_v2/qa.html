@@ -721,7 +721,7 @@
   <!-- Đặt sau Delete Confirmation Modal -->
 
   <!-- Similar Questions Modal -->
-  <!-- <div x-show="showSimilarModal" x-transition class="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-50 p-4">
+  <div x-show="showSimilarModal" x-transition class="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-50 p-4" style="z-index: 1000;">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
       <div class="p-6">
         <div class="flex justify-between items-center mb-6">
@@ -731,15 +731,18 @@
           </button>
         </div>
         
+        <!-- Câu hỏi gốc -->
         <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
           <h4 class="font-medium text-blue-800 mb-2">Câu hỏi gốc:</h4>
           <p x-text="currentSimilarQuestion?.content" class="text-blue-900 whitespace-pre-line"></p>
           <div class="flex gap-4 mt-2 text-sm text-blue-600">
             <span x-text="'Pháp danh: ' + (currentSimilarQuestion?.name || 'N/A')"></span>
+            <span x-text="'Liên hệ: ' + (currentSimilarQuestion?.contact || 'N/A')"></span>
             <span x-text="'Ngày tạo: ' + formatDate(currentSimilarQuestion?.created_at)"></span>
           </div>
         </div>
         
+        <!-- Danh sách câu hỏi tương tự -->
         <div class="space-y-3 max-h-96 overflow-y-auto">
           <template x-for="similar in similarQuestions" :key="similar.question.id">
             <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
@@ -755,87 +758,6 @@
                   </div>
                   <p class="text-sm text-gray-600 whitespace-pre-line" x-text="similar.question.content"></p>
                   <div class="flex gap-4 mt-2 text-xs text-gray-500">
-                    <span x-text="'Tạo: ' + formatDate(similar.question.created_at)"></span>
-                    <span x-text="'Trạng thái: ' + getStatusLabel(similar.question.status)"></span>
-                    <span x-text="'Độ ưu tiên: ' + (priorityOptions.find(p => p.value === similar.question.priority)?.label || similar.question.priority)"></span>
-                  </div>
-                </div>
-                <div class="flex gap-2 ml-4">
-                  <button @click.stop="openEditQuestionModal(similar.question)" 
-                          class="text-blue-600 hover:text-blue-800 p-1">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </template>
-          
-          <div x-show="similarQuestions.length === 0" class="text-center py-8 text-gray-500">
-            <i class="fas fa-check-circle text-2xl mb-2"></i>
-            <p>Không tìm thấy câu hỏi tương tự</p>
-          </div>
-        </div>
-        
-        <div class="flex justify-end gap-3 mt-6 border-t pt-4">
-          <button @click="showSimilarModal = false" class="btn-secondary">
-            Đóng
-          </button>
-        </div>
-      </div>
-    </div>
-  </div> -->
-
-  <!-- Similar Questions Modal -->
-  <div x-show="showSimilarModal" x-transition class="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-50 p-4" style="z-index: 1000;">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[95vh] overflow-y-auto">
-      <div class="p-6">
-        <div class="flex justify-between items-center mb-6 sticky top-0 bg-white py-4 border-b z-10">
-          <h3 class="text-xl font-semibold text-gray-800">Câu hỏi tương tự</h3>
-          <button @click="showSimilarModal = false" class="text-gray-400 hover:text-gray-500">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        
-        <!-- Câu hỏi gốc -->
-        <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <h4 class="font-medium text-blue-800 mb-2">Câu hỏi gốc:</h4>
-          <p x-text="currentSimilarQuestion?.content" class="text-blue-900 whitespace-pre-line mb-3"></p>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-blue-600">
-            <span x-text="'Pháp danh: ' + (currentSimilarQuestion?.name || 'N/A')"></span>
-            <span x-text="'Liên hệ: ' + (currentSimilarQuestion?.contact || 'N/A')"></span>
-            <span x-text="'Ngày tạo: ' + formatDate(currentSimilarQuestion?.created_at)"></span>
-          </div>
-        </div>
-        
-        <!-- Danh sách câu hỏi tương tự -->
-        <div class="mb-4">
-          <h4 class="font-medium text-gray-700 mb-3">
-            Tìm thấy <span x-text="similarQuestions.length"></span> câu hỏi tương tự 
-            (<span x-text="Math.round(similarQuestions.reduce((max, s) => Math.max(max, s.similarity), 0) * 100)"></span>% tương tự cao nhất)
-          </h4>
-        </div>
-        
-        <div class="space-y-4 max-h-96 overflow-y-auto">
-          <template x-for="(similar, index) in similarQuestions" :key="similar.question.id">
-            <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                :class="{'bg-red-50 border-red-200': similar.similarity > 0.9}">
-              <div class="flex justify-between items-start">
-                <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-sm font-medium text-gray-900" 
-                          x-text="'#' + (index + 1)"></span>
-                    <span class="text-xs px-2 py-1 rounded-full font-medium" 
-                          :class="similar.similarity > 0.9 ? 'bg-red-100 text-red-800 border border-red-200' : 
-                                similar.similarity > 0.8 ? 'bg-orange-100 text-orange-800 border border-orange-200' : 
-                                'bg-yellow-100 text-yellow-800 border border-yellow-200'"
-                          x-text="`${Math.round(similar.similarity * 100)}% tương tự`"></span>
-                  </div>
-                  
-                  <p class="text-sm text-gray-600 whitespace-pre-line mb-3" 
-                    x-text="similar.question.edited_content || similar.question.content"></p>
-                  
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-gray-500">
-                    <span x-text="'Pháp danh: ' + (similar.question.name || 'N/A')"></span>
                     <span x-text="'Liên hệ: ' + (similar.question.contact || 'N/A')"></span>
                     <span x-text="'Tạo: ' + formatDate(similar.question.created_at)"></span>
                     <span x-text="'Trạng thái: ' + getStatusLabel(similar.question.status)"></span>
@@ -843,20 +765,9 @@
                     <span x-text="'Slideshow: ' + (similar.question.slideshow ? 'Có' : 'Không')"></span>
                   </div>
                 </div>
-                
-                <div class="flex gap-2 ml-4 flex-shrink-0">
-                  <button @click.stop="showQuestionDetail(similar.question); showSimilarModal = false;" 
-                          class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
-                          title="Xem chi tiết">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <button @click.stop="openEditQuestionModal(similar.question)" 
-                          class="text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors"
-                          title="Chỉnh sửa">
-                    <i class="fas fa-edit"></i>
-                  </button>
+                <div class="flex gap-2 ml-4">
                   <button @click.stop="confirmDelete(similar.question)" 
-                          class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                          class="text-red-600 hover:text-red-800 p-1"
                           title="Xóa câu hỏi">
                     <i class="fas fa-trash"></i>
                   </button>
@@ -871,33 +782,9 @@
           </div>
         </div>
         
-        <!-- Thống kê -->
-        <div x-show="similarQuestions.length > 0" class="mt-4 p-3 bg-gray-50 rounded-lg border">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-            <div>
-              <span class="font-medium">Tổng số:</span> 
-              <span x-text="similarQuestions.length"></span> câu hỏi tương tự
-            </div>
-            <div>
-              <span class="font-medium">Trùng lặp cao:</span> 
-              <span x-text="similarQuestions.filter(s => s.similarity > 0.9).length"></span> câu hỏi
-            </div>
-            <div>
-              <span class="font-medium">Tương tự trung bình:</span> 
-              <span x-text="similarQuestions.filter(s => s.similarity > 0.7 && s.similarity <= 0.9).length"></span> câu hỏi
-            </div>
-          </div>
-        </div>
-        
         <div class="flex justify-end gap-3 mt-6 border-t pt-4">
           <button @click="showSimilarModal = false" class="btn-secondary">
             Đóng
-          </button>
-          <button x-show="similarQuestions.length > 0" 
-                  @click="exportSimilarToExcel()" 
-                  class="btn-success">
-            <i class="fas fa-file-excel mr-2"></i>
-            Xuất danh sách tương tự
           </button>
         </div>
       </div>
