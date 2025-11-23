@@ -236,7 +236,7 @@ document.addEventListener('alpine:init', function() {
         if (!targetContent || targetContent.length < 10) return similar; // Bỏ qua nội dung quá ngắn
         
         this.questions.forEach((question, index) => {
-          if (index === currentIndex) return;
+          if (index === currentIndex || question.id === targetQuestion.id) return;
           
           const content = this.normalizeText(question.edited_content || question.content);
           if (!content || content.length < 10) return;
