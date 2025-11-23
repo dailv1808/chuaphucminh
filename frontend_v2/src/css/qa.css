@@ -435,3 +435,12 @@ table {
 input[type="checkbox"] {
   @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
 }
+
+.duplicate-warning {
+  border-left: 4px solid #ef4444;
+  background-color: #fef2f2;
+}
+
+.duplicate-warning:hover {
+  background-color: #fee2e2;
+}

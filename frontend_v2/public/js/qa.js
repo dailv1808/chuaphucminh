@@ -57,6 +57,77 @@ document.addEventListener('alpine:init', function() {
         updated_by: null
       },
 
+
+      // Hàm phát hiện câu hỏi trùng lặp
+      detectDuplicates: function() {
+        const duplicates = [];
+        
+        this.questions.forEach((question, index) => {
+          const similarQuestions = this.findSimilarQuestions(question, index);
+          if (similarQuestions.length > 0) {
+            duplicates.push({
+              question: question,
+              similar: similarQuestions
+            });
+          }
+        });
+        
+        return duplicates;
+      },
+
+      // Hàm tìm câu hỏi tương tự
+      findSimilarQuestions: function(targetQuestion, currentIndex) {
+        const similar = [];
+        const targetContent = this.normalizeText(targetQuestion.edited_content || targetQuestion.content);
+        
+        this.questions.forEach((question, index) => {
+          if (index === currentIndex) return;
+          
+          const content = this.normalizeText(question.edited_content || question.content);
+          const similarity = this.calculateSimilarity(targetContent, content);
+          
+          if (similarity > 0.7) { // Ngưỡng 70% trùng lặp
+            similar.push({
+              question: question,
+              similarity: similarity
+            });
+          }
+        });
+        
+        return similar.sort((a, b) => b.similarity - a.similarity);
+      },
+
+      // Chuẩn hóa văn bản để so sánh
+      normalizeText: function(text) {
+        return text
+          .toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Bỏ dấu
+          .replace(/[^\w\s]/g, ' ') // Loại bỏ ký tự đặc biệt
+          .replace(/\s+/g, ' ') // Chuẩn hóa khoảng trắng
+          .trim();
+      },
+
+      // Tính độ tương đồng sử dụng Jaccard similarity
+      calculateSimilarity: function(text1, text2) {
+        const words1 = new Set(text1.split(' '));
+        const words2 = new Set(text2.split(' '));
+        
+        const intersection = new Set([...words1].filter(x => words2.has(x)));
+        const union = new Set([...words1, ...words2]);
+        
+        return intersection.size / union.size;
+      },
+
+      // Kiểm tra xem câu hỏi có trùng lặp không
+      hasDuplicate: function(question) {
+        const similar = this.findSimilarQuestions(question, this.questions.indexOf(question));
+        return similar.length > 0;
+      },
+
+      getDuplicateCount: function() {
+        return this.questions.filter(q => this.hasDuplicate(q)).length;
+      },
+
       // Hàm chọn/bỏ chọn tất cả
       toggleSelectAll: function() {
         if (this.selectAll) {
@@ -116,168 +187,11 @@ document.addEventListener('alpine:init', function() {
         }
       },
 
-      // Hàm lấy tên hiển thị - chỉ trả về name gốc
-      // getDisplayName: function(question) {
-      //   return question.name;
-      // },
 
       // Hàm lấy tên hiển thị - ưu tiên display_name, nếu không có thì dùng name
       getDisplayName: function(question) {
         return question.display_name || question.name;
       },
-
-
-
-      // Hàm nhân đôi câu hỏi - sửa lỗi tên bản sao
-      // duplicateQuestion: async function(question) {
-      //   const token = localStorage.getItem('access_token');
-      //   const user = JSON.parse(localStorage.getItem('user'));
-        
-      //   try {
-      //     // Lấy tên gốc (loại bỏ hoàn toàn phần " (bản sao X)" nếu có)
-      //     const baseName = question.name.replace(/\s*\(bản sao\s*\d+\)\s*$/, '').trim();
-          
-      //     // Tìm tất cả các câu hỏi có cùng baseName (bao gồm cả câu hỏi gốc)
-      //     const relatedQuestions = this.questions.filter(q => {
-      //       const qBaseName = q.name.replace(/\s*\(bản sao\s*\d+\)\s*$/, '').trim();
-      //       return qBaseName === baseName;
-      //     });
-          
-      //     // Tìm số bản sao cao nhất hiện có
-      //     let maxDuplicateNumber = 0;
-      //     relatedQuestions.forEach(q => {
-      //       const match = q.name.match(/\(bản sao\s*(\d+)\)$/);
-      //       if (match) {
-      //         const num = parseInt(match[1]);
-      //         if (num > maxDuplicateNumber) {
-      //           maxDuplicateNumber = num;
-      //         }
-      //       }
-      //     });
-          
-      //     const newDuplicateNumber = maxDuplicateNumber + 1;
-      //     const newName = `${baseName} (bản sao ${newDuplicateNumber})`;
-
-      //     // Tạo bản sao của câu hỏi
-      //     const duplicatedQuestion = {
-      //       name: newName,
-      //       email: question.email,
-      //       content: question.content,
-      //       edited_content: question.edited_content,
-      //       contact: question.contact,
-      //       answer: question.answer,
-      //       short_content: question.short_content,
-      //       answered_at: question.answered_at,
-      //       tags: question.tags,
-      //       group: question.group,
-      //       status: question.status,
-      //       priority: question.priority,
-      //       slideshow: question.slideshow,
-      //       is_faq: question.is_faq,
-      //       created_at: new Date().toISOString(), // Sử dụng thời gian hiện tại cho bản sao
-      //       updated_at: new Date().toISOString(),
-      //       created_by: question.created_by?.id || question.created_by,
-      //       updated_by: user?.id || null
-      //     };
-
-      //     const response = await fetch('https://api.chuaphucminh.xyz/api/questions/', {
-      //       method: 'POST',
-      //       headers: { 
-      //         'Content-Type': 'application/json',
-      //         'Authorization': `Bearer ${token}`
-      //       },
-      //       body: JSON.stringify(duplicatedQuestion)
-      //     });
-
-      //     if (!response.ok) {
-      //       const errorText = await response.text();
-      //       throw new Error(`Nhân đôi câu hỏi thất bại: ${errorText}`);
-      //     }
-          
-      //     this.showNotificationMessage(`Đã nhân đôi câu hỏi thành "${newName}"`, 'success');
-      //     this.fetchQuestions(); // Tải lại danh sách
-          
-      //   } catch (error) {
-      //     console.error('Error:', error);
-      //     this.showNotificationMessage(error.message, 'error');
-      //   }
-      // },
-
-      // Hàm nhân đôi câu hỏi - giữ nguyên cấu trúc tên
-      // duplicateQuestion: async function(question) {
-      //   const token = localStorage.getItem('access_token');
-      //   const user = JSON.parse(localStorage.getItem('user'));
-        
-      //   try {
-      //     // Lấy tên gốc (loại bỏ hoàn toàn phần " (bản sao X)" nếu có)
-      //     const baseName = question.name.replace(/\s*\(bản sao\s*\d+\)\s*$/, '').trim();
-          
-      //     // Tìm tất cả các câu hỏi có cùng baseName (bao gồm cả câu hỏi gốc)
-      //     const relatedQuestions = this.questions.filter(q => {
-      //       const qBaseName = q.name.replace(/\s*\(bản sao\s*\d+\)\s*$/, '').trim();
-      //       return qBaseName === baseName;
-      //     });
-          
-      //     // Tìm số bản sao cao nhất hiện có
-      //     let maxDuplicateNumber = 0;
-      //     relatedQuestions.forEach(q => {
-      //       const match = q.name.match(/\(bản sao\s*(\d+)\)$/);
-      //       if (match) {
-      //         const num = parseInt(match[1]);
-      //         if (num > maxDuplicateNumber) {
-      //           maxDuplicateNumber = num;
-      //         }
-      //       }
-      //     });
-          
-      //     const newDuplicateNumber = maxDuplicateNumber + 1;
-      //     const newName = `${baseName} (bản sao ${newDuplicateNumber})`;
-
-      //     // Tạo bản sao của câu hỏi
-      //     const duplicatedQuestion = {
-      //       name: newName, // Chỉ thêm phần "bản sao" vào trường name để hiển thị
-      //       email: question.email,
-      //       content: question.content,
-      //       edited_content: question.edited_content,
-      //       contact: question.contact,
-      //       answer: question.answer,
-      //       short_content: question.short_content,
-      //       answered_at: question.answered_at,
-      //       tags: question.tags,
-      //       group: question.group,
-      //       status: question.status,
-      //       priority: question.priority,
-      //       slideshow: question.slideshow,
-      //       is_faq: question.is_faq,
-      //       created_at: new Date().toISOString(),
-      //       updated_at: new Date().toISOString(),
-      //       created_by: question.created_by?.id || question.created_by,
-      //       updated_by: user?.id || null
-      //     };
-
-      //     const response = await fetch('https://api.chuaphucminh.xyz/api/questions/', {
-      //       method: 'POST',
-      //       headers: { 
-      //         'Content-Type': 'application/json',
-      //         'Authorization': `Bearer ${token}`
-      //       },
-      //       body: JSON.stringify(duplicatedQuestion)
-      //     });
-
-      //     if (!response.ok) {
-      //       const errorText = await response.text();
-      //       throw new Error(`Nhân đôi câu hỏi thất bại: ${errorText}`);
-      //     }
-          
-      //     this.showNotificationMessage(`Đã nhân đôi câu hỏi thành "${newName}"`, 'success');
-      //     this.fetchQuestions(); // Tải lại danh sách
-          
-      //   } catch (error) {
-      //     console.error('Error:', error);
-      //     this.showNotificationMessage(error.message, 'error');
-      //   }
-      // },
-
 
 
       // Hàm nhân đôi câu hỏi - thêm trường display_name
@@ -494,13 +408,21 @@ document.addEventListener('alpine:init', function() {
         }
       }, 1000), // Debounce 1 giây
 
+      // init: function() {
+      //   if (!localStorage.getItem('access_token')) {
+      //     window.location.href = '/login.html?next=' + encodeURIComponent(window.location.pathname);
+      //   }
+      //   this.fetchQuestions();
+      // },
       init: function() {
         if (!localStorage.getItem('access_token')) {
           window.location.href = '/login.html?next=' + encodeURIComponent(window.location.pathname);
         }
-        this.fetchQuestions();
+        this.fetchQuestions().then(() => {
+          // Tự động phát hiện trùng lặp sau khi tải câu hỏi
+          this.detectDuplicates();
+        });
       },
-
       get paginatedQuestions() {
         const start = (this.currentPage - 1) * this.perPage;
         const end = start + this.perPage;
