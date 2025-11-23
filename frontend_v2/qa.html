@@ -32,13 +32,13 @@
         <div>
           <h1 class="text-2xl font-bold text-gray-800">Quản lý Hỏi đáp</h1>
           <p class="text-gray-500 text-sm mt-1" x-text="`Tổng cộng ${filteredQuestions.length} câu hỏi`"></p>
+          <p class="text-red-600 text-sm mt-1 font-medium" 
+            x-show="getDuplicateCount() > 0"
+            x-text="`⚠️ ${getDuplicateCount()} câu hỏi có nội dung tương tự`">
+          </p>
         </div>
 
-        <div class="flex items-center gap-4 text-sm">
-          <span class="text-gray-500" 
-                x-text="`${getDuplicateCount()} câu hỏi có nội dung tương tự`"
-                :class="getDuplicateCount() > 0 ? 'text-red-600 font-medium' : ''"></span>
-        </div>
+    
         
         <div class="flex items-center gap-3">
           <div class="relative w-full md:w-64">
@@ -212,7 +212,7 @@
                     'bg-yellow-50 hover:bg-yellow-100': question.status === 'pending',
                     'bg-gray-50 hover:bg-gray-100': question.status === 'archive',
                     'bg-red-50 hover:bg-red-100': question.status === 'reject',
-                    'bg-blue-50 hover:bg-blue-100': question.status === 'review'
+                    'bg-blue-50 hover:bg-blue-100': question.status === 'review',
                     'duplicate-warning': hasDuplicate(question) 
                   }"
                   @click="showQuestionDetail(question)">
@@ -248,17 +248,7 @@
 
 
                 <!-- THÊM SAU DÒNG NÀY -->
-                <td class="px-6 py-4">
-                  <div x-show="hasDuplicate(question)" class="flex flex-col gap-1">
-                    <span class="text-xs text-red-600 font-medium">Có câu hỏi tương tự</span>
-                    <button @click.stop="showSimilarQuestions(question)" 
-                            class="text-xs text-blue-600 hover:underline">
-                      Xem chi tiết
-                    </button>
-                  </div>
-                </td>
-
-
+                <!-- CỘT TRẠNG THÁI TRƯỚC -->
                 <td class="px-6 py-4">
                   <select x-model="question.status" 
                           @change="quickEditField(question, 'status', question.status)"
@@ -270,6 +260,17 @@
                               :selected="status.value === question.status"></option>
                     </template>
                   </select>
+                </td>
+
+                <!-- CỘT TRÙNG LẶP SAU -->
+                <td class="px-6 py-4">
+                  <div x-show="hasDuplicate(question)" class="flex flex-col gap-1">
+                    <span class="text-xs text-red-600 font-medium">Có câu hỏi tương tự</span>
+                    <button @click.stop="showSimilarQuestions(question)" 
+                            class="text-xs text-blue-600 hover:underline">
+                      Xem chi tiết
+                    </button>
+                  </div>
                 </td>
 
                 <td class="px-6 py-4 whitespace-nowrap" x-text="formatDate(question.updated_at)"></td>
@@ -312,7 +313,7 @@
                 </td>
               </tr>
 
-              <tr class="border-b hover:bg-gray-50 cursor-pointer transition-colors duration-200 duplicate-warning" x-show="hasDuplicate(question)">
+              <!-- <tr class="border-b hover:bg-gray-50 cursor-pointer transition-colors duration-200 duplicate-warning" x-show="hasDuplicate(question)"> -->
             </template>
           </tbody>
         </table>
