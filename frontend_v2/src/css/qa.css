@@ -538,3 +538,8 @@ table {
 .max-h-96.overflow-y-auto::-webkit-scrollbar-thumb:hover {
   background: #a0aec0;
 }
+
+/* Fix z-index for delete confirmation modal to appear above similar questions modal */
+.fixed.inset-0.z-50 {
+  z-index: 1001 !important;
+}
