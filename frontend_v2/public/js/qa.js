@@ -230,20 +230,28 @@ document.addEventListener('alpine:init', function() {
 
       // Hàm tìm câu hỏi tương tự
       findSimilarQuestions: function(targetQuestion, currentIndex) {
-        const similar = [];
-        const targetContent = this.normalizeText(targetQuestion.edited_content || targetQuestion.content);
+        console.log('🔍 Checking duplicates for question:', targetQuestion.id);
         
-        if (!targetContent || targetContent.length < 10) return similar; // Bỏ qua nội dung quá ngắn
+        const similar = [];
+        const targetContent = targetQuestion.edited_content || targetQuestion.content;
+        
+        if (!targetContent || targetContent.length < 20) {
+          console.log('📝 Content too short, skipping');
+          return similar;
+        }
         
         this.questions.forEach((question, index) => {
           if (index === currentIndex) return;
+          if (question.id === targetQuestion.id) return;
           
-          const content = this.normalizeText(question.edited_content || question.content);
-          if (!content || content.length < 10) return;
+          const content = question.edited_content || question.content;
+          if (!content || content.length < 20) return;
           
+          // Tính similarity
           const similarity = this.calculateSimilarity(targetContent, content);
           
-          if (similarity > 0.6) { // Ngưỡng 60% trùng lặp
+          if (similarity > 0.4) { // Ngưỡng 40%
+            console.log(`✅ Found similar: ${similarity.toFixed(2)} - Q${question.id}`);
             similar.push({
               question: question,
               similarity: similarity
@@ -251,6 +259,7 @@ document.addEventListener('alpine:init', function() {
           }
         });
         
+        console.log(`🎯 Found ${similar.length} similar questions for Q${targetQuestion.id}`);
         return similar.sort((a, b) => b.similarity - a.similarity);
       },
 
@@ -267,15 +276,50 @@ document.addEventListener('alpine:init', function() {
 
       // Tính độ tương đồng sử dụng Jaccard similarity
 
+      // calculateSimilarity: function(text1, text2) {
+      //   if (!text1 || !text2) return 0;
+        
+      //   // Chuẩn hóa văn bản
+      //   const normalize = (text) => {
+      //     return text
+      //       .toLowerCase()
+      //       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      //       .replace(/[^\w\s]/g, ' ')
+      //       .replace(/\s+/g, ' ')
+      //       .trim();
+      //   };
+
+      //   const norm1 = normalize(text1);
+      //   const norm2 = normalize(text2);
+        
+      //   if (norm1.length < 10 || norm2.length < 10) return 0;
+        
+      //   // Sử dụng thuật toán Levenshtein distance đơn giản hóa
+      //   const words1 = norm1.split(' ').filter(word => word.length > 2);
+      //   const words2 = norm2.split(' ').filter(word => word.length > 2);
+        
+      //   if (words1.length === 0 || words2.length === 0) return 0;
+        
+      //   // Tìm số từ chung
+      //   const commonWords = words1.filter(word => 
+      //     words2.some(w => w.includes(word) || word.includes(w))
+      //   );
+        
+      //   const totalUniqueWords = [...new Set([...words1, ...words2])].length;
+        
+      //   return totalUniqueWords > 0 ? commonWords.length / totalUniqueWords : 0;
+      // },
+      // Hàm tính similarity cải tiến
+      
+      
       calculateSimilarity: function(text1, text2) {
         if (!text1 || !text2) return 0;
         
-        // Chuẩn hóa văn bản
         const normalize = (text) => {
           return text
             .toLowerCase()
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^\w\s]/g, ' ')
+            .replace(/[^\w\sàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/g, ' ')
             .replace(/\s+/g, ' ')
             .trim();
         };
@@ -283,23 +327,53 @@ document.addEventListener('alpine:init', function() {
         const norm1 = normalize(text1);
         const norm2 = normalize(text2);
         
-        if (norm1.length < 10 || norm2.length < 10) return 0;
-        
-        // Sử dụng thuật toán Levenshtein distance đơn giản hóa
+        // Tách thành các từ
         const words1 = norm1.split(' ').filter(word => word.length > 2);
         const words2 = norm2.split(' ').filter(word => word.length > 2);
         
         if (words1.length === 0 || words2.length === 0) return 0;
         
-        // Tìm số từ chung
-        const commonWords = words1.filter(word => 
-          words2.some(w => w.includes(word) || word.includes(w))
-        );
+        // Đếm từ trùng lặp (có thể là từ gần đúng)
+        let commonCount = 0;
+        words1.forEach(word1 => {
+          if (words2.some(word2 => {
+            // So sánh từ (cho phép sai khác nhỏ)
+            return word1 === word2 || 
+                  word1.includes(word2) || 
+                  word2.includes(word1) ||
+                  this.levenshteinDistance(word1, word2) <= 2;
+          })) {
+            commonCount++;
+          }
+        });
         
-        const totalUniqueWords = [...new Set([...words1, ...words2])].length;
-        
-        return totalUniqueWords > 0 ? commonWords.length / totalUniqueWords : 0;
+        const maxLength = Math.max(words1.length, words2.length);
+        return commonCount / maxLength;
       },
+
+      // Hàm hỗ trợ tính khoảng cách Levenshtein
+      levenshteinDistance: function(str1, str2) {
+        const track = Array(str2.length + 1).fill(null).map(() =>
+          Array(str1.length + 1).fill(null));
+        for (let i = 0; i <= str1.length; i += 1) {
+          track[0][i] = i;
+        }
+        for (let j = 0; j <= str2.length; j += 1) {
+          track[j][0] = j;
+        }
+        for (let j = 1; j <= str2.length; j += 1) {
+          for (let i = 1; i <= str1.length; i += 1) {
+            const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+            track[j][i] = Math.min(
+              track[j][i - 1] + 1, // deletion
+              track[j - 1][i] + 1, // insertion
+              track[j - 1][i - 1] + indicator, // substitution
+            );
+          }
+        }
+        return track[str2.length][str1.length];
+      },
+
 
       // Kiểm tra xem câu hỏi có trùng lặp không
       hasDuplicate: function(question) {
