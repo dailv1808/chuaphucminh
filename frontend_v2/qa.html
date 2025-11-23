@@ -194,12 +194,13 @@
               <th scope="col" class="px-6 py-3 min-w-[400px]">Câu hỏi</th>
               <th scope="col" class="px-6 py-3">Liên Lạc</th>
               <th scope="col" class="px-6 py-3">Trạng Thái</th>
+              <th scope="col" class="px-6 py-3">Trùng lặp</th>
               <th scope="col" class="px-6 py-3">Ngày sửa</th>
               <th scope="col" class="px-6 py-3">Người tạo</th>
               <th scope="col" class="px-6 py-3">Người biên tập</th>
               <th scope="col" class="px-6 py-3">Slide</th>
               <th scope="col" class="px-6 py-3">FAQ</th>
-              <th scope="col" class="px-6 py-3">Trùng lặp</th>
+              
               <th scope="col" class="px-6 py-3 text-right">Thao tác</th>
             </tr>
           </thead>
@@ -212,6 +213,7 @@
                     'bg-gray-50 hover:bg-gray-100': question.status === 'archive',
                     'bg-red-50 hover:bg-red-100': question.status === 'reject',
                     'bg-blue-50 hover:bg-blue-100': question.status === 'review'
+                    'duplicate-warning': hasDuplicate(question) 
                   }"
                   @click="showQuestionDetail(question)">
 
@@ -230,15 +232,7 @@
                   <!-- <div class="font-medium text-gray-900" x-text="question.name"></div> -->
                   <div class="font-medium text-gray-900" x-text="getDisplayName(question)"></div>
                 </td>
-                <td class="px-6 py-4">
-                  <div x-show="hasDuplicate(question)" class="flex flex-col gap-1">
-                    <span class="text-xs text-red-600 font-medium">Có câu hỏi tương tự</span>
-                    <button @click.stop="showSimilarQuestions(question)" 
-                            class="text-xs text-blue-600 hover:underline">
-                      Xem chi tiết
-                    </button>
-                  </div>
-                </td>
+                
 
                 <td class="px-6 py-4">
                   <textarea 
@@ -251,7 +245,20 @@
                 </td>
 
                 <td class="px-6 py-4" x-text="question.contact || 'N/A'"></td>
-    
+
+
+                <!-- THÊM SAU DÒNG NÀY -->
+                <td class="px-6 py-4">
+                  <div x-show="hasDuplicate(question)" class="flex flex-col gap-1">
+                    <span class="text-xs text-red-600 font-medium">Có câu hỏi tương tự</span>
+                    <button @click.stop="showSimilarQuestions(question)" 
+                            class="text-xs text-blue-600 hover:underline">
+                      Xem chi tiết
+                    </button>
+                  </div>
+                </td>
+
+
                 <td class="px-6 py-4">
                   <select x-model="question.status" 
                           @change="quickEditField(question, 'status', question.status)"
@@ -347,48 +354,6 @@
     </div>
   </div>
 
-  <!-- Similar Questions Modal -->
-  <div x-show="showSimilarModal" x-transition class="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-50 p-4">
-    <div class="modal-container max-w-4xl">
-      <div class="p-6">
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-semibold text-gray-800">Câu hỏi tương tự</h3>
-          <button @click="showSimilarModal = false" class="text-gray-400 hover:text-gray-500">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        
-        <div class="mb-4 p-4 bg-blue-50 rounded-lg">
-          <h4 class="font-medium text-blue-800">Câu hỏi gốc:</h4>
-          <p x-text="currentSimilarQuestion.content" class="text-blue-900 mt-2"></p>
-        </div>
-        
-        <div class="space-y-4 max-h-96 overflow-y-auto">
-          <template x-for="similar in similarQuestions" :key="similar.question.id">
-            <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-                @click="showQuestionDetail(similar.question)">
-              <div class="flex justify-between items-start">
-                <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-sm font-medium text-gray-900" 
-                          x-text="similar.question.name"></span>
-                    <span class="text-xs px-2 py-1 rounded-full" 
-                          :class="similar.similarity > 0.9 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'"
-                          x-text="`${Math.round(similar.similarity * 100)}% tương tự`"></span>
-                  </div>
-                  <p class="text-sm text-gray-600" x-text="similar.question.content"></p>
-                  <div class="flex gap-4 mt-2 text-xs text-gray-500">
-                    <span x-text="formatDate(similar.question.created_at)"></span>
-                    <span x-text="similar.question.status"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Question Detail Modal -->
   
@@ -747,6 +712,73 @@
           </button>
           <button @click="deleteQuestion()" class="btn-danger">
             Xác nhận xóa
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Đặt sau Delete Confirmation Modal -->
+
+  <!-- Similar Questions Modal -->
+  <div x-show="showSimilarModal" x-transition class="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold text-gray-800">Câu hỏi tương tự</h3>
+          <button @click="showSimilarModal = false" class="text-gray-400 hover:text-gray-500">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <h4 class="font-medium text-blue-800 mb-2">Câu hỏi gốc:</h4>
+          <p x-text="currentSimilarQuestion?.content" class="text-blue-900 whitespace-pre-line"></p>
+          <div class="flex gap-4 mt-2 text-sm text-blue-600">
+            <span x-text="'Pháp danh: ' + (currentSimilarQuestion?.name || 'N/A')"></span>
+            <span x-text="'Ngày tạo: ' + formatDate(currentSimilarQuestion?.created_at)"></span>
+          </div>
+        </div>
+        
+        <div class="space-y-3 max-h-96 overflow-y-auto">
+          <template x-for="similar in similarQuestions" :key="similar.question.id">
+            <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                @click="showQuestionDetail(similar.question); showSimilarModal = false;">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-sm font-medium text-gray-900" 
+                          x-text="similar.question.name"></span>
+                    <span class="text-xs px-2 py-1 rounded-full" 
+                          :class="similar.similarity > 0.9 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'"
+                          x-text="`${Math.round(similar.similarity * 100)}% tương tự`"></span>
+                  </div>
+                  <p class="text-sm text-gray-600 whitespace-pre-line" x-text="similar.question.content"></p>
+                  <div class="flex gap-4 mt-2 text-xs text-gray-500">
+                    <span x-text="'Tạo: ' + formatDate(similar.question.created_at)"></span>
+                    <span x-text="'Trạng thái: ' + getStatusLabel(similar.question.status)"></span>
+                    <span x-text="'Độ ưu tiên: ' + (priorityOptions.find(p => p.value === similar.question.priority)?.label || similar.question.priority)"></span>
+                  </div>
+                </div>
+                <div class="flex gap-2 ml-4">
+                  <button @click.stop="openEditQuestionModal(similar.question)" 
+                          class="text-blue-600 hover:text-blue-800 p-1">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+          
+          <div x-show="similarQuestions.length === 0" class="text-center py-8 text-gray-500">
+            <i class="fas fa-check-circle text-2xl mb-2"></i>
+            <p>Không tìm thấy câu hỏi tương tự</p>
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-3 mt-6 border-t pt-4">
+          <button @click="showSimilarModal = false" class="btn-secondary">
+            Đóng
           </button>
         </div>
       </div>

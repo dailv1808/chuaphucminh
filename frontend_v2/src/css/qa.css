@@ -431,16 +431,18 @@ table {
   background-color: #dcfce7;
 }
 
-/* Thêm vào cuối file */
-input[type="checkbox"] {
-  @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
-}
+/* Thêm vào cuối file qa.css */
 
+/* Cảnh báo câu hỏi trùng lặp */
 .duplicate-warning {
   border-left: 4px solid #ef4444;
-  background-color: #fef2f2;
+  background-color: #fef2f2 !important;
 }
 
 .duplicate-warning:hover {
-  background-color: #fee2e2;
+  background-color: #fee2e2 !important;
+}
+
+.duplicate-indicator {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800;
 }

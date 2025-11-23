@@ -56,77 +56,16 @@ document.addEventListener('alpine:init', function() {
         created_by: null,
         updated_by: null
       },
+      // Thêm vào các biến hiện có
+      showSimilarModal: false,
+      currentSimilarQuestion: null,
+      similarQuestions: [],
+      duplicateFilter: '',
 
 
-      // Hàm phát hiện câu hỏi trùng lặp
-      detectDuplicates: function() {
-        const duplicates = [];
-        
-        this.questions.forEach((question, index) => {
-          const similarQuestions = this.findSimilarQuestions(question, index);
-          if (similarQuestions.length > 0) {
-            duplicates.push({
-              question: question,
-              similar: similarQuestions
-            });
-          }
-        });
-        
-        return duplicates;
-      },
 
-      // Hàm tìm câu hỏi tương tự
-      findSimilarQuestions: function(targetQuestion, currentIndex) {
-        const similar = [];
-        const targetContent = this.normalizeText(targetQuestion.edited_content || targetQuestion.content);
-        
-        this.questions.forEach((question, index) => {
-          if (index === currentIndex) return;
-          
-          const content = this.normalizeText(question.edited_content || question.content);
-          const similarity = this.calculateSimilarity(targetContent, content);
-          
-          if (similarity > 0.7) { // Ngưỡng 70% trùng lặp
-            similar.push({
-              question: question,
-              similarity: similarity
-            });
-          }
-        });
-        
-        return similar.sort((a, b) => b.similarity - a.similarity);
-      },
 
-      // Chuẩn hóa văn bản để so sánh
-      normalizeText: function(text) {
-        return text
-          .toLowerCase()
-          .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Bỏ dấu
-          .replace(/[^\w\s]/g, ' ') // Loại bỏ ký tự đặc biệt
-          .replace(/\s+/g, ' ') // Chuẩn hóa khoảng trắng
-          .trim();
-      },
 
-      // Tính độ tương đồng sử dụng Jaccard similarity
-      calculateSimilarity: function(text1, text2) {
-        const words1 = new Set(text1.split(' '));
-        const words2 = new Set(text2.split(' '));
-        
-        const intersection = new Set([...words1].filter(x => words2.has(x)));
-        const union = new Set([...words1, ...words2]);
-        
-        return intersection.size / union.size;
-      },
-
-      // Kiểm tra xem câu hỏi có trùng lặp không
-      hasDuplicate: function(question) {
-        const similar = this.findSimilarQuestions(question, this.questions.indexOf(question));
-        return similar.length > 0;
-      },
-
-      getDuplicateCount: function() {
-        return this.questions.filter(q => this.hasDuplicate(q)).length;
-      },
 
       // Hàm chọn/bỏ chọn tất cả
       toggleSelectAll: function() {
@@ -268,6 +207,93 @@ document.addEventListener('alpine:init', function() {
           console.error('Error:', error);
           this.showNotificationMessage(error.message, 'error');
         }
+      },
+
+
+
+      // Hàm phát hiện câu hỏi trùng lặp
+      detectDuplicates: function() {
+        const duplicates = [];
+        
+        this.questions.forEach((question, index) => {
+          const similarQuestions = this.findSimilarQuestions(question, index);
+          if (similarQuestions.length > 0) {
+            duplicates.push({
+              question: question,
+              similar: similarQuestions
+            });
+          }
+        });
+        
+        return duplicates;
+      },
+
+      // Hàm tìm câu hỏi tương tự
+      findSimilarQuestions: function(targetQuestion, currentIndex) {
+        const similar = [];
+        const targetContent = this.normalizeText(targetQuestion.edited_content || targetQuestion.content);
+        
+        if (!targetContent || targetContent.length < 10) return similar; // Bỏ qua nội dung quá ngắn
+        
+        this.questions.forEach((question, index) => {
+          if (index === currentIndex) return;
+          
+          const content = this.normalizeText(question.edited_content || question.content);
+          if (!content || content.length < 10) return;
+          
+          const similarity = this.calculateSimilarity(targetContent, content);
+          
+          if (similarity > 0.6) { // Ngưỡng 60% trùng lặp
+            similar.push({
+              question: question,
+              similarity: similarity
+            });
+          }
+        });
+        
+        return similar.sort((a, b) => b.similarity - a.similarity);
+      },
+
+      // Chuẩn hóa văn bản để so sánh
+      normalizeText: function(text) {
+        if (!text) return '';
+        return text
+          .toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Bỏ dấu
+          .replace(/[^\w\s]/g, ' ') // Loại bỏ ký tự đặc biệt
+          .replace(/\s+/g, ' ') // Chuẩn hóa khoảng trắng
+          .trim();
+      },
+
+      // Tính độ tương đồng sử dụng Jaccard similarity
+      calculateSimilarity: function(text1, text2) {
+        const words1 = new Set(text1.split(' ').filter(word => word.length > 2)); // Lọc từ ngắn
+        const words2 = new Set(text2.split(' ').filter(word => word.length > 2));
+        
+        if (words1.size === 0 || words2.size === 0) return 0;
+        
+        const intersection = new Set([...words1].filter(x => words2.has(x)));
+        const union = new Set([...words1, ...words2]);
+        
+        return intersection.size / union.size;
+      },
+
+      // Kiểm tra xem câu hỏi có trùng lặp không
+      hasDuplicate: function(question) {
+        const similar = this.findSimilarQuestions(question, this.questions.indexOf(question));
+        return similar.length > 0;
+      },
+
+      // Hiển thị modal câu hỏi tương tự
+      showSimilarQuestions: function(question) {
+        this.currentSimilarQuestion = question;
+        this.similarQuestions = this.findSimilarQuestions(question, this.questions.indexOf(question));
+        this.showSimilarModal = true;
+      },
+
+      // Đếm số câu hỏi có trùng lặp
+      getDuplicateCount: function() {
+        return this.questions.filter(q => this.hasDuplicate(q)).length;
       },
 
 
@@ -414,15 +440,24 @@ document.addEventListener('alpine:init', function() {
       //   }
       //   this.fetchQuestions();
       // },
+     
+
+
       init: function() {
         if (!localStorage.getItem('access_token')) {
           window.location.href = '/login.html?next=' + encodeURIComponent(window.location.pathname);
         }
-        this.fetchQuestions().then(() => {
-          // Tự động phát hiện trùng lặp sau khi tải câu hỏi
+        this.fetchQuestions();
+        
+        // Tự động tính toán trùng lặp sau khi tải dữ liệu
+        setTimeout(() => {
           this.detectDuplicates();
-        });
+        }, 1000);
       },
+
+
+      
+
       get paginatedQuestions() {
         const start = (this.currentPage - 1) * this.perPage;
         const end = start + this.perPage;
@@ -799,9 +834,19 @@ document.addEventListener('alpine:init', function() {
         } else {
           results.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
         }
+
+        // THÊM BỘ LỌC TRÙNG LẶP
+        if (this.duplicateFilter === 'has_duplicate') {
+          results = results.filter(q => this.hasDuplicate(q));
+        } else if (this.duplicateFilter === 'no_duplicate') {
+          results = results.filter(q => !this.hasDuplicate(q));
+        }
         
         this.filteredQuestions = results;
       },
+
+
+
 
       goToPage: function(page) {
         this.currentPage = page;
