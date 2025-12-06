@@ -233,17 +233,17 @@ document.addEventListener('alpine:init', function() {
         const similar = [];
         const targetContent = this.normalizeText(targetQuestion.edited_content || targetQuestion.content);
         
-        if (!targetContent || targetContent.length < 10) return similar; // Bỏ qua nội dung quá ngắn
+        if (!targetContent || targetContent.length < 5) return similar; // Bỏ qua nội dung quá ngắn
         
         this.questions.forEach((question, index) => {
           if (index === currentIndex || question.id === targetQuestion.id) return;
           
           const content = this.normalizeText(question.edited_content || question.content);
-          if (!content || content.length < 10) return;
+          if (!content || content.length < 5) return;
           
           const similarity = this.calculateSimilarity(targetContent, content);
           
-          if (similarity > 0.6) { // Ngưỡng 60% trùng lặp
+          if (similarity > 0.5) { // Ngưỡng 60% trùng lặp
             similar.push({
               question: question,
               similarity: similarity
@@ -900,6 +900,7 @@ document.addEventListener('alpine:init', function() {
         this.currentQuestionIndex = this.filteredQuestions.findIndex(q => q.id === question.id);
         this.showQuestionModal = true;
         this.showDetailModal = false;
+        this.showSimilarModal = false; // Thêm dòng này để đóng modal tương tự
       },
 
 
@@ -1010,6 +1011,7 @@ document.addEventListener('alpine:init', function() {
         this.showConfirmModal = true;
       },
 
+
       // deleteQuestion: function() {
       //   const token = localStorage.getItem('access_token');
       //   fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
@@ -1021,7 +1023,14 @@ document.addEventListener('alpine:init', function() {
       //     this.showNotificationMessage('Xóa câu hỏi thành công', 'success');
       //     this.showConfirmModal = false;
       //     this.showDetailModal = false;
-      //     this.fetchQuestions();
+          
+      //     // CẬP NHẬT QUAN TRỌNG: Nếu đang ở modal câu hỏi tương tự, cập nhật lại danh sách
+      //     if (this.showSimilarModal && this.currentSimilarQuestion) {
+      //       // Gọi lại hàm hiển thị câu hỏi tương tự để refresh danh sách
+      //       this.showSimilarQuestions(this.currentSimilarQuestion);
+      //     }
+          
+      //     this.fetchQuestions(); // Tải lại toàn bộ danh sách câu hỏi
       //   })
       //   .catch(error => {
       //     console.error('Error:', error);
@@ -1029,6 +1038,8 @@ document.addEventListener('alpine:init', function() {
       //   });
       // },
 
+
+      // Hàm xóa câu hỏi (đã có, nhưng cần đảm bảo xử lý modal tương tự)
       deleteQuestion: function() {
         const token = localStorage.getItem('access_token');
         fetch(`https://api.chuaphucminh.xyz/api/questions/${this.currentQuestion.id}/`, {
@@ -1041,10 +1052,16 @@ document.addEventListener('alpine:init', function() {
           this.showConfirmModal = false;
           this.showDetailModal = false;
           
-          // CẬP NHẬT QUAN TRỌNG: Nếu đang ở modal câu hỏi tương tự, cập nhật lại danh sách
+          // Cập nhật: Nếu đang ở modal câu hỏi tương tự, cập nhật lại danh sách
           if (this.showSimilarModal && this.currentSimilarQuestion) {
-            // Gọi lại hàm hiển thị câu hỏi tương tự để refresh danh sách
-            this.showSimilarQuestions(this.currentSimilarQuestion);
+            // Kiểm tra xem câu hỏi vừa xóa có phải là currentSimilarQuestion không
+            if (this.currentQuestion.id === this.currentSimilarQuestion.id) {
+              // Nếu xóa chính câu hỏi gốc, đóng modal tương tự
+              this.showSimilarModal = false;
+            } else {
+              // Nếu xóa câu hỏi khác, chỉ refresh danh sách
+              this.showSimilarQuestions(this.currentSimilarQuestion);
+            }
           }
           
           this.fetchQuestions(); // Tải lại toàn bộ danh sách câu hỏi
@@ -1054,6 +1071,8 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage(error.message, 'error');
         });
       },
+
+
 
       updateAnsweredAt: function() {
         if (this.currentQuestion.answer && !this.currentQuestion.answered_at) {

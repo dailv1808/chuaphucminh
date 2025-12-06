@@ -543,3 +543,18 @@ table {
 .fixed.inset-0.z-50 {
   z-index: 1001 !important;
 }
+
+/* Thêm vào cuối file qa.css */
+.text-blue-600:hover.text-blue-800,
+.text-red-600:hover.text-red-800 {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+.bg-blue-50 .flex.gap-2 button {
+  @apply p-1.5 rounded-md bg-white border border-blue-200 shadow-sm;
+}
+
+.bg-blue-50 .flex.gap-2 button:hover {
+  @apply shadow-md;
+}

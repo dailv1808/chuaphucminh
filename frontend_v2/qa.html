@@ -731,9 +731,27 @@
           </button>
         </div>
         
+      
+
         <!-- Câu hỏi gốc -->
         <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <h4 class="font-medium text-blue-800 mb-2">Câu hỏi gốc:</h4>
+          <div class="flex justify-between items-start mb-2">
+            <h4 class="font-medium text-blue-800">Câu hỏi gốc:</h4>
+            <div class="flex gap-2">
+              <!-- Nút chỉnh sửa câu hỏi gốc -->
+              <button @click.stop="openEditQuestionModal(currentSimilarQuestion); showSimilarModal = false" 
+                      class="text-blue-600 hover:text-blue-800 p-1"
+                      title="Chỉnh sửa câu hỏi gốc">
+                <i class="fas fa-edit"></i>
+              </button>
+              <!-- Nút xóa câu hỏi gốc -->
+              <button @click.stop="confirmDelete(currentSimilarQuestion)" 
+                      class="text-red-600 hover:text-red-800 p-1"
+                      title="Xóa câu hỏi gốc">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
           <p x-text="currentSimilarQuestion?.content" class="text-blue-900 whitespace-pre-line"></p>
           <div class="flex gap-4 mt-2 text-sm text-blue-600">
             <span x-text="'Pháp danh: ' + (currentSimilarQuestion?.name || 'N/A')"></span>
@@ -742,6 +760,8 @@
           </div>
         </div>
         
+
+
         <!-- Danh sách câu hỏi tương tự -->
         <div class="space-y-3 max-h-96 overflow-y-auto">
           <template x-for="similar in similarQuestions" :key="similar.question.id">
