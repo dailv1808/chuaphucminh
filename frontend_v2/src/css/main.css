@@ -100,3 +100,12 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* Auth guard: ẩn layout admin cho tới khi xác thực xong */
+html.auth-guard-loading body {
+  visibility: hidden;
+}
+
+html.auth-guard-ok body {
+  visibility: visible;
+}

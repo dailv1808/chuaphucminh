@@ -558,3 +558,12 @@ table {
 .bg-blue-50 .flex.gap-2 button:hover {
   @apply shadow-md;
 }
+
+/* Auth guard cho trang QA: ẩn giao diện cho tới khi xác thực xong */
+html.auth-guard-loading body {
+  visibility: hidden;
+}
+
+html.auth-guard-ok body {
+  visibility: visible;
+}
