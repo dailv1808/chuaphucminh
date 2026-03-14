@@ -36,6 +36,9 @@
             x-show="getDuplicateCount() > 0"
             x-text="`⚠️ ${getDuplicateCount()} câu hỏi có nội dung tương tự`">
           </p>
+          <p class="text-gray-500 text-xs mt-1"
+             x-show="duplicateDisabledReason"
+             x-text="duplicateDisabledReason"></p>
         </div>
 
     
@@ -45,7 +48,7 @@
             <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <i class="fas fa-search text-gray-400"></i>
             </div>
-            <input type="text" x-model="searchQuery" @input.debounce.300ms="applyFilters"
+            <input type="text" x-model="searchQuery" @input.debounce.500ms="applyFilters"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" 
                   placeholder="Tìm kiếm...">
           </div>
@@ -101,6 +104,17 @@
 
       <!-- Filter Section -->
       <div class="flex flex-wrap items-center gap-4 mb-6">
+        <div class="filter-item">
+          <span class="filter-label">Trùng lặp:</span>
+          <label class="flex items-center gap-2">
+            <input type="checkbox"
+                   x-model="enableDuplicateCheck"
+                   @change="rebuildDuplicateMap(); applyFilters()"
+                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+            <span class="text-sm text-gray-700">Bật kiểm tra</span>
+          </label>
+          <span class="text-xs text-gray-500" x-show="isDetectingDuplicates">Đang kiểm tra...</span>
+        </div>
         <div class="filter-item">
           <span class="filter-label">Sắp xếp:</span>
           <div class="flex gap-2">

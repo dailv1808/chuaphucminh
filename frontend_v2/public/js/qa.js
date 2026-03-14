@@ -14,6 +14,7 @@ document.addEventListener('alpine:init', function() {
       showConfirmModal: false,
       isEditing: false,
       isLoading: true,
+      isDetectingDuplicates: false,
       showNotification: false,
       notificationMessage: '',
       notificationType: 'success',
@@ -61,6 +62,13 @@ document.addEventListener('alpine:init', function() {
       currentSimilarQuestion: null,
       similarQuestions: [],
       duplicateFilter: '',
+      enableDuplicateCheck: true,
+      maxDuplicateCheck: 300,
+      duplicateSimilarityThreshold: 0.5,
+      duplicateMap: {},
+      duplicateCount: 0,
+      duplicateDisabledReason: '',
+      searchDebounceMs: 500,
 
 
 
@@ -105,20 +113,25 @@ document.addEventListener('alpine:init', function() {
         const token = localStorage.getItem('access_token');
         
         try {
-          // Xóa từng câu hỏi
-          for (const questionId of this.selectedQuestions) {
+          const idsToDelete = [...this.selectedQuestions];
+          const results = await Promise.all(idsToDelete.map(async (questionId) => {
             const response = await fetch(`https://api.chuaphucminh.xyz/api/questions/${questionId}/`, {
               method: 'DELETE',
               headers: { 'Authorization': `Bearer ${token}` }
             });
-
             if (!response.ok) throw new Error(`Xóa câu hỏi ${questionId} thất bại`);
-          }
+            return questionId;
+          }));
           
-          this.showNotificationMessage(`Đã xóa thành công ${this.selectedQuestions.length} câu hỏi`, 'success');
+          this.showNotificationMessage(`Đã xóa thành công ${results.length} câu hỏi`, 'success');
           this.selectedQuestions = []; // Reset danh sách chọn
           this.selectAll = false;
-          this.fetchQuestions(); // Tải lại danh sách
+
+          // Update local state instead of refetching whole list
+          const deletedSet = new Set(idsToDelete);
+          this.questions = this.questions.filter(q => !deletedSet.has(q.id));
+          this.applyFilters();
+          setTimeout(() => this.rebuildDuplicateMap(), 0);
           
         } catch (error) {
           console.error('Error:', error);
@@ -199,9 +212,22 @@ document.addEventListener('alpine:init', function() {
             const errorText = await response.text();
             throw new Error(`Nhân đôi câu hỏi thất bại: ${errorText}`);
           }
-          
+
+          const createdQuestion = await response.json();
+          const q = {
+            ...createdQuestion,
+            edited_content: createdQuestion.edited_content || createdQuestion.content,
+            showAnswerSection: false,
+            newAnswer: '',
+            created_by: createdQuestion.created_by || {username: 'Khách', full_name: 'Khách'},
+            updated_by: createdQuestion.updated_by || createdQuestion.created_by || {username: 'Khách', full_name: 'Khách'}
+          };
+          q.search_index = this.buildSearchIndex(q);
+          this.questions.unshift(q);
+          this.applyFilters();
+          setTimeout(() => this.rebuildDuplicateMap(), 0);
+
           this.showNotificationMessage(`Đã nhân đôi câu hỏi thành "${displayName}"`, 'success');
-          this.fetchQuestions(); // Tải lại danh sách
           
         } catch (error) {
           console.error('Error:', error);
@@ -213,44 +239,42 @@ document.addEventListener('alpine:init', function() {
 
       // Hàm phát hiện câu hỏi trùng lặp
       detectDuplicates: function() {
+        // Backward-compatible wrapper: ensure cache exists, then return list form
+        if (this.enableDuplicateCheck && !this.isDetectingDuplicates && Object.keys(this.duplicateMap).length === 0) {
+          this.rebuildDuplicateMap();
+        }
+
         const duplicates = [];
-        
-        this.questions.forEach((question, index) => {
-          const similarQuestions = this.findSimilarQuestions(question, index);
-          if (similarQuestions.length > 0) {
-            duplicates.push({
-              question: question,
-              similar: similarQuestions
-            });
+        for (const q of this.questions) {
+          const info = this.duplicateMap[q.id];
+          if (info?.hasDuplicate) {
+            duplicates.push({ question: q, similar: info.similar || [] });
           }
-        });
-        
+        }
         return duplicates;
       },
 
       // Hàm tìm câu hỏi tương tự
       findSimilarQuestions: function(targetQuestion, currentIndex) {
+        // Prefer cached results (O(1))
+        const cached = this.duplicateMap?.[targetQuestion.id]?.similar;
+        if (Array.isArray(cached)) return cached;
+
+        // Fallback to the old calculation (should be rare; main path is rebuildDuplicateMap)
         const similar = [];
         const targetContent = this.normalizeText(targetQuestion.edited_content || targetQuestion.content);
-        
-        if (!targetContent || targetContent.length < 5) return similar; // Bỏ qua nội dung quá ngắn
-        
+        if (!targetContent || targetContent.length < 5) return similar;
+
         this.questions.forEach((question, index) => {
           if (index === currentIndex || question.id === targetQuestion.id) return;
-          
           const content = this.normalizeText(question.edited_content || question.content);
           if (!content || content.length < 5) return;
-          
           const similarity = this.calculateSimilarity(targetContent, content);
-          
-          if (similarity > 0.5) { // Ngưỡng 60% trùng lặp
-            similar.push({
-              question: question,
-              similarity: similarity
-            });
+          if (similarity > this.duplicateSimilarityThreshold) {
+            similar.push({ question: question, similarity: similarity });
           }
         });
-        
+
         return similar.sort((a, b) => b.similarity - a.similarity);
       },
 
@@ -263,6 +287,23 @@ document.addEventListener('alpine:init', function() {
           .replace(/[^\w\s]/g, ' ') // Loại bỏ ký tự đặc biệt
           .replace(/\s+/g, ' ') // Chuẩn hóa khoảng trắng
           .trim();
+      },
+
+      buildSearchIndex: function(q) {
+        const parts = [
+          q.name,
+          q.display_name,
+          q.content,
+          q.short_content,
+          q.edited_content,
+          q.answer,
+          q.group,
+          q.tags,
+          q.contact
+        ].filter(Boolean);
+
+        // Use same normalization as duplicate detection (lowercase + remove accents)
+        return this.normalizeText(parts.join(' '));
       },
 
       // Tính độ tương đồng sử dụng Jaccard similarity
@@ -280,20 +321,113 @@ document.addEventListener('alpine:init', function() {
 
       // Kiểm tra xem câu hỏi có trùng lặp không
       hasDuplicate: function(question) {
-        const similar = this.findSimilarQuestions(question, this.questions.indexOf(question));
-        return similar.length > 0;
+        return !!this.duplicateMap?.[question.id]?.hasDuplicate;
       },
 
       // Hiển thị modal câu hỏi tương tự
       showSimilarQuestions: function(question) {
         this.currentSimilarQuestion = question;
+        // Ensure cache exists if enabled; otherwise fallback to direct compute
+        if (this.enableDuplicateCheck && Object.keys(this.duplicateMap).length === 0 && !this.isDetectingDuplicates) {
+          this.rebuildDuplicateMap();
+        }
         this.similarQuestions = this.findSimilarQuestions(question, this.questions.indexOf(question));
         this.showSimilarModal = true;
       },
 
       // Đếm số câu hỏi có trùng lặp
       getDuplicateCount: function() {
-        return this.questions.filter(q => this.hasDuplicate(q)).length;
+        return this.duplicateCount || 0;
+      },
+
+      rebuildDuplicateMap: function() {
+        if (!this.enableDuplicateCheck) {
+          this.duplicateMap = {};
+          this.duplicateCount = 0;
+          this.duplicateDisabledReason = '';
+          return;
+        }
+
+        const n = this.questions.length;
+        if (n === 0) {
+          this.duplicateMap = {};
+          this.duplicateCount = 0;
+          this.duplicateDisabledReason = '';
+          return;
+        }
+
+        if (n > this.maxDuplicateCheck) {
+          this.duplicateMap = {};
+          this.duplicateCount = 0;
+          this.duplicateDisabledReason = `Tạm tắt kiểm tra trùng lặp vì danh sách quá lớn (${n} > ${this.maxDuplicateCheck})`;
+          return;
+        }
+
+        this.isDetectingDuplicates = true;
+        this.duplicateDisabledReason = '';
+
+        const wordSets = new Array(n);
+        const ids = new Array(n);
+
+        for (let i = 0; i < n; i++) {
+          const q = this.questions[i];
+          ids[i] = q.id;
+          const normalized = this.normalizeText(q.edited_content || q.content);
+          if (!normalized || normalized.length < 5) {
+            wordSets[i] = null;
+            continue;
+          }
+          wordSets[i] = new Set(normalized.split(' ').filter(w => w.length > 2));
+        }
+
+        const map = {};
+        const threshold = this.duplicateSimilarityThreshold;
+
+        const ensureEntry = (id) => {
+          if (!map[id]) map[id] = { hasDuplicate: false, similar: [] };
+          return map[id];
+        };
+
+        const jaccard = (setA, setB) => {
+          if (!setA || !setB || setA.size === 0 || setB.size === 0) return 0;
+          let small = setA, large = setB;
+          if (setA.size > setB.size) {
+            small = setB; large = setA;
+          }
+          let intersection = 0;
+          small.forEach(w => { if (large.has(w)) intersection++; });
+          const union = setA.size + setB.size - intersection;
+          return union === 0 ? 0 : intersection / union;
+        };
+
+        for (let i = 0; i < n; i++) {
+          const setI = wordSets[i];
+          if (!setI) continue;
+          for (let j = i + 1; j < n; j++) {
+            const setJ = wordSets[j];
+            if (!setJ) continue;
+            const sim = jaccard(setI, setJ);
+            if (sim > threshold) {
+              const qi = this.questions[i];
+              const qj = this.questions[j];
+              const ei = ensureEntry(ids[i]);
+              const ej = ensureEntry(ids[j]);
+              ei.similar.push({ question: qj, similarity: sim });
+              ej.similar.push({ question: qi, similarity: sim });
+            }
+          }
+        }
+
+        let dupCount = 0;
+        for (const id of Object.keys(map)) {
+          map[id].similar.sort((a, b) => b.similarity - a.similarity);
+          map[id].hasDuplicate = map[id].similar.length > 0;
+          if (map[id].hasDuplicate) dupCount++;
+        }
+
+        this.duplicateMap = map;
+        this.duplicateCount = dupCount;
+        this.isDetectingDuplicates = false;
       },
 
 
@@ -306,6 +440,7 @@ document.addEventListener('alpine:init', function() {
       quickEditField: async function(question, field, value) {
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
+        const oldValue = question[field];
         
         // Xác định trường cần cập nhật
         let updateField = field;
@@ -320,6 +455,10 @@ document.addEventListener('alpine:init', function() {
         } else {
           question[field] = value;
         }
+
+        // Skip request if value is unchanged
+        const currentValue = (field === 'content') ? question.edited_content : question[field];
+        if (currentValue === oldValue) return;
 
         const payload = {
           [updateField]: updateValue,
@@ -344,6 +483,7 @@ document.addEventListener('alpine:init', function() {
           // Cập nhật lại toàn bộ dữ liệu từ server
           const updatedQuestion = await response.json();
           Object.assign(question, updatedQuestion);
+          question.search_index = this.buildSearchIndex(question);
           
           // Nếu đang mở modal chi tiết, cập nhật luôn selectedQuestion
           if (this.showDetailModal && this.selectedQuestion.id === question.id) {
@@ -421,6 +561,7 @@ document.addEventListener('alpine:init', function() {
           const index = this.questions.findIndex(q => q.id === updatedQuestion.id);
           if (index !== -1) {
             this.questions[index] = { ...this.questions[index], ...updatedQuestion };
+            this.questions[index].search_index = this.buildSearchIndex(this.questions[index]);
           }
           
           // Cập nhật filteredQuestions
@@ -432,7 +573,7 @@ document.addEventListener('alpine:init', function() {
           console.error('Error auto-saving edit modal:', error);
           // Không hiển thị thông báo lỗi để không làm phiền người dùng
         }
-      }, 1000), // Debounce 1 giây
+      }, 1800), // Debounce tăng để giảm request khi gõ dài
 
       // init: function() {
       //   if (!localStorage.getItem('access_token')) {
@@ -448,11 +589,6 @@ document.addEventListener('alpine:init', function() {
           window.location.href = '/login.html?next=' + encodeURIComponent(window.location.pathname);
         }
         this.fetchQuestions();
-        
-        // Tự động tính toán trùng lặp sau khi tải dữ liệu
-        setTimeout(() => {
-          this.detectDuplicates();
-        }, 1000);
       },
 
 
@@ -610,10 +746,19 @@ document.addEventListener('alpine:init', function() {
               showAnswerSection: false,
               newAnswer: '',
               created_by: q.created_by || {username: 'Khách', full_name: 'Khách'},
-              updated_by: q.updated_by || q.created_by || {username: 'Khách', full_name: 'Khách'}
+              updated_by: q.updated_by || q.created_by || {username: 'Khách', full_name: 'Khách'},
+              search_index: '' // filled below
             }));
+
+            // Build a single normalized string for fast includes() search
+            this.questions.forEach(q => { q.search_index = this.buildSearchIndex(q); });
             
             this.applyFilters();
+
+            // Build duplicate cache once after loading (bounded by maxDuplicateCheck)
+            setTimeout(() => {
+              this.rebuildDuplicateMap();
+            }, 0);
           })
           .catch(error => {
             console.error('Error:', error);
@@ -719,6 +864,7 @@ document.addEventListener('alpine:init', function() {
           if (index !== -1) {
             this.questions[index].edited_content = this.selectedQuestion.edited_content;
             this.questions[index].updated_at = new Date().toISOString();
+            this.questions[index].search_index = this.buildSearchIndex(this.questions[index]);
           }
           
           // Hiển thị thông báo nhỏ không làm phiền người dùng
@@ -727,7 +873,7 @@ document.addEventListener('alpine:init', function() {
           console.error('Error:', error);
           this.showNotificationMessage('Lỗi khi lưu thay đổi: ' + error.message, 'error');
         }
-      }, 500), // Debounce 500ms
+      }, 1200), // Debounce tăng để giảm request khi gõ dài
 
       // Thông báo nhỏ không làm phiền
       showTemporaryNotification: function(message) {
@@ -793,16 +939,8 @@ document.addEventListener('alpine:init', function() {
         let results = [...this.questions];
         
         if (this.searchQuery) {
-          const query = this.searchQuery.toLowerCase();
-          results = results.filter(q => 
-            q.name.toLowerCase().includes(query) || 
-            q.content.toLowerCase().includes(query) ||
-            (q.short_content && q.short_content.toLowerCase().includes(query)) ||
-            (q.edited_content && q.edited_content.toLowerCase().includes(query)) ||
-            (q.answer && q.answer.toLowerCase().includes(query)) ||
-            (q.group && q.group.toLowerCase().includes(query)) ||
-            (q.tags && q.tags.toLowerCase().includes(query))
-          );
+          const query = this.normalizeText(this.searchQuery);
+          results = results.filter(q => (q.search_index || '').includes(query));
         }
         
         if (this.statusFilter) {
@@ -970,10 +1108,22 @@ document.addEventListener('alpine:init', function() {
           if (!response.ok) throw new Error('Thêm mới thất bại');
           return response.json();
         })
-        .then(() => {
+        .then((createdQuestion) => {
+          const q = {
+            ...createdQuestion,
+            edited_content: createdQuestion.edited_content || createdQuestion.content,
+            showAnswerSection: false,
+            newAnswer: '',
+            created_by: createdQuestion.created_by || {username: 'Khách', full_name: 'Khách'},
+            updated_by: createdQuestion.updated_by || createdQuestion.created_by || {username: 'Khách', full_name: 'Khách'}
+          };
+          q.search_index = this.buildSearchIndex(q);
+          this.questions.unshift(q);
+          this.applyFilters();
+          setTimeout(() => this.rebuildDuplicateMap(), 0);
+
           this.showNotificationMessage('Thêm câu hỏi mới thành công', 'success');
           this.showQuestionModal = false;
-          this.fetchQuestions();
         })
         .catch(error => {
           console.error('Error:', error);
@@ -995,10 +1145,18 @@ document.addEventListener('alpine:init', function() {
           if (!response.ok) throw new Error('Cập nhật thất bại');
           return response.json();
         })
-        .then(() => {
+        .then((updatedQuestion) => {
+          const index = this.questions.findIndex(q => q.id === updatedQuestion.id);
+          if (index !== -1) {
+            this.questions[index] = { ...this.questions[index], ...updatedQuestion };
+            this.questions[index].edited_content = this.questions[index].edited_content || this.questions[index].content;
+            this.questions[index].search_index = this.buildSearchIndex(this.questions[index]);
+          }
+          this.applyFilters();
+          setTimeout(() => this.rebuildDuplicateMap(), 0);
+
           this.showNotificationMessage('Cập nhật câu hỏi thành công', 'success');
           this.showQuestionModal = false;
-          this.fetchQuestions();
         })
         .catch(error => {
           console.error('Error:', error);
@@ -1051,6 +1209,11 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage('Xóa câu hỏi thành công', 'success');
           this.showConfirmModal = false;
           this.showDetailModal = false;
+
+          const deletedId = this.currentQuestion.id;
+          this.questions = this.questions.filter(q => q.id !== deletedId);
+          this.applyFilters();
+          setTimeout(() => this.rebuildDuplicateMap(), 0);
           
           // Cập nhật: Nếu đang ở modal câu hỏi tương tự, cập nhật lại danh sách
           if (this.showSimilarModal && this.currentSimilarQuestion) {
@@ -1063,8 +1226,6 @@ document.addEventListener('alpine:init', function() {
               this.showSimilarQuestions(this.currentSimilarQuestion);
             }
           }
-          
-          this.fetchQuestions(); // Tải lại toàn bộ danh sách câu hỏi
         })
         .catch(error => {
           console.error('Error:', error);
