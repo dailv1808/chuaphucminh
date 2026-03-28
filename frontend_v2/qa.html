@@ -263,14 +263,14 @@
                 <!-- THÊM SAU DÒNG NÀY -->
                 <!-- CỘT TRẠNG THÁI TRƯỚC -->
                 <td class="px-6 py-4">
-                  <select x-model="question.status" 
-                          @change="quickEditField(question, 'status', question.status)"
+                  <!-- :value + @change (không dùng x-model): x-model cập nhật trước @change khiến quickEditField so sánh old/new sai và bỏ qua PATCH -->
+                  <select :value="question.status"
+                          @change="quickEditField(question, 'status', $event.target.value)"
                           @click.stop
                           class="status-select w-full" 
                           :class="question.status">
-                    <template x-for="status in statusOptions" :key="status.value">
-                      <option :value="status.value" x-text="status.label" 
-                              :selected="status.value === question.status"></option>
+                    <template x-for="opt in statusOptions" :key="opt.value">
+                      <option :value="opt.value" x-text="opt.label"></option>
                     </template>
                   </select>
                 </td>
