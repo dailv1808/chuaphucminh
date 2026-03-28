@@ -293,16 +293,17 @@
 
                 <td class="px-6 py-4 text-center">
                   <input type="checkbox" 
-                        x-model="question.slideshow" 
-                        @change="quickEditField(question, 'slideshow', question.slideshow)"
+                        
+                        :checked="question.slideshow"
+                        @change="quickEditField(question, 'slideshow', $event.target.checked)"
                         @click.stop
                         class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                 </td>
 
                 <td class="px-6 py-4 text-center">
                   <input type="checkbox" 
-                        x-model="question.is_faq" 
-                        @change="quickEditField(question, 'is_faq', question.is_faq)"
+                        :checked="question.is_faq" 
+                        @change="quickEditField(question, 'is_faq', $event.target.checked)"
                         @click.stop
                         class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                 </td>
