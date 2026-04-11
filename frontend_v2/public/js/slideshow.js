@@ -398,6 +398,24 @@ document.addEventListener('alpine:init', function() {
       get currentQuestion() {
         return this.slideshowQuestions[this.currentSlideIndex - 1];
       },
+
+      priorityRank: function(priority) {
+        const rankMap = { high: 0, medium: 1, low: 2 };
+        return rankMap[priority] ?? 3;
+      },
+
+      getPriorityLabel: function(priority) {
+        const labelMap = { high: 'Cao', medium: 'Vừa', low: 'Thấp' };
+        return labelMap[priority] || priority || 'N/A';
+      },
+
+      sortSlideshowQuestions: function(questions) {
+        return [...questions].sort((a, b) => {
+          const priorityDiff = this.priorityRank(a.priority) - this.priorityRank(b.priority);
+          if (priorityDiff !== 0) return priorityDiff;
+          return new Date(a.created_at) - new Date(b.created_at);
+        });
+      },
       
       fetchQuestions: function() {
         this.isLoading = true;
@@ -414,14 +432,15 @@ document.addEventListener('alpine:init', function() {
             }));
             
             // Lọc câu hỏi trình chiếu và sắp xếp theo thứ tự cũ nhất trước
-            this.slideshowQuestions = data
-              .filter(q => q.status === "pending" && q.slideshow === true)
-              .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-              .map(q => ({
-                ...q,
-                // THÊM DÒNG NÀY: Đảm bảo edited_content không bị null/undefined
-                edited_content: q.edited_content || q.content
-              }));
+            this.slideshowQuestions = this.sortSlideshowQuestions(
+              data
+                .filter(q => q.status === "pending" && q.slideshow === true)
+                .map(q => ({
+                  ...q,
+                  // THÊM DÒNG NÀY: Đảm bảo edited_content không bị null/undefined
+                  edited_content: q.edited_content || q.content
+                }))
+            );
           })
           .catch(error => {
             console.error('Error:', error);
@@ -710,8 +729,12 @@ document.addEventListener('alpine:init', function() {
           }
 
           const updatedQuestion = await response.json();
-          this.slideshowQuestions = this.slideshowQuestions.map(q => 
-            q.id === questionId ? updatedQuestion : q
+          this.slideshowQuestions = this.sortSlideshowQuestions(
+            this.slideshowQuestions.map(q =>
+              q.id === questionId
+                ? { ...updatedQuestion, edited_content: updatedQuestion.edited_content || updatedQuestion.content }
+                : q
+            )
           );
         } catch (error) {
           console.error('Update error:', error);

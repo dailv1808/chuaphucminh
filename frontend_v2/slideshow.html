@@ -127,6 +127,7 @@
               <tr>
                 <th scope="col" class="px-6 py-3">STT</th>
                 <th scope="col" class="px-6 py-3">Pháp danh</th>
+                <th scope="col" class="px-6 py-3">Độ ưu tiên</th>
                 <th scope="col" class="px-6 py-3">Nội dung</th>
                 <th scope="col" class="px-6 py-3 text-right">Thao tác</th>
               </tr>
@@ -145,6 +146,17 @@
                     @dragend="handleDragEnd()">
                   <td class="px-6 py-4" x-text="index + 1"></td>
                   <td class="px-6 py-4 font-medium text-gray-900" x-text="question.name || 'Ẩn danh'"></td>
+                  <td class="px-6 py-4">
+                    <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium"
+                          :class="{
+                            'bg-red-100 text-red-700': question.priority === 'high',
+                            'bg-yellow-100 text-yellow-800': question.priority === 'medium',
+                            'bg-green-100 text-green-700': question.priority === 'low',
+                            'bg-gray-100 text-gray-700': !question.priority
+                          }"
+                          x-text="getPriorityLabel(question.priority)">
+                    </span>
+                  </td>
                   <td class="px-6 py-4" style="white-space: pre-line; word-wrap: break-word; word-break: break-word;" x-text="question.edited_content"></td>
 
                   <td class="px-6 py-4 text-right">
