@@ -450,15 +450,10 @@ document.addEventListener('alpine:init', function() {
         if (field === 'content') {
           updateField = 'edited_content';
           updateValue = value;
-          // Cập nhật ngay lập tức trên giao diện
-          question.edited_content = value;
-        } else {
-          question[field] = value;
         }
 
         // Skip request if value is unchanged
-        const currentValue = (field === 'content') ? question.edited_content : question[field];
-        if (currentValue === oldValue) return;
+        if (updateValue === oldValue) return;
 
         const payload = {
           [updateField]: updateValue,
@@ -477,7 +472,8 @@ document.addEventListener('alpine:init', function() {
           });
 
           if (!response.ok) {
-            throw new Error('Cập nhật thất bại');
+            const errorText = await response.text();
+            throw new Error(`Cập nhật thất bại (${response.status}) ${errorText || ''}`.trim());
           }
           
           // Cập nhật lại toàn bộ dữ liệu từ server
@@ -493,12 +489,8 @@ document.addEventListener('alpine:init', function() {
           this.showNotificationMessage('Cập nhật thành công', 'success');
         } catch (error) {
           console.error('Error:', error);
-          // Rollback giá trị nếu có lỗi
-          if (field === 'content') {
-            question.edited_content = oldValue;
-          } else {
-            question[field] = oldValue;
-          }
+          // Rollback về giá trị đã lưu thật trên server
+          question[field] = oldValue;
           this.showNotificationMessage(error.message, 'error');
         }
       },

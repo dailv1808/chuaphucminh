@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions
 from .models import GuestQuestion
 from .serializers import GuestQuestionSerializer
+from accounts.permissions import IsAdminOrStaff
 
 class GuestQuestionViewSet(viewsets.ModelViewSet):
     queryset = GuestQuestion.objects.all().order_by('-created_at')
@@ -11,9 +12,9 @@ class GuestQuestionViewSet(viewsets.ModelViewSet):
         elif self.action == 'create':  # POST /registrations/
             permission_classes = [permissions.AllowAny]
         elif self.action in ['update', 'partial_update']:  # PUT/PATCH /registrations/<id>/
-            permission_classes = [permissions.IsAdminUser]
+            permission_classes = [IsAdminOrStaff]
         elif self.action == 'destroy':  # DELETE /registrations/<id>/
-            permission_classes = [permissions.IsAdminUser]
+            permission_classes = [IsAdminOrStaff]
         else:
             permission_classes = [permissions.IsAuthenticated]
 
