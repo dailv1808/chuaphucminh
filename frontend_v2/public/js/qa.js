@@ -519,14 +519,7 @@ document.addEventListener('alpine:init', function() {
             updated_at: new Date().toISOString()
           };
 
-          // Cập nhật answered_at nếu có câu trả lời
-          if (payload.answer && !payload.answered_at) {
-            payload.answered_at = new Date().toISOString();
-            payload.status = 'answered';
-          } else if (!payload.answer && payload.answered_at) {
-            payload.answered_at = null;
-            payload.status = 'pending';
-          }
+          this.syncAnswerStatus(payload);
 
           // Clean up payload
           delete payload.showAnswerSection;
@@ -1059,6 +1052,7 @@ document.addEventListener('alpine:init', function() {
       preparePayload: function() {
         const token = localStorage.getItem('access_token');
         const user = JSON.parse(localStorage.getItem('user'));
+        this.updateAnsweredAt();
         
         // Đảm bảo edited_content luôn có giá trị
         if (!this.currentQuestion.edited_content) {
@@ -1074,8 +1068,6 @@ document.addEventListener('alpine:init', function() {
         if (!this.isEditing) {
           payload.created_by = user?.id || null;
         }
-        
-        this.updateAnsweredAt();
         
         // Clean up payload before sending
         delete payload.showAnswerSection;
@@ -1228,12 +1220,26 @@ document.addEventListener('alpine:init', function() {
 
 
       updateAnsweredAt: function() {
-        if (this.currentQuestion.answer && !this.currentQuestion.answered_at) {
-          this.currentQuestion.answered_at = new Date().toISOString();
-          this.currentQuestion.status = 'answered';
-        } else if (!this.currentQuestion.answer) {
-          this.currentQuestion.answered_at = null;
-          this.currentQuestion.status = 'pending';
+        this.syncAnswerStatus(this.currentQuestion);
+      },
+
+      syncAnswerStatus: function(target) {
+        if (!target) return;
+
+        const hasAnswer = !!(target.answer && String(target.answer).trim());
+        const status = target.status;
+
+        if (hasAnswer && !target.answered_at) {
+          target.answered_at = new Date().toISOString();
+        }
+
+        if (!hasAnswer && status === 'answered') {
+          target.answered_at = null;
+          target.status = 'pending';
+        }
+
+        if (hasAnswer && status === 'pending') {
+          target.status = 'answered';
         }
       },
 
@@ -1296,14 +1302,7 @@ document.addEventListener('alpine:init', function() {
             updated_at: new Date().toISOString()
           };
 
-          // Cập nhật answered_at nếu có câu trả lời
-          if (payload.answer && !payload.answered_at) {
-            payload.answered_at = new Date().toISOString();
-            payload.status = 'answered';
-          } else if (!payload.answer && payload.answered_at) {
-            payload.answered_at = null;
-            payload.status = 'pending';
-          }
+          this.syncAnswerStatus(payload);
 
           // Clean up payload
           delete payload.showAnswerSection;
