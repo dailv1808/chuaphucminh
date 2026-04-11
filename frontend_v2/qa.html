@@ -264,13 +264,14 @@
                 <!-- CỘT TRẠNG THÁI TRƯỚC -->
                 <td class="px-6 py-4">
                   <!-- :value + @change (không dùng x-model): x-model cập nhật trước @change khiến quickEditField so sánh old/new sai và bỏ qua PATCH -->
-                  <select :value="question.status"
-                          @change="quickEditField(question, 'status', $event.target.value)"
+                  <select @change="quickEditField(question, 'status', $event.target.value)"
                           @click.stop
                           class="status-select w-full" 
                           :class="question.status">
                     <template x-for="opt in statusOptions" :key="opt.value">
-                      <option :value="opt.value" x-text="opt.label"></option>
+                      <option :value="opt.value"
+                              :selected="opt.value === question.status"
+                              x-text="opt.label"></option>
                     </template>
                   </select>
                 </td>
