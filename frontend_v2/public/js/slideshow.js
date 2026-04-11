@@ -177,7 +177,11 @@ document.addEventListener('alpine:init', function() {
           
           document.body.removeChild(tempContainer);
           
-          const fileName = `Hoi-Dap-Trinh-Phap-${new Date().toISOString().split('T')[0]}.pdf`;
+          const now = new Date();
+          const day = String(now.getDate()).padStart(2, '0');
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          const year = now.getFullYear();
+          const fileName = `Hoi-Dap-Trinh-Phap-${day}-${month}-${year}.pdf`;
           doc.save(fileName);
           
           this.showNotificationMessage('Đã tạo PDF thành công!', 'success');
