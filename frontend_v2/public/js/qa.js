@@ -20,6 +20,7 @@ document.addEventListener('alpine:init', function() {
       notificationType: 'success',
       currentPage: 1,
       perPage: 10,
+      totalCount: 0,
       selectedQuestion: null,
       currentQuestionIndex: 0,
       // Biến cho chức năng chọn nhiều
@@ -63,12 +64,14 @@ document.addEventListener('alpine:init', function() {
       similarQuestions: [],
       duplicateFilter: '',
       enableDuplicateCheck: true,
-      maxDuplicateCheck: 300,
+      maxDuplicateCheck: 5000,
       duplicateSimilarityThreshold: 0.5,
       duplicateMap: {},
       duplicateCount: 0,
       duplicateDisabledReason: '',
       searchDebounceMs: 500,
+      fetchController: null,
+      fetchSeq: 0,
 
 
 
@@ -356,13 +359,6 @@ document.addEventListener('alpine:init', function() {
           return;
         }
 
-        if (n > this.maxDuplicateCheck) {
-          this.duplicateMap = {};
-          this.duplicateCount = 0;
-          this.duplicateDisabledReason = `Tạm tắt kiểm tra trùng lặp vì danh sách quá lớn (${n} > ${this.maxDuplicateCheck})`;
-          return;
-        }
-
         this.isDetectingDuplicates = true;
         this.duplicateDisabledReason = '';
 
@@ -580,13 +576,11 @@ document.addEventListener('alpine:init', function() {
       
 
       get paginatedQuestions() {
-        const start = (this.currentPage - 1) * this.perPage;
-        const end = start + this.perPage;
-        return this.filteredQuestions.slice(start, end);
+        return this.filteredQuestions;
       },
 
       get totalPages() {
-        return Math.ceil(this.filteredQuestions.length / this.perPage);
+        return Math.max(1, Math.ceil(this.totalCount / this.perPage));
       },
 
       getStatusLabel: function(status) {
@@ -713,9 +707,37 @@ document.addEventListener('alpine:init', function() {
 
 
       fetchQuestions: function() {
+        const requestId = ++this.fetchSeq;
+        if (this.fetchController) {
+          this.fetchController.abort();
+        }
+        this.fetchController = new AbortController();
         this.isLoading = true;
         const token = localStorage.getItem('access_token');
-        fetch('https://api.chuaphucminh.xyz/api/questions/', {
+        const orderingMap = {
+          newest: '-updated_at',
+          oldest: 'updated_at',
+          newest_created: '-created_at',
+          oldest_created: 'created_at'
+        };
+
+        const params = new URLSearchParams();
+        params.set('paginated', '1');
+        params.set('priority_first', '1');
+        params.set('page', this.currentPage);
+        params.set('page_size', this.perPage);
+        params.set('ordering', orderingMap[this.sortBy] || '-created_at');
+
+        if (this.searchQuery?.trim()) params.set('search', this.searchQuery.trim());
+        if (this.statusFilter) params.set('status', this.statusFilter);
+        if (this.priorityFilter) params.set('priority', this.priorityFilter);
+        if (this.slideshowFilter === 'yes') params.set('slideshow', 'true');
+        if (this.slideshowFilter === 'no') params.set('slideshow', 'false');
+        if (this.faqFilter === 'yes') params.set('is_faq', 'true');
+        if (this.faqFilter === 'no') params.set('is_faq', 'false');
+
+        fetch(`https://api.chuaphucminh.xyz/api/questions/?${params.toString()}`, {
+          signal: this.fetchController.signal,
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -725,7 +747,10 @@ document.addEventListener('alpine:init', function() {
             return response.json();
           })
           .then(data => {
-            this.questions = data.map(q => ({
+            if (requestId !== this.fetchSeq) return;
+            const results = Array.isArray(data) ? data : (data.results || []);
+            this.totalCount = Array.isArray(data) ? results.length : (data.count || 0);
+            this.questions = results.map(q => ({
               ...q,
               edited_content: q.edited_content || q.content, // Set edited_content to content if empty
               showAnswerSection: false,
@@ -738,7 +763,7 @@ document.addEventListener('alpine:init', function() {
             // Build a single normalized string for fast includes() search
             this.questions.forEach(q => { q.search_index = this.buildSearchIndex(q); });
             
-            this.applyFilters();
+            this.filteredQuestions = [...this.questions];
 
             // Build duplicate cache once after loading (bounded by maxDuplicateCheck)
             setTimeout(() => {
@@ -746,11 +771,14 @@ document.addEventListener('alpine:init', function() {
             }, 0);
           })
           .catch(error => {
+            if (error?.name === 'AbortError') return;
             console.error('Error:', error);
             this.showNotificationMessage(error.message, 'error');
           })
           .finally(() => {
-            this.isLoading = false;
+            if (requestId === this.fetchSeq) {
+              this.isLoading = false;
+            }
           });
       },
 
@@ -916,11 +944,13 @@ document.addEventListener('alpine:init', function() {
       },
 
       applyFilters: function() {
-        // this.currentPage = 1;
-        this.sortAndFilterQuestions();
+        this.currentPage = 1;
+        this.fetchQuestions();
       },
 
       sortAndFilterQuestions: function() {
+        this.filteredQuestions = [...this.questions];
+        return;
         let results = [...this.questions];
         
         if (this.searchQuery) {
@@ -972,15 +1002,23 @@ document.addEventListener('alpine:init', function() {
 
 
       goToPage: function(page) {
+        if (page < 1 || page > this.totalPages) return;
         this.currentPage = page;
+        this.fetchQuestions();
       },
 
       prevPage: function() {
-        if (this.currentPage > 1) this.currentPage--;
+        if (this.currentPage > 1) {
+          this.currentPage--;
+          this.fetchQuestions();
+        }
       },
 
       nextPage: function() {
-        if (this.currentPage < this.totalPages) this.currentPage++;
+        if (this.currentPage < this.totalPages) {
+          this.currentPage++;
+          this.fetchQuestions();
+        }
       },
 
       openAddQuestionModal: function() {

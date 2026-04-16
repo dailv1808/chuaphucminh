@@ -343,9 +343,9 @@
       <!-- Pagination -->
       <div class="flex items-center justify-between mt-6">
         <div class="text-sm text-gray-500">
-          Hiển thị <span x-text="(currentPage - 1) * perPage + 1"></span>-<span 
-          x-text="Math.min(currentPage * perPage, filteredQuestions.length)"></span> của <span 
-          x-text="filteredQuestions.length"></span> câu hỏi
+          Hiển thị <span x-text="totalCount === 0 ? 0 : ((currentPage - 1) * perPage + 1)"></span>-<span 
+          x-text="Math.min(((currentPage - 1) * perPage) + filteredQuestions.length, totalCount)"></span> của <span 
+          x-text="totalCount"></span> câu hỏi
         </div>
         <div class="flex gap-2">
           <button @click="prevPage" :disabled="currentPage === 1" 
@@ -360,9 +360,9 @@
               <span x-text="page"></span>
             </button>
           </template>
-          <button @click="nextPage" :disabled="currentPage === totalPages" 
+          <button @click="nextPage" :disabled="currentPage >= totalPages" 
                   class="pagination-btn"
-                  :class="{'disabled': currentPage === totalPages}">
+                  :class="{'disabled': currentPage >= totalPages}">
             Sau
           </button>
         </div>
