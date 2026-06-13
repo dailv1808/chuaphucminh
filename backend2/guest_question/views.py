@@ -1,4 +1,4 @@
-from django.db.models import Q, Case, When, Value, IntegerField
+from django.db.models import Q
 from rest_framework import viewsets, permissions
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -91,30 +91,6 @@ class GuestQuestionViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(is_faq=is_faq)
 
         ordering = self._get_ordering(params.get('ordering'))
-        priority_first = self._as_bool(params.get('priority_first')) is True
-
-        # Priority ordering: high -> medium -> low
-        priority_rank_expr = Case(
-            When(priority='high', then=Value(0)),
-            When(priority='medium', then=Value(1)),
-            When(priority='low', then=Value(2)),
-            default=Value(3),
-            output_field=IntegerField(),
-        )
-
-        if priority_first:
-            queryset = queryset.annotate(priority_rank=priority_rank_expr)
-            secondary_ordering = ordering
-            if secondary_ordering in ['priority', '-priority']:
-                secondary_ordering = '-created_at'
-            return queryset.order_by('priority_rank', secondary_ordering, '-id')
-
-        if ordering in ['priority', '-priority']:
-            queryset = queryset.annotate(priority_rank=priority_rank_expr)
-            if ordering.startswith('-'):
-                return queryset.order_by('-priority_rank', '-id')
-            return queryset.order_by('priority_rank', '-id')
-
         return queryset.order_by(ordering)
 
     def list(self, request, *args, **kwargs):
