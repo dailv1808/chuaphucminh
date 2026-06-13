@@ -38,7 +38,16 @@ DEBUG = True
 #ALLOWED_HOSTS = []
 ALLOWED_HOSTS = [
     '192.168.0.200',
-    'app.chuaphucminh.com',  # Your domain
+    'app.chuaphucminh.com',  # Legacy domain
+    'chuaphucminh.top',
+    'www.chuaphucminh.top',
+    'api.chuaphucminh.top',
+    'admin.chuaphucminh.top',
+    # Transitional: remove after old domain redirects are in place
+    'chuaphucminh.xyz',
+    'www.chuaphucminh.xyz',
+    'api.chuaphucminh.xyz',
+    'admin.chuaphucminh.xyz',
     'localhost',             # Local development
     '127.0.0.1',             # Localhost IP
     '0.0.0.0',           # Your server's local IP (replace x.x)
@@ -94,6 +103,18 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://chuaphucminh.top',
+    'https://www.chuaphucminh.top',
+    'https://api.chuaphucminh.top',
+    'https://admin.chuaphucminh.top',
+    # Transitional: remove after old domain redirects are in place
+    'https://chuaphucminh.xyz',
+    'https://www.chuaphucminh.xyz',
+    'https://api.chuaphucminh.xyz',
+    'https://admin.chuaphucminh.xyz',
 ]
 
 MIDDLEWARE = [

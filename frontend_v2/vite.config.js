@@ -4,8 +4,7 @@ import autoprefixer from 'autoprefixer'
 
 export default defineConfig({
   define: {
-    'window.API_BASE_URL': JSON.stringify('https://api.chuaphucminh.xyz'),
-//    'window.API_BASE_URL': JSON.stringify(process.env.VITE_API_URL || 'https://api.chuaphucminh.xyz')
+    'window.API_BASE_URL': JSON.stringify(process.env.VITE_API_URL || 'https://api.chuaphucminh.top'),
   },
   server: {
     host: '0.0.0.0',
@@ -14,9 +13,10 @@ export default defineConfig({
     allowedHosts: [
       'app.chuaphucminh.com',
       'chuaphucminh.com',
-      'chuaphucminh.xyz',
-      'api.chuaphucminh.xyz',
-      'admin.chuaphucminh.xyz',
+      'chuaphucminh.top',
+      'www.chuaphucminh.top',
+      'api.chuaphucminh.top',
+      'admin.chuaphucminh.top',
       'localhost'
     ]
   },
