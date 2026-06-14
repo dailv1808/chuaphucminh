@@ -267,14 +267,17 @@ document.addEventListener('alpine:init', function() {
         // Fallback: check only against pending questions (same scope as rebuildDuplicateMap)
         const similar = [];
         const targetContent = this.normalizeText(targetQuestion.edited_content || targetQuestion.content);
-        if (!targetContent || targetContent.length < 5) return similar;
+        if (!targetContent || targetContent.trim().length === 0) return similar;
 
         const pendingQuestions = this.questions.filter(q => (q.status || 'pending') === 'pending');
-        pendingQuestions.forEach((question, index) => {
+        const targetWords = new Set(targetContent.split(/\s+/).filter(w => w.length > 0));
+        
+        pendingQuestions.forEach((question) => {
           if (question.id === targetQuestion.id) return;
           const content = this.normalizeText(question.edited_content || question.content);
-          if (!content || content.length < 5) return;
-          const similarity = this.calculateSimilarity(targetContent, content);
+          if (!content || content.trim().length === 0) return;
+          const words = new Set(content.split(/\s+/).filter(w => w.length > 0));
+          const similarity = this.calculateSimilarity(targetWords, words);
           if (similarity > this.duplicateSimilarityThreshold) {
             similar.push({ question: question, similarity: similarity });
           }
@@ -313,15 +316,28 @@ document.addEventListener('alpine:init', function() {
 
       // Tính độ tương đồng sử dụng Jaccard similarity
       calculateSimilarity: function(text1, text2) {
-        const words1 = new Set(text1.split(' ').filter(word => word.length > 2)); // Lọc từ ngắn
-        const words2 = new Set(text2.split(' ').filter(word => word.length > 2));
+        // Handle both string and Set inputs
+        let set1, set2;
+        if (text1 instanceof Set) {
+          set1 = text1;
+        } else {
+          const normalized1 = typeof text1 === 'string' ? text1 : (text1 || '').toString();
+          set1 = new Set(normalized1.split(/\s+/).filter(word => word.length > 0));
+        }
         
-        if (words1.size === 0 || words2.size === 0) return 0;
+        if (text2 instanceof Set) {
+          set2 = text2;
+        } else {
+          const normalized2 = typeof text2 === 'string' ? text2 : (text2 || '').toString();
+          set2 = new Set(normalized2.split(/\s+/).filter(word => word.length > 0));
+        }
         
-        const intersection = new Set([...words1].filter(x => words2.has(x)));
-        const union = new Set([...words1, ...words2]);
+        if (set1.size === 0 || set2.size === 0) return 0;
         
-        return intersection.size / union.size;
+        const intersection = new Set([...set1].filter(x => set2.has(x)));
+        const union = new Set([...set1, ...set2]);
+        
+        return union.size === 0 ? 0 : intersection.size / union.size;
       },
 
       // Hàm chuyên dùng khi toggle bật/tắt kiểm tra trùng lặp
@@ -414,11 +430,13 @@ document.addEventListener('alpine:init', function() {
           const q = pendingQuestions[i];
           ids[i] = q.id;
           const normalized = this.normalizeText(q.edited_content || q.content);
-          if (!normalized || normalized.length < 5) {
+          // Skip only if text is completely empty (allow short text like "ae", "fwe", etc.)
+          if (!normalized || normalized.trim().length === 0) {
             wordSets[i] = null;
             continue;
           }
-          wordSets[i] = new Set(normalized.split(' ').filter(w => w.length > 2));
+          // Include ALL words, even 1-character ones (changed from > 2 to > 0)
+          wordSets[i] = new Set(normalized.split(/\s+/).filter(w => w.length > 0));
         }
 
         const map = {};
