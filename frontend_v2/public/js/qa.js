@@ -357,12 +357,7 @@ document.addEventListener('alpine:init', function() {
           return;
         }
 
-        if (total > this.maxDuplicateCheck) {
-          this.duplicateMap = {};
-          this.duplicateCount = 0;
-          this.duplicateDisabledReason = `Tạm tắt kiểm tra trùng lặp vì danh sách quá lớn (${total} > ${this.maxDuplicateCheck})`;
-          return;
-        }
+        // We'll decide to skip only if pending questions exceed the cap; defer until we have pending list
 
         this.isDetectingDuplicates = true;
         this.duplicateDisabledReason = '';
@@ -384,13 +379,21 @@ document.addEventListener('alpine:init', function() {
           console.warn('Could not fetch full list for duplicate detection, falling back to loaded page:', e);
           allQuestions = this.questions;
         }
-
-        const n = allQuestions.length;
+        // Only check duplicates among pending questions (chưa trả lời)
+        const pendingQuestions = allQuestions.filter(q => (q.status || 'pending') === 'pending');
+        const n = pendingQuestions.length;
+        if (n > this.maxDuplicateCheck) {
+          this.duplicateMap = {};
+          this.duplicateCount = 0;
+          this.duplicateDisabledReason = `Tạm tắt kiểm tra trùng lặp vì số câu hỏi chưa trả lời quá lớn (${n} > ${this.maxDuplicateCheck})`;
+          this.isDetectingDuplicates = false;
+          return;
+        }
         const wordSets = new Array(n);
         const ids = new Array(n);
 
         for (let i = 0; i < n; i++) {
-          const q = allQuestions[i];
+          const q = pendingQuestions[i];
           ids[i] = q.id;
           const normalized = this.normalizeText(q.edited_content || q.content);
           if (!normalized || normalized.length < 5) {
@@ -428,8 +431,8 @@ document.addEventListener('alpine:init', function() {
             if (!setJ) continue;
             const sim = jaccard(setI, setJ);
             if (sim > threshold) {
-              const qi = allQuestions[i];
-              const qj = allQuestions[j];
+              const qi = pendingQuestions[i];
+              const qj = pendingQuestions[j];
               const ei = ensureEntry(ids[i]);
               const ej = ensureEntry(ids[j]);
               ei.similar.push({ question: qj, similarity: sim });

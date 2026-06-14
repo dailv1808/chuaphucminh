@@ -348,7 +348,7 @@
           x-text="Math.min(((currentPage - 1) * perPage) + filteredQuestions.length, totalCount)"></span> của <span 
           x-text="totalCount"></span> câu hỏi
         </div>
-        <div class="flex gap-2">
+        <div class="pagination-group flex gap-2 items-center">
           <button @click="prevPage" :disabled="currentPage === 1" 
                   class="pagination-btn" 
                   :class="{'disabled': currentPage === 1}">
@@ -356,7 +356,7 @@
           </button>
           <template x-for="page in visiblePages" :key="page">
             <template x-if="page === 'start-ellipsis' || page === 'end-ellipsis'">
-              <button class="pagination-btn disabled" @click.prevent>
+              <button class="pagination-btn ellipsis disabled" @click.prevent>
                 …
               </button>
             </template>
