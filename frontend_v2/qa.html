@@ -348,33 +348,50 @@
           x-text="Math.min(((currentPage - 1) * perPage) + filteredQuestions.length, totalCount)"></span> của <span 
           x-text="totalCount"></span> câu hỏi
         </div>
-        <div class="pagination-group flex gap-2 items-center">
-          <button @click="prevPage" :disabled="currentPage === 1" 
-                  class="pagination-btn" 
-                  :class="{'disabled': currentPage === 1}">
-            ← Trước
-          </button>
-          <template x-for="page in visiblePages" :key="page">
-            <template x-if="page === 'start-ellipsis' || page === 'end-ellipsis'">
-              <button class="pagination-btn ellipsis disabled" @click.prevent>
-                …
-              </button>
+        <div class="pagination-group flex flex-wrap gap-2 items-center">
+          <div class="flex gap-2 items-center">
+            <button @click="prevPage" :disabled="currentPage === 1" 
+                    class="pagination-btn" 
+                    :class="{'disabled': currentPage === 1}">
+              ← Trước
+            </button>
+            <template x-for="page in visiblePages" :key="page">
+              <template x-if="page === 'start-ellipsis' || page === 'end-ellipsis'">
+                <button class="pagination-btn ellipsis disabled" @click.prevent>
+                  …
+                </button>
+              </template>
+              <template x-if="page !== 'start-ellipsis' && page !== 'end-ellipsis'">
+                <button @click="goToPage(page)" 
+                        class="pagination-btn"
+                        :class="{'active': page === currentPage}">
+                  <span x-text="page"></span>
+                </button>
+              </template>
             </template>
-            <template x-if="page !== 'start-ellipsis' && page !== 'end-ellipsis'">
-              <button @click="goToPage(page)" 
-                      class="pagination-btn"
-                      :class="{'active': page === currentPage}">
-                <span x-text="page"></span>
-              </button>
-            </template>
-          </template>
-          <button @click="nextPage" :disabled="currentPage >= totalPages" 
-                  class="pagination-btn"
-                  :class="{'disabled': currentPage >= totalPages}">
-            Sau →
-          </button>
-          <div class="pagination-info">
-            <span x-text="currentPage + ' / ' + totalPages"></span>
+            <button @click="nextPage" :disabled="currentPage >= totalPages" 
+                    class="pagination-btn"
+                    :class="{'disabled': currentPage >= totalPages}">
+              Sau →
+            </button>
+          </div>
+          
+          <!-- Page jump input on the right -->
+          <div class="flex items-center gap-2 ml-auto">
+            <label for="pageJump" class="text-sm text-gray-600 font-medium whitespace-nowrap">Tới trang:</label>
+            <input type="number" 
+                   id="pageJump"
+                   x-model.number="jumpPageInput"
+                   @keyup.enter="jumpToPage()"
+                   :placeholder="currentPage"
+                   min="1"
+                   :max="totalPages"
+                   class="w-14 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button @click="jumpToPage()" 
+                    class="px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition whitespace-nowrap">
+              Go
+            </button>
+            <span class="text-sm text-gray-500 ml-2"><span x-text="currentPage"></span> / <span x-text="totalPages"></span></span>
           </div>
         </div>
       </div>

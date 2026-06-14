@@ -21,6 +21,7 @@ document.addEventListener('alpine:init', function() {
       currentPage: 1,
       perPage: 10,
       totalCount: 0,
+      jumpPageInput: '',
       selectedQuestion: null,
       currentQuestionIndex: 0,
       // Biến cho chức năng chọn nhiều
@@ -335,6 +336,11 @@ document.addEventListener('alpine:init', function() {
           this.duplicateDisabledReason = '';
         }
         this.applyFilters();
+      },
+
+      // Kiểm tra xem câu hỏi có trùng lặp không
+      hasDuplicate: function(question) {
+        return !!this.duplicateMap?.[question.id]?.hasDuplicate;
       },
 
       // Hiển thị modal câu hỏi tương tự
@@ -828,11 +834,20 @@ document.addEventListener('alpine:init', function() {
             // Build a single normalized string for fast includes() search
             this.questions.forEach(q => { q.search_index = this.buildSearchIndex(q); });
             
+            // Set all questions first without duplicate filter
             this.filteredQuestions = [...this.questions];
 
             // Build duplicate cache once after loading (bounded by maxDuplicateCheck)
             setTimeout(async () => {
               await this.rebuildDuplicateMap();
+              // After duplicate map is built, apply duplicate filter to already-loaded questions
+              let filtered = [...this.questions];
+              if (this.duplicateFilter === 'has_duplicate') {
+                filtered = filtered.filter(q => this.hasDuplicate(q));
+              } else if (this.duplicateFilter === 'no_duplicate') {
+                filtered = filtered.filter(q => !this.hasDuplicate(q));
+              }
+              this.filteredQuestions = filtered;
             }, 0);
           })
           .catch(error => {
@@ -1081,6 +1096,17 @@ document.addEventListener('alpine:init', function() {
           this.currentPage++;
           this.fetchQuestions();
         }
+      },
+
+      jumpToPage: function() {
+        const page = parseInt(this.jumpPageInput, 10);
+        if (isNaN(page) || page < 1 || page > this.totalPages) {
+          this.showNotification('Số trang không hợp lệ', 'error');
+          return;
+        }
+        this.currentPage = page;
+        this.jumpPageInput = '';
+        this.fetchQuestions();
       },
 
       openAddQuestionModal: function() {
