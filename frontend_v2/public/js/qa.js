@@ -26,6 +26,8 @@ document.addEventListener('alpine:init', function() {
       // Biến cho chức năng chọn nhiều
       selectedQuestions: [],
       selectAll: false,
+      // Disable duplicate check by default to prevent page load blocking
+      enableDuplicateCheck: false,
       statusOptions: [
         { value: 'answered', label: 'Đã trả lời' },
         { value: 'pending', label: 'Chưa trả lời' },
@@ -261,13 +263,14 @@ document.addEventListener('alpine:init', function() {
         const cached = this.duplicateMap?.[targetQuestion.id]?.similar;
         if (Array.isArray(cached)) return cached;
 
-        // Fallback to the old calculation (should be rare; main path is rebuildDuplicateMap)
+        // Fallback: check only against pending questions (same scope as rebuildDuplicateMap)
         const similar = [];
         const targetContent = this.normalizeText(targetQuestion.edited_content || targetQuestion.content);
         if (!targetContent || targetContent.length < 5) return similar;
 
-        this.questions.forEach((question, index) => {
-          if (index === currentIndex || question.id === targetQuestion.id) return;
+        const pendingQuestions = this.questions.filter(q => (q.status || 'pending') === 'pending');
+        pendingQuestions.forEach((question, index) => {
+          if (question.id === targetQuestion.id) return;
           const content = this.normalizeText(question.edited_content || question.content);
           if (!content || content.length < 5) return;
           const similarity = this.calculateSimilarity(targetContent, content);
@@ -320,17 +323,26 @@ document.addEventListener('alpine:init', function() {
         return intersection.size / union.size;
       },
 
-      // Kiểm tra xem câu hỏi có trùng lặp không
-      hasDuplicate: function(question) {
-        return !!this.duplicateMap?.[question.id]?.hasDuplicate;
+      // Hàm chuyên dùng khi toggle bật/tắt kiểm tra trùng lặp
+      toggleDuplicateCheck: async function() {
+        if (this.enableDuplicateCheck) {
+          // Nếu bật, rebuild map trước khi apply filters
+          await this.rebuildDuplicateMap();
+        } else {
+          // Nếu tắt, xóa map ngay
+          this.duplicateMap = {};
+          this.duplicateCount = 0;
+          this.duplicateDisabledReason = '';
+        }
+        this.applyFilters();
       },
 
       // Hiển thị modal câu hỏi tương tự
-      showSimilarQuestions: function(question) {
+      showSimilarQuestions: async function(question) {
         this.currentSimilarQuestion = question;
-        // Ensure cache exists if enabled; otherwise fallback to direct compute
-        if (this.enableDuplicateCheck && Object.keys(this.duplicateMap).length === 0 && !this.isDetectingDuplicates) {
-          this.rebuildDuplicateMap();
+        // Ensure cache exists if enabled; rebuild if not already detecting
+        if (this.enableDuplicateCheck && !this.isDetectingDuplicates) {
+          await this.rebuildDuplicateMap();
         }
         this.similarQuestions = this.findSimilarQuestions(question, this.questions.indexOf(question));
         this.showSimilarModal = true;
@@ -793,8 +805,8 @@ document.addEventListener('alpine:init', function() {
             this.filteredQuestions = [...this.questions];
 
             // Build duplicate cache once after loading (bounded by maxDuplicateCheck)
-            setTimeout(() => {
-              this.rebuildDuplicateMap();
+            setTimeout(async () => {
+              await this.rebuildDuplicateMap();
             }, 0);
           })
           .catch(error => {

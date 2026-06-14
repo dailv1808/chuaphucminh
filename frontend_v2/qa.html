@@ -110,7 +110,7 @@
           <label class="flex items-center gap-2">
             <input type="checkbox"
                    x-model="enableDuplicateCheck"
-                   @change="rebuildDuplicateMap(); applyFilters()"
+                   @change="toggleDuplicateCheck()"
                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
             <span class="text-sm text-gray-700">Bật kiểm tra</span>
           </label>
