@@ -1,0 +1,17 @@
+[0;1;31m×[0m gunicorn.service - Gunicorn service for Django project
+     Loaded: loaded (/etc/systemd/system/gunicorn.service; enabled; vendor preset: enabled)
+     Active: [0;1;31mfailed[0m (Result: exit-code) since Sun 2026-06-14 14:35:23 +07; 11min ago
+    Process: 3380589 ExecStart=/data/chuaphucminh/backend2/venv/bin/gunicorn --workers 3 --bind unix:/data/chuaphucminh/backend2/backend2/gunicorn.sock backend2.wsgi:application [0;1;31m(code=exited, status=3)[0m
+   Main PID: 3380589 (code=exited, status=3)
+        CPU: 1.083s
+
+Jun 14 14:35:23 webserver gunicorn[3380591]: No module named 'rest_framework'
+Jun 14 14:35:23 webserver gunicorn[3380591]: [2026-06-14 07:35:23 +0000] [3380591] [INFO] Worker exiting (pid: 3380591)
+Jun 14 14:35:23 webserver gunicorn[3380589]: [2026-06-14 14:35:23 +0700] [3380589] [ERROR] Worker (pid:3380590) exited with code 3.
+Jun 14 14:35:23 webserver gunicorn[3380589]: [2026-06-14 14:35:23 +0700] [3380589] [INFO] Worker (pid:3380591) was sent SIGTERM!
+Jun 14 14:35:23 webserver gunicorn[3380589]: [2026-06-14 14:35:23 +0700] [3380589] [INFO] Worker (pid:3380592) was sent SIGTERM!
+Jun 14 14:35:23 webserver gunicorn[3380589]: [2026-06-14 14:35:23 +0700] [3380589] [ERROR] Shutting down: Master
+Jun 14 14:35:23 webserver gunicorn[3380589]: [2026-06-14 14:35:23 +0700] [3380589] [ERROR] Reason: Worker failed to boot.
+Jun 14 14:35:23 webserver systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED[0m
+Jun 14 14:35:23 webserver systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mgunicorn.service: Failed with result 'exit-code'.[0m
+Jun 14 14:35:23 webserver systemd[1]: gunicorn.service: Consumed 1.083s CPU time.

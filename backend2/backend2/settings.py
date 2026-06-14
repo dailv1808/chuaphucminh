@@ -157,9 +157,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'chuadb',
-        'USER': 'dailv',
-        'PASSWORD': 'dailv',
-        'HOST': '192.168.0.200',  # hoặc địa chỉ IP nếu PostgreSQL nằm trên server khác
+        'USER': 'cpm',
+        'PASSWORD': 'cpm',
+        'HOST': 'localhost',  # hoặc địa chỉ IP nếu PostgreSQL nằm trên server khác
         'PORT': '5432',
     }
 }
