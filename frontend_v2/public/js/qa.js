@@ -588,6 +588,27 @@ document.addEventListener('alpine:init', function() {
         return Math.max(1, Math.ceil(this.totalCount / this.perPage));
       },
 
+      get visiblePages() {
+        const total = this.totalPages;
+        const cur = this.currentPage;
+        const pages = [];
+        if (total <= 7) {
+          for (let i = 1; i <= total; i++) pages.push(i);
+          return pages;
+        }
+
+        pages.push(1);
+        if (cur > 4) pages.push('start-ellipsis');
+
+        const start = Math.max(2, cur - 2);
+        const end = Math.min(total - 1, cur + 2);
+        for (let i = start; i <= end; i++) pages.push(i);
+
+        if (cur < total - 3) pages.push('end-ellipsis');
+        pages.push(total);
+        return pages;
+      },
+
       getStatusLabel: function(status) {
         const option = this.statusOptions.find(s => s.value === status);
         return option ? option.label : status;
@@ -600,95 +621,114 @@ document.addEventListener('alpine:init', function() {
       // Thêm vào trong Alpine.data('qaData', function() { ... })
 
       exportToExcel: function() {
-        try {
+        rebuildDuplicateMap: async function() {
           // Tạo dữ liệu cho Excel (định dạng HTML table)
           const tableHeaders = [
             'STT', 'Ngày tạo', 'Pháp Danh', 'Câu hỏi', 'Nội dung đã biên tập',
             'Nội dung rút gọn', 'Liên Lạc', 'Trạng Thái', 'Độ ưu tiên',
             'Ngày sửa', 'Người tạo', 'Người biên tập', 'Slide', 'FAQ',
             'Phân Loại', 'Tags', 'Câu trả lời', 'Ngày trả lời'
-          ];
+          // Use totalCount if available (server supports pagination)
+          const total = this.totalCount || this.questions.length;
+          if (total === 0) {
+            this.duplicateMap = {};
+            this.duplicateCount = 0;
+            this.duplicateDisabledReason = '';
+            return;
+          }
 
-          const tableData = this.filteredQuestions.map((question, index) => [
-            (index + 1).toString(),
-            this.formatDate(question.created_at),
-            this.escapeExcelValue(question.name),
-            this.escapeExcelValue(question.content),
-            this.escapeExcelValue(question.edited_content || question.content),
-            this.escapeExcelValue(question.short_content || ''),
-            this.escapeExcelValue(question.contact || 'N/A'),
-            this.getStatusLabel(question.status),
-            this.priorityOptions.find(p => p.value === question.priority)?.label || question.priority,
-            this.formatDate(question.updated_at),
-            question.created_by?.full_name || question.created_by?.username || 'Khách',
-            question.updated_by?.full_name || question.updated_by?.username || 'Khách',
-            question.slideshow ? 'Có' : 'Không',
-            question.is_faq ? 'Có' : 'Không',
-            question.group || 'N/A',
-            question.tags || 'N/A',
-            this.escapeExcelValue(question.answer || ''),
-            question.answered_at ? this.formatDate(question.answered_at) : 'N/A'
-          ]);
+          if (total > this.maxDuplicateCheck) {
+            this.duplicateMap = {};
+            this.duplicateCount = 0;
+            this.duplicateDisabledReason = `Tạm tắt kiểm tra trùng lặp vì danh sách quá lớn (${total} > ${this.maxDuplicateCheck})`;
+            return;
+          }
 
-          // Tạo nội dung CSV
-          const csvContent = this.generateCSVContent(tableHeaders, tableData);
-          
-          // Tạo và tải file
-          this.downloadFile(csvContent, 'questions.csv', 'text/csv;charset=utf-8;');
-          
-          this.showNotificationMessage('Xuất file Excel thành công!', 'success');
-          
-        } catch (error) {
-          console.error('Error exporting to Excel:', error);
-          this.showNotificationMessage('Lỗi khi xuất file: ' + error.message, 'error');
-        }
-      },
+          this.isDetectingDuplicates = true;
+          this.duplicateDisabledReason = '';
 
-      // Hàm hỗ trợ: Escape giá trị cho CSV
-      escapeExcelValue: function(value) {
-        if (value === null || value === undefined) return '';
-        
-        const stringValue = String(value);
-        // Nếu giá trị chứa dấu phẩy, xuống dòng, hoặc dấu ngoặc kép, thì bọc trong ngoặc kép
-        if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"') || stringValue.includes('\r')) {
-          return '"' + stringValue.replace(/"/g, '""') + '"';
-        }
-        return stringValue;
-      },
+          // If current loaded questions do not include all items, try to fetch full list for duplicate detection
+          let allQuestions = this.questions;
+          try {
+            if (this.questions.length < total) {
+              const token = localStorage.getItem('access_token');
+              const resp = await fetch(getApiUrl(`/api/questions/?page_size=${total}`), {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              if (resp.ok) {
+                const data = await resp.json();
+                allQuestions = Array.isArray(data) ? data : (data.results || []);
+              }
+            }
+          } catch (e) {
+            console.warn('Could not fetch full list for duplicate detection, falling back to loaded page:', e);
+            allQuestions = this.questions;
+          }
 
-      // Hàm tạo nội dung CSV
-      generateCSVContent: function(headers, data) {
-        const headerRow = headers.map(header => this.escapeExcelValue(header)).join(',');
-        const dataRows = data.map(row => row.join(','));
-        
-        // Thêm BOM để hiển thị tiếng Việt đúng trong Excel
-        return '\uFEFF' + [headerRow, ...dataRows].join('\n');
-      },
+          const n = allQuestions.length;
+          const wordSets = new Array(n);
+          const ids = new Array(n);
 
-      // Hàm tải file
-      downloadFile: function(content, filename, mimeType) {
-        const blob = new Blob([content], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        
-        link.setAttribute('href', url);
-        link.setAttribute('download', filename);
-        link.style.visibility = 'hidden';
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Giải phóng bộ nhớ
-        setTimeout(() => URL.revokeObjectURL(url), 100);
-      },
+          for (let i = 0; i < n; i++) {
+            const q = allQuestions[i];
+            ids[i] = q.id;
+            const normalized = this.normalizeText(q.edited_content || q.content);
+            if (!normalized || normalized.length < 5) {
+              wordSets[i] = null;
+              continue;
+            }
+            wordSets[i] = new Set(normalized.split(' ').filter(w => w.length > 2));
+          }
 
-      // Thêm hàm format date chi tiết hơn cho export
-      formatDateForExport: function(dateString) {
-        if (!dateString) return 'N/A';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('vi-VN', {
-          day: '2-digit',
+          const map = {};
+          const threshold = this.duplicateSimilarityThreshold;
+
+          const ensureEntry = (id) => {
+            if (!map[id]) map[id] = { hasDuplicate: false, similar: [] };
+            return map[id];
+          };
+
+          const jaccard = (setA, setB) => {
+            if (!setA || !setB || setA.size === 0 || setB.size === 0) return 0;
+            let small = setA, large = setB;
+            if (setA.size > setB.size) {
+              small = setB; large = setA;
+            }
+            let intersection = 0;
+            small.forEach(w => { if (large.has(w)) intersection++; });
+            const union = setA.size + setB.size - intersection;
+            return union === 0 ? 0 : intersection / union;
+          };
+
+          for (let i = 0; i < n; i++) {
+            const setI = wordSets[i];
+            if (!setI) continue;
+            for (let j = i + 1; j < n; j++) {
+              const setJ = wordSets[j];
+              if (!setJ) continue;
+              const sim = jaccard(setI, setJ);
+              if (sim > threshold) {
+                const qi = allQuestions[i];
+                const qj = allQuestions[j];
+                const ei = ensureEntry(ids[i]);
+                const ej = ensureEntry(ids[j]);
+                ei.similar.push({ question: qj, similarity: sim });
+                ej.similar.push({ question: qi, similarity: sim });
+              }
+            }
+          }
+
+          let dupCount = 0;
+          for (const id of Object.keys(map)) {
+            map[id].similar.sort((a, b) => b.similarity - a.similarity);
+            map[id].hasDuplicate = map[id].similar.length > 0;
+            if (map[id].hasDuplicate) dupCount++;
+          }
+
+          this.duplicateMap = map;
+          this.duplicateCount = dupCount;
+          this.isDetectingDuplicates = false;
+        },
           month: '2-digit',
           year: 'numeric',
           hour: '2-digit',

@@ -398,6 +398,26 @@ table {
   @apply transform scale-95;
 }
 
+/* Improve fit: slightly smaller font inside table textareas and modals to avoid ugly wrapping */
+table td textarea,
+.modal-container,
+.main-content {
+  font-size: 13px;
+}
+
+table td textarea {
+  line-height: 1.25;
+  white-space: pre-wrap;
+  overflow: auto;
+  resize: vertical;
+  min-height: 64px;
+}
+
+/* On very large screens reduce modal font slightly to fit more content */
+@media (min-width: 1280px) {
+  .modal-container { font-size: 12.75px; }
+}
+
 /* Icon animation */
 .btn-success i, .btn-export i {
   @apply transition-transform duration-200;

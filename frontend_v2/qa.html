@@ -354,12 +354,19 @@
                   :class="{'disabled': currentPage === 1}">
             Trước
           </button>
-          <template x-for="page in totalPages" :key="page">
-            <button @click="goToPage(page)" 
-                    class="pagination-btn"
-                    :class="{'active': page === currentPage}">
-              <span x-text="page"></span>
-            </button>
+          <template x-for="page in visiblePages" :key="page">
+            <template x-if="page === 'start-ellipsis' || page === 'end-ellipsis'">
+              <button class="pagination-btn disabled" @click.prevent>
+                …
+              </button>
+            </template>
+            <template x-if="page !== 'start-ellipsis' && page !== 'end-ellipsis'">
+              <button @click="goToPage(page)" 
+                      class="pagination-btn"
+                      :class="{'active': page === currentPage}">
+                <span x-text="page"></span>
+              </button>
+            </template>
           </template>
           <button @click="nextPage" :disabled="currentPage >= totalPages" 
                   class="pagination-btn"
