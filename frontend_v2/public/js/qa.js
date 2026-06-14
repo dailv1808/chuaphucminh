@@ -626,20 +626,46 @@ document.addEventListener('alpine:init', function() {
         const total = this.totalPages;
         const cur = this.currentPage;
         const pages = [];
-        if (total <= 7) {
+        
+        // If total pages <= 10, show all
+        if (total <= 10) {
           for (let i = 1; i <= total; i++) pages.push(i);
           return pages;
         }
 
-        pages.push(1);
-        if (cur > 4) pages.push('start-ellipsis');
+        // Show first 5 pages
+        for (let i = 1; i <= Math.min(5, total); i++) {
+          pages.push(i);
+        }
 
-        const start = Math.max(2, cur - 2);
-        const end = Math.min(total - 1, cur + 2);
-        for (let i = start; i <= end; i++) pages.push(i);
+        // Check if we need ellipsis after first pages
+        const afterFirstPages = 5;
+        const beforeLastPages = total - 4;
+        const aroundStart = Math.max(cur - 1, afterFirstPages + 1);
+        const aroundEnd = Math.min(cur + 1, beforeLastPages - 1);
 
-        if (cur < total - 3) pages.push('end-ellipsis');
-        pages.push(total);
+        // Add ellipsis if there's gap between first pages and around current
+        if (aroundStart > afterFirstPages + 1) {
+          pages.push('start-ellipsis');
+        }
+
+        // Add pages around current (if not already in first 5)
+        if (aroundStart >= afterFirstPages + 1) {
+          for (let i = aroundStart; i <= aroundEnd; i++) {
+            if (!pages.includes(i)) pages.push(i);
+          }
+        }
+
+        // Add ellipsis if there's gap between around current and last pages
+        if (aroundEnd < beforeLastPages - 1) {
+          pages.push('end-ellipsis');
+        }
+
+        // Show last 5 pages
+        for (let i = Math.max(beforeLastPages, afterFirstPages + 1); i <= total; i++) {
+          if (!pages.includes(i)) pages.push(i);
+        }
+
         return pages;
       },
 
