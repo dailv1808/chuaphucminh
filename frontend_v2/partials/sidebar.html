@@ -2,6 +2,23 @@
        :class="{'translate-x-0': $store.sidebar.open || $store.sidebar.pinned}"
        class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 -translate-x-full transition-transform duration-300 bg-white border-r border-gray-200 shadow-sm">
   <div class="h-full px-3 pb-4 overflow-y-auto bg-white">
+    <div class="flex items-center justify-between px-2 mb-3">
+      <span class="text-xs font-semibold uppercase tracking-wide text-gray-400">Menu</span>
+      <button
+        @click="$store.sidebar.togglePinned()"
+        type="button"
+        class="inline-flex items-center justify-center p-2 text-gray-500 rounded-lg cursor-pointer hover:text-blue-600 hover:bg-gray-100"
+        :class="$store.sidebar.pinned ? 'text-blue-600 bg-blue-50' : ''"
+        :aria-pressed="$store.sidebar.pinned.toString()"
+        :title="$store.sidebar.pinned ? 'Bỏ ghim sidebar' : 'Ghim sidebar'"
+        aria-label="Toggle pinned sidebar"
+      >
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path x-cloak x-show="!$store.sidebar.pinned" d="M11 1a1 1 0 0 1 1 1v2.586l2.707 2.707a1 1 0 0 1 .293.707V9a1 1 0 0 1-1 1h-2v5l1.707 1.707A1 1 0 0 1 13 17.414V18a1 1 0 0 1-1.707.707L9 16.414V10H7a1 1 0 0 1-1-1V7a1 1 0 0 1 .293-.707L9 3.586V2a1 1 0 0 1 1-1Z"/>
+          <path x-cloak x-show="$store.sidebar.pinned" d="M10 1a1 1 0 0 1 1 1v2h1a3 3 0 0 1 3 3v2H5V7a3 3 0 0 1 3-3h1V2a1 1 0 0 1 1-1Zm-4 8h8v4l2 2v1H4v-1l2-2V9Z"/>
+        </svg>
+      </button>
+    </div>
     <ul class="space-y-1 font-medium">
       <!-- Dashboard -->
       <li>
