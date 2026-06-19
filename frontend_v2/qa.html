@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <link rel="stylesheet" href="./src/css/qa.css">
+  <script src="/js/main.js"></script>
   <script src="/js/baseURL.js"></script>
   <script src="/js/auth.js"></script>
 
@@ -24,7 +25,7 @@
 
   <!-- Main Content -->
   
-  <div class="p-4 sm:ml-64 pt-20 main-content">
+  <div class="p-4 pt-20 main-content" :class="$store.sidebar.open ? 'sm:ml-64' : ''">
     <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-200">
 
       <!-- Header Section -->

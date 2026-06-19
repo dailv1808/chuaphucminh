@@ -1,6 +1,6 @@
 <aside x-data="sidebar" 
-       :class="{'translate-x-0': $store.sidebar.open, '-translate-x-full': !$store.sidebar.open}"
-       class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform duration-300 bg-white border-r border-gray-200 shadow-sm">
+       :class="{'translate-x-0': $store.sidebar.open}"
+       class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 -translate-x-full transition-transform duration-300 bg-white border-r border-gray-200 shadow-sm">
   <div class="h-full px-3 pb-4 overflow-y-auto bg-white">
     <ul class="space-y-1 font-medium">
       <!-- Dashboard -->
@@ -25,7 +25,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
           </svg>
         </button>
-        <ul x-show="open" x-collapse class="py-1 pl-8 space-y-1">
+        <ul x-cloak x-show="open" x-collapse class="py-1 pl-8 space-y-1">
           <li>
             <a href="pending.html" class="flex items-center p-2 text-gray-600 rounded-lg hover:bg-blue-50 group">
               <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 16 20">
@@ -81,7 +81,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
           </svg>
         </button>
-        <ul x-show="open" x-collapse class="py-1 pl-8 space-y-1">
+        <ul x-cloak x-show="open" x-collapse class="py-1 pl-8 space-y-1">
           <li>
             <a href="kuti-list.html" class="flex items-center p-2 text-gray-600 rounded-lg hover:bg-blue-50 group">
               <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 16 20">
@@ -112,7 +112,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
           </svg>
         </button>
-        <ul x-show="open" x-collapse class="py-1 pl-8 space-y-1">
+        <ul x-cloak x-show="open" x-collapse class="py-1 pl-8 space-y-1">
           <li>
             <a href="qa.html" class="flex items-center p-2 text-gray-600 rounded-lg hover:bg-blue-50 group">
               <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 16 20">
@@ -153,19 +153,3 @@
   </div>
 </aside>
 
-<script>
-document.addEventListener('alpine:init', () => {
-  Alpine.data('sidebar', () => ({
-    init() {
-      // Auto-open menu based on current page
-      const path = window.location.pathname.split('/').pop();
-      if (['kuti-list.html', 'kuti-assign.html'].includes(path)) {
-        this.$persist(true).as('kutiMenu');
-      }
-      if (['qa.html', 'slideshow.html', 'qa_approval.html'].includes(path)) {
-        this.$persist(true).as('qaMenu');
-      }
-    }
-  }));
-});
-</script>

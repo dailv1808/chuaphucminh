@@ -12,6 +12,7 @@
   <!-- Thêm thư viện PowerPoint -->
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
   <link rel="stylesheet" href="./src/css/slideshow.css">
+  <script src="/js/main.js"></script>
   <script src="/js/baseURL.js"></script>
   <script src="/js/auth.js"></script>
   <!-- Trong phần header, thêm thư viện jsPDF và html2canvas -->
@@ -33,7 +34,7 @@
   <div x-html="await (await fetch('./partials/sidebar.html')).text()"></div>
 
   <!-- Main Content -->
-  <div class="p-4 sm:ml-64 pt-20">
+  <div class="p-4 pt-20" :class="$store.sidebar.open ? 'sm:ml-64' : ''">
     <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-200">
       <!-- Header Section -->
       <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">

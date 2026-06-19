@@ -1,10 +1,20 @@
+<style>[x-cloak]{display:none!important;}</style>
 <header class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
   <div class="px-4 py-3 lg:px-6">
     <div class="flex items-center justify-between">
       <div class="flex items-center justify-start">
-        <button @click="$store.sidebar.open = !$store.sidebar.open" class="p-2 text-gray-500 rounded-lg cursor-pointer lg:hidden hover:text-blue-600 hover:bg-gray-100">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+        <button
+          @click="$store.sidebar.toggle()"
+          type="button"
+          class="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-blue-600 hover:bg-gray-100"
+          :aria-expanded="$store.sidebar.open.toString()"
+          aria-label="Toggle sidebar"
+        >
+          <svg x-cloak x-show="!$store.sidebar.open" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          <svg x-cloak x-show="$store.sidebar.open" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 0 1 1.414 0L10 8.586l4.293-4.293a1 1 0 1 1 1.414 1.414L11.414 10l4.293 4.293a1 1 0 1 1-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L8.586 10 4.293 5.707a1 1 0 0 1 0-1.414Z" clip-rule="evenodd"></path>
           </svg>
         </button>
         <a href="index.html" class="flex ml-2 md:mr-24">
@@ -160,7 +170,7 @@
         </template>
         
         <!-- Dropdown menu -->
-        <div x-show="dropdownOpen" @click.away="dropdownOpen = false" 
+        <div x-cloak x-show="dropdownOpen" @click.away="dropdownOpen = false" 
              x-transition:enter="transition ease-out duration-100"
              x-transition:enter-start="transform opacity-0 scale-95"
              x-transition:enter-end="transform opacity-100 scale-100"
@@ -183,13 +193,11 @@
   </div>
 </header>
 
-<script>
-document.addEventListener('alpine:init', () => {
-  Alpine.store('sidebar', {
-    open: window.innerWidth >= 1024,
-    toggle() {
-      this.open = !this.open;
-    }
-  });
-});
-</script>
+<div
+  x-cloak
+  x-show="$store.sidebar.open"
+  x-transition.opacity
+  @click="$store.sidebar.close()"
+  class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+  aria-hidden="true"
+></div>

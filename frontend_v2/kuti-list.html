@@ -8,6 +8,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="./src/css/kuti-list.css">
+  <script src="/js/main.js"></script>
   <script src="/js/baseURL.js"></script>
   <script src="/js/auth.js"></script>
 </head>
@@ -112,7 +113,7 @@
     </div>
   </div>
 
-  <div class="p-4 sm:ml-64 pt-20">
+  <div class="p-4 pt-20" :class="$store.sidebar.open ? 'sm:ml-64' : ''">
     <div class="p-6 bg-white rounded-xl card-shadow border border-gray-100 hover-scale">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
         <div>
@@ -170,17 +171,6 @@
       </div>
     </div>
   </div>
-
-  <script>
-    document.addEventListener('alpine:initialized', () => {
-      Alpine.store('sidebar', {
-        open: window.innerWidth >= 640,
-        toggle() {
-          this.open = !this.open;
-        }
-      });
-    });
-  </script>
 
   <script src="/js/kuti-list.js"></script>
 </body>

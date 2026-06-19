@@ -1,29 +1,14 @@
-// Khởi tạo Alpine store
-document.addEventListener('alpine:init', () => {
-  Alpine.store('sidebar', {
-    open: window.innerWidth >= 1024,
-    toggle() {
-      this.open = !this.open;
-    }
-  });
-});
-
-// Định nghĩa user dropdown component
 document.addEventListener('alpine:init', () => {
   Alpine.data('userDropdown', () => ({
     dropdownOpen: false,
     user: null,
     isLoading: true,
     error: null,
-    
+
     init() {
       this.loadUser();
-      // Cập nhật sidebar khi resize
-      window.addEventListener('resize', () => {
-        Alpine.store('sidebar').open = window.innerWidth >= 1024;
-      });
     },
-    
+
     async loadUser() {
       this.error = null;
       try {
@@ -60,7 +45,7 @@ document.addEventListener('alpine:init', () => {
         this.isLoading = false;
       }
     },
-    
+
     getInitials() {
       if (!this.user) return 'AD';
       const name = this.user.full_name || this.user.username;
@@ -71,7 +56,7 @@ document.addEventListener('alpine:init', () => {
         .toUpperCase()
         .substring(0, 2);
     },
-    
+
     async logout() {
       this.error = null;
       try {
