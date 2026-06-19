@@ -631,15 +631,12 @@ table td textarea {
 
 @media (min-width: 1024px) {
   .qa-main {
-    transform: scale(0.9);
-    transform-origin: top left;
-    width: 111.111%;
+    zoom: 0.8;
   }
 }
 
 @media (max-width: 1023px) {
   .qa-main {
-    transform: none;
-    width: 100%;
+    zoom: 1;
   }
 }
