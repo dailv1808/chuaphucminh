@@ -631,7 +631,7 @@ table td textarea {
 
 @media (min-width: 1024px) {
   body.qa-page {
-    zoom: 0.9;
+    zoom: 0.8;
   }
 }
 
