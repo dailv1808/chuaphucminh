@@ -14,7 +14,6 @@ document.addEventListener('alpine:init', () => {
       try {
         const token = localStorage.getItem('access_token');
         if (!token) {
-          console.log('No token found in localStorage');
           this.isLoading = false;
           return;
         }
@@ -49,7 +48,8 @@ document.addEventListener('alpine:init', () => {
     getInitials() {
       if (!this.user) return 'AD';
       const name = this.user.full_name || this.user.username;
-      return name.split(' ')
+      return name
+        .split(' ')
         .filter(part => part.length > 0)
         .map(part => part[0])
         .join('')
