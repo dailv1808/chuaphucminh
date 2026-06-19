@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quản lý Hỏi đáp - CPM Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.9/dist/cdn.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.9/dist/cdn.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -202,8 +204,8 @@
             <col style="width:5.5rem">
             <col style="width:7.5rem">
             <col style="width:60rem">
-            <col style="width:6rem">
-            <col style="width:7rem">
+            <col style="width:5rem">
+            <col style="width:11rem">
             <col style="width:6.5rem">
             <col style="width:6rem">
             <col style="width:7.5rem">
@@ -223,8 +225,8 @@
               <th scope="col" class="px-6 py-3">Ngày tạo</th>
               <th scope="col" class="px-6 py-3">Pháp Danh</th>
               <th scope="col" class="px-6 py-3" style="min-width:60rem">Câu hỏi</th>
-              <th scope="col" class="px-6 py-3" style="width:6rem">Liên Lạc</th>
-              <th scope="col" class="px-6 py-3">Trạng Thái</th>
+              <th scope="col" class="px-6 py-3" style="width:5rem">Liên Lạc</th>
+              <th scope="col" class="px-6 py-3 whitespace-nowrap" style="width:11rem">Trạng Thái</th>
               <th scope="col" class="px-6 py-3">Trùng lặp</th>
               <th scope="col" class="px-6 py-3">Ngày sửa</th>
               <th scope="col" class="px-6 py-3">Người tạo</th>
@@ -274,17 +276,17 @@
                 </td>
 
                 <td class="px-3 py-3 align-top">
-                  <div class="max-w-[10rem] whitespace-normal break-words text-gray-700" x-text="question.contact || 'N/A'"></div>
+                  <div class="max-w-[8rem] whitespace-normal break-words text-gray-700" x-text="question.contact || 'N/A'"></div>
                 </td>
 
 
                 <!-- THÊM SAU DÒNG NÀY -->
                 <!-- CỘT TRẠNG THÁI TRƯỚC -->
-                <td class="px-6 py-4">
+                <td class="px-6 py-4" style="width:11rem">
                   <!-- :value + @change (không dùng x-model): x-model cập nhật trước @change khiến quickEditField so sánh old/new sai và bỏ qua PATCH -->
                   <select @change="quickEditField(question, 'status', $event.target.value)"
                           @click.stop
-                          class="status-select w-full" 
+                          class="status-select w-full min-w-[9rem]" 
                           :class="question.status">
                     <template x-for="opt in statusOptions" :key="opt.value">
                       <option :value="opt.value"

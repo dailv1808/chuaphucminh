@@ -630,13 +630,13 @@ table td textarea {
 }
 
 @media (min-width: 1024px) {
-  .qa-main {
+  body.qa-page {
     zoom: 0.8;
   }
 }
 
 @media (max-width: 1023px) {
-  .qa-main {
+  body.qa-page {
     zoom: 1;
   }
 }
