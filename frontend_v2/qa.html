@@ -204,14 +204,14 @@
             <col style="width:5.5rem">
             <col style="width:7.5rem">
             <col style="width:60rem">
-            <col style="width:5rem">
-            <col style="width:11rem">
+            <col style="width:4rem">
+            <col style="width:12.5rem">
             <col style="width:6.5rem">
             <col style="width:6rem">
-            <col style="width:7.5rem">
-            <col style="width:7.5rem">
+            <col style="width:7rem">
+            <col style="width:7rem">
             <col style="width:4.5rem">
-            <col style="width:9rem">
+            <col style="width:8.5rem">
           </colgroup>
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
@@ -225,8 +225,8 @@
               <th scope="col" class="px-6 py-3">Ngày tạo</th>
               <th scope="col" class="px-6 py-3">Pháp Danh</th>
               <th scope="col" class="px-6 py-3" style="min-width:60rem">Câu hỏi</th>
-              <th scope="col" class="px-6 py-3" style="width:5rem">Liên Lạc</th>
-              <th scope="col" class="px-6 py-3 whitespace-nowrap" style="width:11rem">Trạng Thái</th>
+              <th scope="col" class="px-6 py-3" style="width:4rem">Liên Lạc</th>
+              <th scope="col" class="px-6 py-3 whitespace-nowrap" style="width:12.5rem">Trạng Thái</th>
               <th scope="col" class="px-6 py-3">Trùng lặp</th>
               <th scope="col" class="px-6 py-3">Ngày sửa</th>
               <th scope="col" class="px-6 py-3">Người tạo</th>
@@ -276,17 +276,17 @@
                 </td>
 
                 <td class="px-3 py-3 align-top">
-                  <div class="max-w-[8rem] whitespace-normal break-words text-gray-700" x-text="question.contact || 'N/A'"></div>
+                  <div class="max-w-[5rem] whitespace-normal break-words text-gray-700" x-text="question.contact || 'N/A'"></div>
                 </td>
 
 
                 <!-- THÊM SAU DÒNG NÀY -->
                 <!-- CỘT TRẠNG THÁI TRƯỚC -->
-                <td class="px-6 py-4" style="width:11rem">
+                <td class="px-6 py-4" style="width:12.5rem">
                   <!-- :value + @change (không dùng x-model): x-model cập nhật trước @change khiến quickEditField so sánh old/new sai và bỏ qua PATCH -->
                   <select @change="quickEditField(question, 'status', $event.target.value)"
                           @click.stop
-                          class="status-select w-full min-w-[9rem]" 
+                          class="status-select w-full min-w-[10.5rem]" 
                           :class="question.status">
                     <template x-for="opt in statusOptions" :key="opt.value">
                       <option :value="opt.value"
