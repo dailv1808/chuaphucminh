@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" x-data="qaData()">
 <head>
   <meta charset="UTF-8">
@@ -16,7 +16,7 @@
 
 </head>
 
-<body class="bg-gray-50 font-sans text-gray-800" @keydown="handleKeyNavigation($event)">
+<body class="qa-page bg-gray-50 font-sans text-gray-800" @keydown="handleKeyNavigation($event)">
   <!-- Header -->
   <div x-html="await (await fetch('./partials/header.html')).text()"></div>
   
@@ -195,7 +195,23 @@
 
       <!-- Questions List Table -->
       <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left text-gray-500">
+        <table class="w-full table-fixed text-sm text-left text-gray-500">
+          <colgroup>
+            <col class="w-12">
+            <col class="w-16">
+            <col class="w-24">
+            <col class="w-32">
+            <col class="w-[36rem]">
+            <col class="w-48">
+            <col class="w-28">
+            <col class="w-28">
+            <col class="w-24">
+            <col class="w-32">
+            <col class="w-32">
+            <col class="w-20">
+            <col class="w-20">
+            <col class="w-32">
+          </colgroup>
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
               <th scope="col" class="px-6 py-3 w-12">
@@ -207,7 +223,7 @@
               <th scope="col" class="px-6 py-3">STT</th>
               <th scope="col" class="px-6 py-3">Ngày tạo</th>
               <th scope="col" class="px-6 py-3">Pháp Danh</th>
-              <th scope="col" class="px-6 py-3 min-w-[400px]">Câu hỏi</th>
+              <th scope="col" class="px-6 py-3 min-w-[36rem]">Câu hỏi</th>
               <th scope="col" class="px-6 py-3">Liên Lạc</th>
               <th scope="col" class="px-6 py-3">Trạng Thái</th>
               <th scope="col" class="px-6 py-3">Trùng lặp</th>
@@ -249,17 +265,19 @@
                 </td>
                 
 
-                <td class="px-6 py-4">
+                <td class="px-4 py-3 align-top">
                   <textarea 
                     x-model="question.edited_content || question.short_content || question.content"
                     @blur="quickEditField(question, 'edited_content', $event.target.value)"
                     @click.stop
-                    rows="3"
-                    class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2 text-sm resize-y min-h-[80px]"
+                    rows="5"
+                    class="w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-2 px-3 text-sm leading-relaxed resize-y min-h-[140px]"
                   ></textarea>
                 </td>
 
-                <td class="px-6 py-4" x-text="question.contact || 'N/A'"></td>
+                <td class="px-4 py-3 align-top">
+                  <div class="max-w-[12rem] whitespace-normal break-words text-gray-700" x-text="question.contact || 'N/A'"></div>
+                </td>
 
 
                 <!-- THÊM SAU DÒNG NÀY -->
@@ -874,3 +892,5 @@
   <script src="/js/qa.js"></script>
 </body>
 </html>
+
+

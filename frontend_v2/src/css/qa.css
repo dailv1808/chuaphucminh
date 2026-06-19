@@ -628,3 +628,15 @@ table td textarea {
 .bg-blue-50 .flex.gap-2 button:hover {
   @apply shadow-md;
 }
+
+@media (min-width: 1024px) {
+  body.qa-page {
+    zoom: 0.9;
+  }
+}
+
+@media (max-width: 1023px) {
+  body.qa-page {
+    zoom: 1;
+  }
+}

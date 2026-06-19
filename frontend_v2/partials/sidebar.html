@@ -1,5 +1,5 @@
-<aside x-data="sidebar" 
-       :class="{'translate-x-0': $store.sidebar.open}"
+<aside x-cloak x-data="sidebar" 
+       :class="{'translate-x-0': $store.sidebar.open || $store.sidebar.pinned}"
        class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 -translate-x-full transition-transform duration-300 bg-white border-r border-gray-200 shadow-sm">
   <div class="h-full px-3 pb-4 overflow-y-auto bg-white">
     <ul class="space-y-1 font-medium">
